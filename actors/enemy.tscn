@@ -1,0 +1,232 @@
+[gd_scene format=3 uid="uid://vloijhvrq35x"]
+
+[ext_resource type="Texture2D" uid="uid://c3rs83llhcxnt" path="res://assets/Sprite Pack 5/4 - Squirmy Wormy/Movement_(32 x 32).png" id="1_ho334"]
+[ext_resource type="Texture2D" uid="uid://cdrurkywgml3a" path="res://assets/Sprite Pack 5/4 - Squirmy Wormy/Hurt_(32 x 32).png" id="2_c6xed"]
+[ext_resource type="PackedScene" uid="uid://ml1fn2mmrm1n" path="res://prefabs/hitbox.tscn" id="3_8yred"]
+
+[sub_resource type="GDScript" id="GDScript_ho334"]
+script/source = "extends CharacterBody2D
+
+var direction := -1
+var dead := false
+
+@onready var wall_detector := $wall_detector as RayCast2D
+@onready var texture := $texture as Sprite2D
+@onready var anim := $anim
+
+const SPEED = 40.0
+
+func _ready():
+	add_to_group(\"enemies\")
+
+func _physics_process(delta):
+
+	# morto
+	if dead:
+		velocity += get_gravity() * delta
+		move_and_slide()
+		return
+
+	# gravidade
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+
+	# virar parede
+	if wall_detector.is_colliding():
+		direction *= -1
+		
+		texture.flip_h = !texture.flip_h
+		
+		wall_detector.target_position.x *= -1
+
+	# movimento
+	velocity.x = direction * SPEED
+
+	move_and_slide()
+
+func die():
+
+	dead = true
+
+	# para tudo
+	velocity.x = 0
+
+	# faz cair
+	velocity.y = -200
+
+	# desliga hitbox do inimigo
+	set_collision_layer_value(3, false)
+	set_collision_mask_value(1, false)
+
+	anim.play(\"hurt\")
+
+	await get_tree().create_timer(0.4).timeout
+
+	queue_free()
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ho334"]
+size = Vector2(27, 8)
+
+[sub_resource type="Animation" id="Animation_c6xed"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("texture:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("1_ho334")]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("texture:hframes")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [3]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("texture:frame")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_34jws"]
+resource_name = "hurt"
+length = 0.1
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("texture:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("2_c6xed")]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("texture:hframes")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [1]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("texture:frame")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_8yred"]
+resource_name = "walk"
+length = 0.3
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("texture:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [ExtResource("1_ho334")]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("texture:hframes")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [3]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("texture:frame")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [0, 1, 2]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_34jws"]
+_data = {
+&"RESET": SubResource("Animation_c6xed"),
+&"hurt": SubResource("Animation_34jws"),
+&"walk": SubResource("Animation_8yred")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_34jws"]
+size = Vector2(12, 3.5)
+
+[node name="enemy" type="CharacterBody2D" unique_id=310052193]
+collision_layer = 4
+collision_mask = 38
+script = SubResource("GDScript_ho334")
+
+[node name="texture" type="Sprite2D" parent="." unique_id=768039148]
+scale = Vector2(1.15625, 1.25)
+texture = ExtResource("1_ho334")
+hframes = 3
+
+[node name="collision" type="CollisionShape2D" parent="." unique_id=853398990]
+position = Vector2(-0.5, 15)
+shape = SubResource("RectangleShape2D_ho334")
+
+[node name="anim" type="AnimationPlayer" parent="." unique_id=2023916758]
+libraries/ = SubResource("AnimationLibrary_34jws")
+autoplay = &"walk"
+speed_scale = 0.4
+
+[node name="wall_detector" type="RayCast2D" parent="." unique_id=702571762]
+position = Vector2(0, 11)
+target_position = Vector2(-19, 1)
+collision_mask = 6
+
+[node name="hitbox" parent="." unique_id=1812316366 instance=ExtResource("3_8yred")]
+
+[node name="collision2" type="CollisionShape2D" parent="hitbox" unique_id=1264996259]
+position = Vector2(0, 7.75)
+shape = SubResource("RectangleShape2D_34jws")
+
+[connection signal="animation_finished" from="anim" to="." method="_on_anim_animation_finished"]
