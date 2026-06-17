@@ -1,0 +1,3 @@
+res://levels/world_01.tscn
+res://prefabs/coin.tscn
+res://scripts/coin.gd
