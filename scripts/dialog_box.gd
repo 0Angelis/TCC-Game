@@ -17,7 +17,8 @@ signal text_display_finished
 func display_text(text_to_display: String):
 	letter_index = 0
 	text = text_to_display
-	text_label.text = text_to_display
+
+	text_label.text = text
 
 	await resized
 
@@ -32,8 +33,7 @@ func display_text(text_to_display: String):
 	global_position.x -= size.x / 2
 	global_position.y -= size.y + 24
 
-	text_label.text = ""
-	display_letter()
+	text_display_finished.emit()
 
 func display_letter():
 	text_label.text += text[letter_index]

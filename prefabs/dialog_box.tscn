@@ -11,6 +11,7 @@ scale = Vector2(3.04, 0.84000015)
 script = ExtResource("1_d17km")
 
 [node name="background" type="NinePatchRect" parent="." unique_id=1694148070]
+custom_minimum_size = Vector2(1, 1)
 layout_mode = 2
 texture = ExtResource("1_t14ly")
 region_rect = Rect2(0, 0, 16, 16)
@@ -26,7 +27,7 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="Label" type="Label" parent="label_margin" unique_id=1165563160]
+[node name="text_label" type="Label" parent="label_margin" unique_id=1165563160]
 layout_mode = 2
 offset_transform_enabled = true
 theme_override_colors/font_color = Color(0, 0, 0, 1)

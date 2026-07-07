@@ -1,5 +1,3 @@
 res://levels/world_01.tscn
-res://scripts/dialog_box.gd
-res://singletons/dialog_manager.gd
-res://scripts/warning_sing.gd
 res://prefabs/dialog_box.tscn
+res://scripts/dialog_box.gd

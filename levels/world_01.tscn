@@ -355,6 +355,23 @@ layer_0/tile_data = PackedInt32Array(-917506, 196608, 2, -851970, 196608, 2, -78
 layer_1/name = "trees"
 layer_1/tile_data = PackedInt32Array(2359300, 65537, 1, 2686983, 65537, 5, 2686984, 65537, 5, 2686985, 65537, 5, 2686986, 65537, 5, 2555910, 196614, 0, 2621474, 65537, 1, 2621476, 65537, 1, 2621478, 65537, 1, 2621477, 327681, 1, 2621475, 327681, 1, 2621479, 327681, 1, 2621480, 65537, 1, 2621519, 589825, 1, 2555982, 65537, 1, 2621518, 65537, 1, 2555981, 589825, 1, 2621517, 589825, 1, 2621515, 65537, 1, 2621516, 589825, 1, 2621520, 589825, 1, 2555980, 65537, 1, 2555979, 589825, 1, 2621521, 589825, 1, 2555985, 589825, 1, 2555984, 65537, 1, 2555983, 65537, 1, -65489, 327681, 1, -65485, 327681, 1, 262214, 327681, 1, 131136, 327681, 1, 58, 327681, 1, 983076, 327681, 1, 786449, 327681, 1, 786457, 327681, 1, 983049, 327681, 1, 1572886, 327681, 1, 16, 65537, 5, 17, 65537, 5, 18, 65537, 5, 19, 65537, 5, 20, 65537, 5, 21, 65537, 5, 22, 65537, 5, -65513, 196612, 1, 23, 196612, 2, -65512, 262148, 1, 24, 262148, 2, -65511, 327684, 1, 25, 327684, 2, 28, 393220, 2, -65509, 327681, 1, -65493, 327681, 1, -65497, 327681, 1, -65501, 327681, 1, -65500, 327681, 1, -65499, 327681, 1, -65498, 327681, 1, 30, 65537, 5, 31, 65537, 5, 32, 65537, 5, 33, 65537, 5, 34, 65537, 5, 2686990, 196614, 0, 2686991, 131078, 0, 720960, 327681, 1, 720962, 327681, 1, 720964, 327681, 1, 720966, 327681, 1, 720968, 327681, 1, 2687024, 3, 0, 2359347, 3, 0, 2293835, 3, 0, 1179704, 3, 0, 1179728, 65537, 5, 786494, 3, 0, 1048613, 3, 0, 29, 3, 0, 42, 3, 0, 41, 3, 0, 40, 3, 0, 1769483, 65540, 1, 1835019, 65540, 2, 1769484, 131076, 1, 1835020, 131076, 2, 1441872, 589825, 1, 1441871, 65537, 1, 1179727, 196609, 5, 2555964, 65538, 1, 2621500, 65538, 2, 2687036, 65538, 3, 2555965, 131074, 1, 2687037, 131074, 3, 2555966, 196610, 1, 2621502, 196610, 2, 2687038, 196610, 3, 2621501, 131074, 2, 2687035, 65542, 0, 2687039, 196614, 0, 2686999, 327681, 5, 2687000, 327681, 5, 2687003, 327681, 5, 2687005, 720897, 5, 2686988, 196609, 5)
 
+[node name="warning_sing" type="Node2D" parent="." unique_id=1771737388]
+position = Vector2(199, 663)
+script = ExtResource("20_6ibfi")
+
+[node name="texture" type="Sprite2D" parent="warning_sing" unique_id=1133745016]
+visible = false
+position = Vector2(0, -17)
+texture = ExtResource("21_jfqd0")
+region_enabled = true
+region_rect = Rect2(0, 0, 16, 16)
+
+[node name="area_sign" type="Area2D" parent="warning_sing" unique_id=1471857681]
+collision_layer = 2
+
+[node name="colission" type="CollisionShape2D" parent="warning_sing/area_sign" unique_id=1468885801]
+shape = SubResource("RectangleShape2D_sob1t")
+
 [node name="coins" type="TileMap" parent="." unique_id=624749532]
 position = Vector2(-1, 0)
 format = 2
@@ -522,20 +539,3 @@ centered = false
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
 zoom = Vector2(2.5, 2.5)
 limit_left = 0
-
-[node name="warning_sing" type="Node2D" parent="." unique_id=1771737388]
-position = Vector2(199, 663)
-script = ExtResource("20_6ibfi")
-
-[node name="texture" type="Sprite2D" parent="warning_sing" unique_id=1133745016]
-visible = false
-position = Vector2(0, -17)
-texture = ExtResource("21_jfqd0")
-region_enabled = true
-region_rect = Rect2(0, 0, 16, 16)
-
-[node name="area_sign" type="Area2D" parent="warning_sing" unique_id=1471857681]
-collision_layer = 2
-
-[node name="colission" type="CollisionShape2D" parent="warning_sing/area_sign" unique_id=1468885801]
-shape = SubResource("RectangleShape2D_sob1t")
