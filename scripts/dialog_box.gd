@@ -5,8 +5,8 @@ extends MarginContainer
 
 const MAX_WIDTH = 256
 
-var text := ""
-var letter_index := 0
+var text = ""
+var letter_index = 0
 
 var letter_display_timer := 0.07
 var space_display_timer := 0.05
@@ -14,15 +14,11 @@ var punctuation_display_timer := 0.2
 
 signal text_display_finished
 
-func _ready():
-	print("TEXT LABEL:", text_label)
-	print("TIMER:", letter_timer_display)
-
 func display_text(text_to_display: String):
-
 	letter_index = 0
 	text = text_to_display
-	text_label.text = ""
+
+	text_label.text = text
 
 	await resized
 
@@ -37,14 +33,9 @@ func display_text(text_to_display: String):
 	global_position.x -= size.x / 2
 	global_position.y -= size.y + 24
 
-	display_letter()
+	text_display_finished.emit()
 
 func display_letter():
-
-	if letter_index >= text.length():
-		text_display_finished.emit()
-		return
-
 	text_label.text += text[letter_index]
 	letter_index += 1
 
@@ -55,8 +46,10 @@ func display_letter():
 	match text[letter_index]:
 		"!", "?", ",", ".":
 			letter_timer_display.start(punctuation_display_timer)
+
 		" ":
 			letter_timer_display.start(space_display_timer)
+
 		_:
 			letter_timer_display.start(letter_display_timer)
 

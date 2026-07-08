@@ -1,60 +1,61 @@
 extends Node
 
-const DIALOG = preload("res://prefabs/dialog_box.tscn")
+var dialog_box_scene = preload("res://prefabs/dialog_box.tscn")
+
+var message_lines: Array[String] = []
+var current_line := 0
 
 var dialog_box
+var dialog_box_position := Vector2.ZERO
 
-var lines = []
-var line = 0
+var is_message_active := false
+var can_advance_message := false
 
-var is_message_active = false
-var can_next = false
-
-func start_message(position:Vector2,new_lines:Array[String]):
+func start_message(position: Vector2, lines: Array[String]):
 
 	if is_message_active:
 		return
 
-	lines = new_lines
-	line = 0
+	message_lines = lines
+	dialog_box_position = position
+	current_line = 0
+
+	show_text()
 
 	is_message_active = true
 
-	show_dialog(position)
+func show_text():
 
-func show_dialog(position):
+	dialog_box = dialog_box_scene.instantiate()
 
-	dialog_box = DIALOG.instantiate()
+	dialog_box.text_display_finished.connect(_on_all_text_displayed)
 
-	get_tree().current_scene.add_child(dialog_box)
+	get_tree().root.add_child(dialog_box)
 
-	dialog_box.global_position = position + Vector2(-120,-90)
+	dialog_box.global_position = dialog_box_position
 
-	dialog_box.finished.connect(_finished)
+	dialog_box.display_text(message_lines[current_line])
 
-	dialog_box.display_text(lines[line])
+	can_advance_message = false
 
-func _finished():
+func _on_all_text_displayed():
 
-	can_next = true
+	can_advance_message = true
 
 func _unhandled_input(event):
 
-	if !is_message_active:
-		return
-
-	if event.is_action_pressed("advance_message") and can_next:
+	if event.is_action_pressed("advance_message") and is_message_active and can_advance_message:
 
 		dialog_box.queue_free()
 
-		can_next = false
+		current_line += 1
 
-		line += 1
-
-		if line >= lines.size():
+		if current_line >= message_lines.size():
 
 			is_message_active = false
+			current_line = 0
 			dialog_box = null
+
 			return
 
-		show_dialog(dialog_box.global_position)
+		show_text()

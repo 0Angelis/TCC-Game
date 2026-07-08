@@ -1,28 +1,28 @@
 extends Node2D
 
 @onready var texture = $texture
-@onready var area = $area_sign
+@onready var area_sign = $area_sign
 
-const LINES:Array[String] = [
-	"Olá aventureiro!",
-	"Bem-vindo ao jogo.",
-	"Use A e D para andar.",
-	"Use Espaço para pular.",
-	"Boa sorte!"
+const lines: Array[String] = [
+	"Olá, aventureiro!",
+	"É muito bom vê-lo por aqui.",
+	"Espero que esteja preparado...",
+	"Sua jornada está apenas...",
+	"...COMEÇANDO!"
 ]
-
-func _process(_delta):
-
-	if area.get_overlapping_bodies().size() > 0:
-		texture.show()
-	else:
-		texture.hide()
 
 func _unhandled_input(event):
 
-	if area.get_overlapping_bodies().size() == 0:
-		return
+	if area_sign.get_overlapping_bodies().size() > 0:
 
-	if event.is_action_pressed("interact") and !DialogManager.is_message_active:
+		texture.show()
 
-		DialogManager.start_message(global_position,LINES)
+		if event.is_action_pressed("interact") and !DialogManager.is_message_active:
+
+			texture.hide()
+
+			DialogManager.start_message(global_position, lines)
+
+	else:
+
+		texture.hide()
