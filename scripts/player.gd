@@ -3,7 +3,6 @@ extends CharacterBody2D
 const SPEED = 150.0
 const JUMP_FORCE = -300.0
 
-var player_life := 3
 var knockback_vector := Vector2.ZERO
 
 var taking_damage := false
@@ -12,6 +11,9 @@ var can_move := true
 
 @onready var animation = $Anim as AnimatedSprite2D
 @onready var remote_transform := $remote as RemoteTransform2D
+
+func _ready():
+	Globals.player_life = 3
 
 func _physics_process(delta: float) -> void:
 
@@ -62,8 +64,8 @@ func _physics_process(delta: float) -> void:
 	else:
 		animation.play("idle")
 
-	# ultima vida piscando vermelho
-	if player_life == 1 and not taking_damage:
+	# última vida piscando vermelho
+	if Globals.player_life == 1 and not taking_damage:
 
 		var blink = abs(sin(Time.get_ticks_msec() * 0.005))
 
@@ -82,10 +84,9 @@ func _on_hurtbox_body_entered(body: Node2D) -> void:
 
 		var direction = (global_position - body.global_position).normalized()
 
-		# knockback menor e mais suave
 		take_damage(Vector2(direction.x * 230, -80))
 
-	if player_life <= 0:
+	if Globals.player_life <= 0:
 		queue_free()
 
 
@@ -99,9 +100,9 @@ func take_damage(knockback_force := Vector2.ZERO, duration := 0.1):
 	can_move = false
 	taking_damage = true
 
-	player_life -= 1
+	Globals.player_life -= 1
 
-	print("vida:", player_life)
+	print("Vida:", Globals.player_life)
 
 	# vermelho ao tomar dano
 	animation.modulate = Color(1.0, 0.0, 0.0, 1.0)
@@ -113,7 +114,6 @@ func take_damage(knockback_force := Vector2.ZERO, duration := 0.1):
 
 		var knockback_tween := get_tree().create_tween()
 
-		# remove knockback aos poucos
 		knockback_tween.tween_property(
 			self,
 			"knockback_vector",

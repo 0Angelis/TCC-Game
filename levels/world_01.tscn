@@ -577,10 +577,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
 
 [node name="coins_container" type="HBoxContainer" parent="HUD/control/container" unique_id=151665756]
 layout_mode = 2
@@ -669,3 +669,6 @@ theme_override_fonts/font = ExtResource("27_gmex4")
 theme_override_font_sizes/font_size = 40
 text = "X"
 vertical_alignment = 1
+
+[node name="clock_timer" type="Timer" parent="HUD/control/container" unique_id=1966678653]
+autostart = true
