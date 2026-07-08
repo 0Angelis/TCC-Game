@@ -1,3 +1,2 @@
-res://levels/world_01.tscn
 res://prefabs/dialog_box.tscn
-res://scripts/dialog_box.gd
+res://scripts/warning_sing.gd

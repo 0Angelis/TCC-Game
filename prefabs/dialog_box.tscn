@@ -5,8 +5,8 @@
 [ext_resource type="FontFile" uid="uid://ciyqtt45x1jtc" path="res://assets/Fontes/RevMiniPixel.ttf" id="2_d17km"]
 
 [node name="dialog_box" type="MarginContainer" unique_id=1328486254]
-offset_right = 13.157893
-offset_bottom = 38.09523
+offset_right = 9.0
+offset_bottom = 19.047615
 scale = Vector2(3.04, 0.84000015)
 script = ExtResource("1_d17km")
 
@@ -30,6 +30,7 @@ theme_override_constants/margin_bottom = 4
 [node name="text_label" type="Label" parent="label_margin" unique_id=1165563160]
 layout_mode = 2
 offset_transform_enabled = true
+offset_transform_pivot_ratio = Vector2(1, 1)
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_d17km")
 theme_override_font_sizes/font_size = 8
