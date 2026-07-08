@@ -12,6 +12,6 @@ func _on_body_entered(body: Node2D) -> void:
 		Globals.coins += 1
 		$anim.play("collect")
 
-		await get_tree().create_timer(0.3).timeout
+		await get_tree().create_timer(0.1).timeout
 
 		queue_free()

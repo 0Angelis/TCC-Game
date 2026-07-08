@@ -13,6 +13,7 @@ var can_move := true
 @onready var remote_transform := $remote as RemoteTransform2D
 
 func _ready():
+	add_to_group("player")
 	Globals.player_life = 3
 
 func _physics_process(delta: float) -> void:
@@ -68,7 +69,6 @@ func _physics_process(delta: float) -> void:
 	if Globals.player_life == 1 and not taking_damage:
 
 		var blink = abs(sin(Time.get_ticks_msec() * 0.005))
-
 		animation.modulate = Color(1, blink, blink, 1)
 
 	elif not taking_damage:
@@ -87,7 +87,7 @@ func _on_hurtbox_body_entered(body: Node2D) -> void:
 		take_damage(Vector2(direction.x * 230, -80))
 
 	if Globals.player_life <= 0:
-		queue_free()
+		die()
 
 
 func take_damage(knockback_force := Vector2.ZERO, duration := 0.1):
@@ -134,6 +134,21 @@ func take_damage(knockback_force := Vector2.ZERO, duration := 0.1):
 
 	# volta cor normal
 	animation.modulate = Color(1, 1, 1, 1)
+
+
+func die():
+
+	can_move = false
+	can_take_damage = false
+	taking_damage = true
+
+	velocity = Vector2.ZERO
+
+	animation.play("hurt")
+
+	await get_tree().create_timer(1.0).timeout
+
+	get_tree().reload_current_scene()
 
 
 func follow_camera(camera):

@@ -1,48 +1,43 @@
 extends Control
 
-@onready var coins_counter: Label = $container/coins_container/coins_counter
-@onready var timer_counter: Label = $container/timer_container/timer_counter
-@onready var score_counter: Label = $container/score_container/score_counter
-@onready var life_counter: Label = $container/life_container/life_counter
-@onready var clock_timer: Timer = $clock_timer
+@onready var coins_counter = $container/coins_container/coins_counter as Label
+@onready var timer_counter = $container/tiemer_container/timer_counter as Label
+@onready var score_counter = $container/score_container/score_counter as Label
+@onready var life_counter = $container/life_container/life_counter as Label
 
-@export_range(0, 5) var default_minutes := 1
-@export_range(0, 59) var default_seconds := 0
-
-var minutes := 0
-var seconds := 0
+var time_left := 180.0 # 3 minutos
+var game_over := false
 
 func _ready():
-
-	minutes = default_minutes
-	seconds = default_seconds
-
 	coins_counter.text = "%03d" % Globals.coins
 	score_counter.text = "%06d" % Globals.score
 	life_counter.text = "%02d" % Globals.player_life
-	timer_counter.text = "%02d:%02d" % [minutes, seconds]
-
-	clock_timer.start()
 
 
 func _process(delta):
 
+	# Atualiza HUD
 	coins_counter.text = "%03d" % Globals.coins
 	score_counter.text = "%06d" % Globals.score
 	life_counter.text = "%02d" % Globals.player_life
 
+	# Timer
+	if !game_over:
 
-func _on_clock_timer_timeout() -> void:
+		time_left -= delta
 
-	if seconds > 0:
-		seconds -= 1
+		if time_left <= 0:
+			time_left = 0
+			game_over = true
 
-	elif minutes > 0:
-		minutes -= 1
-		seconds = 59
+			print("Tempo esgotado!")
 
-	else:
-		clock_timer.stop()
-		print("Tempo acabou!")
+			var player = get_tree().get_first_node_in_group("player")
+
+			if player:
+				player.die()
+
+	var minutes = int(time_left) / 60
+	var seconds = int(time_left) % 60
 
 	timer_counter.text = "%02d:%02d" % [minutes, seconds]
