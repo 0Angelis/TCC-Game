@@ -5,9 +5,9 @@
 [ext_resource type="FontFile" uid="uid://ciyqtt45x1jtc" path="res://assets/Fontes/RevMiniPixel.ttf" id="2_d17km"]
 
 [node name="dialog_box" type="MarginContainer" unique_id=1328486254]
-offset_right = 9.0
-offset_bottom = 19.047615
-scale = Vector2(3.04, 0.84000015)
+offset_right = 16.0
+offset_bottom = 16.0
+scale = Vector2(1.2, 1.2)
 script = ExtResource("1_d17km")
 
 [node name="background" type="NinePatchRect" parent="." unique_id=1694148070]
