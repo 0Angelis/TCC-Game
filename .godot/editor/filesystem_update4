@@ -1,3 +1,6 @@
 res://levels/world_01.tscn
 res://singletons/globals.gd
 res://scripts/hud_manager.gd
+res://scripts/coin.gd
+res://actors/eneme_2.tscn
+res://actors/enemy.tscn

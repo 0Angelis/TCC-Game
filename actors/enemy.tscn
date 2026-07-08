@@ -48,6 +48,9 @@ func die():
 
 	dead = true
 
+	# adiciona 50 pontos
+	Globals.score += 50
+
 	# para tudo
 	velocity.x = 0
 

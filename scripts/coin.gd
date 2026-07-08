@@ -1,16 +1,17 @@
 extends Area2D
 
 func _ready() -> void:
-	pass 
-
+	pass
 
 func _process(delta: float) -> void:
 	pass
 
-
 func _on_body_entered(body: Node2D) -> void:
-	$anim.play("collect")
-	
+	if body.name == "player":
+		monitoring = false
+		Globals.coins += 1
+		$anim.play("collect")
 
-func _on_anim_animation_finished() -> void:
-	queue_free()
+		await get_tree().create_timer(0.3).timeout
+
+		queue_free()

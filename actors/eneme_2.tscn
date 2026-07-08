@@ -49,17 +49,24 @@ func die():
 
 	dead = true
 
+	# adiciona 100 pontos
+	Globals.score += 100
+
 	# para movimento horizontal
 	velocity.x = 0
-	
+
 	# joga pra cima
 	velocity.y = -200
 
 	# vira corpo
 	rotation_degrees = 180
-	
+
 	anim.play(\"hurt\")
 
+	# remove rápido
+	await get_tree().create_timer(0.5).timeout
+
+	queue_free()
 	# remove rápido
 	await get_tree().create_timer(0.5).timeout
 	

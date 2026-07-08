@@ -351,7 +351,7 @@ size = Vector2(28, 17)
 
 [sub_resource type="AnimatedTexture" id="AnimatedTexture_5t4lp"]
 frames = 4
-speed_scale = -5.0
+speed_scale = 3.0
 frame_0/texture = ExtResource("22_5fif6")
 frame_1/texture = ExtResource("23_ao123")
 frame_1/duration = 1.0

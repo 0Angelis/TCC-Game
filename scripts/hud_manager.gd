@@ -7,9 +7,14 @@ extends Control
 @onready var life_counter = $container/life_container/life_counter as Label
 
 
+
+
+
+
 func _ready():
 	coins_counter.text = "%03d" % Globals.coins
-
+	score_counter.text = "%06d" % Globals.score
 
 func _process(delta):
-	pass
+	coins_counter.text = "%03d" % Globals.coins
+	score_counter.text = "%06d" % Globals.score
