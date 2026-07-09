@@ -549,7 +549,6 @@ limit_left = 0
 [node name="HUD" type="CanvasLayer" parent="." unique_id=184126909]
 
 [node name="control" type="Control" parent="HUD" unique_id=1623216057]
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
