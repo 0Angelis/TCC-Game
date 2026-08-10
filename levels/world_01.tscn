@@ -378,7 +378,6 @@ position = Vector2(2, 0)
 script = ExtResource("1_dl4q8")
 
 [node name="pause_menu" parent="." unique_id=1799463148 instance=ExtResource("15_0uwfl")]
-visible = false
 
 [node name="level" type="TileMap" parent="." unique_id=2135947595]
 position = Vector2(-1, 0)

@@ -12,9 +12,11 @@ var can_move := true
 @onready var animation = $Anim as AnimatedSprite2D
 @onready var remote_transform := $remote as RemoteTransform2D
 
+
 func _ready():
 	add_to_group("player")
 	Globals.player_life = 3
+
 
 func _physics_process(delta: float) -> void:
 
@@ -146,24 +148,9 @@ func die():
 
 	animation.play("hurt")
 
-	# perde as moedas e os pontos ao morrer
-	Globals.coins = 0
-	Globals.score = 0
-
-	await get_tree().create_timer(1.0).timeout
-
-	get_tree().reload_current_scene()
-	can_move = false
-	can_take_damage = false
-	taking_damage = true
-
-	velocity = Vector2.ZERO
-
-	animation.play("hurt")
-
-	# perde as moedas e os pontos ao morrer
-	Globals.coins = 0
-	Globals.score = 0
+	# volta para o estado em que entrou na fase
+	Globals.coins = Globals.level_start_coins
+	Globals.score = Globals.level_start_score
 
 	await get_tree().create_timer(1.0).timeout
 

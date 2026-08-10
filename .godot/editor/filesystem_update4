@@ -2,3 +2,7 @@ res://shaders/transition.gdshader
 res://prefabs/pause_menu.tscn
 res://scripts/pause_menu.gd
 res://levels/world_01.tscn
+res://levels/world_02.tscn
+res://singletons/globals.gd
+res://scripts/goal.gd
+res://scripts/player.gd

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cu2qwong3kyvc" path="res://scripts/world_01.gd" id="1_q6ugd"]
 [ext_resource type="Texture2D" uid="uid://0fyk46lijo1j" path="res://assets/Seasonal Tilesets/1 - Grassland/Terrain (16 x 16).png" id="2_ncdwf"]
+[ext_resource type="PackedScene" uid="uid://cvence5b8xxpw" path="res://prefabs/pause_menu.tscn" id="2_whufi"]
 [ext_resource type="Texture2D" uid="uid://c5wxdxmb13d41" path="res://assets/Seasonal Tilesets/1 - Grassland/Grassland_entities (16 x 16).png" id="3_whufi"]
 [ext_resource type="Texture2D" uid="uid://mj8hwm5x23pc" path="res://assets/Seasonal Tilesets/1 - Grassland/Extra_plants (16 x 16).png" id="4_qauss"]
 [ext_resource type="Texture2D" uid="uid://ycmraiojr84x" path="res://assets/Seasonal Tilesets/5 - Misc. universal tiles/Rock_shape (16 x 16).png" id="5_epl0q"]
@@ -375,6 +376,8 @@ shader_parameter/line_color_b = Color(0, 0, 0, 1)
 [node name="World-02" type="Node2D" unique_id=540749280]
 position = Vector2(2, 0)
 script = ExtResource("1_q6ugd")
+
+[node name="pause_menu" parent="." unique_id=1799463148 instance=ExtResource("2_whufi")]
 
 [node name="level" type="TileMap" parent="." unique_id=2135947595]
 position = Vector2(-1, 0)
