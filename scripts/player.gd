@@ -146,6 +146,25 @@ func die():
 
 	animation.play("hurt")
 
+	# perde as moedas e os pontos ao morrer
+	Globals.coins = 0
+	Globals.score = 0
+
+	await get_tree().create_timer(1.0).timeout
+
+	get_tree().reload_current_scene()
+	can_move = false
+	can_take_damage = false
+	taking_damage = true
+
+	velocity = Vector2.ZERO
+
+	animation.play("hurt")
+
+	# perde as moedas e os pontos ao morrer
+	Globals.coins = 0
+	Globals.score = 0
+
 	await get_tree().create_timer(1.0).timeout
 
 	get_tree().reload_current_scene()

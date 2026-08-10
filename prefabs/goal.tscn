@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://c05me6gpn8c70"]
+
+[ext_resource type="Script" uid="uid://d1o2xui8lewyk" path="res://scripts/goal.gd" id="1_15wru"]
+[ext_resource type="Texture2D" uid="uid://cs6m0x4l0p3k2" path="res://assets/Mini FX, Items & UI/Food Items/Pancake_Stack (16 x 16).png" id="1_lm043"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_sob1t"]
+radius = 15.0
+
+[sub_resource type="Animation" id="Animation_15wru"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sprite:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_bnsmo"]
+resource_name = "float"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("sprite:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.50022477),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, -12)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_b3wvb"]
+_data = {
+&"RESET": SubResource("Animation_15wru"),
+&"float": SubResource("Animation_bnsmo")
+}
+
+[node name="goal" type="Area2D" unique_id=1383269650]
+script = ExtResource("1_15wru")
+
+[node name="sprite" type="Sprite2D" parent="." unique_id=427735680]
+scale = Vector2(1.6562499, 1.53125)
+texture = ExtResource("1_lm043")
+
+[node name="collision" type="CollisionShape2D" parent="." unique_id=1137894934]
+position = Vector2(0, -1)
+shape = SubResource("CircleShape2D_sob1t")
+
+[node name="anim" type="AnimationPlayer" parent="." unique_id=22912563]
+libraries/ = SubResource("AnimationLibrary_b3wvb")
+autoplay = &"float"
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

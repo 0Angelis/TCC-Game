@@ -1,7 +1,8 @@
 res://scripts/
-res://singletons/
-res://prefabs/
 res://
+res://shaders/
+res://prefabs/
+res://singletons/
 res://actors/
 res://assets/Mini FX, Items & UI/Effects/
 res://assets/Mini FX, Items & UI/Common Pick-ups/
