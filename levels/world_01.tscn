@@ -664,241 +664,245 @@ vertical_alignment = 1
 [node name="clock_timer" type="Timer" parent="HUD/control/container" unique_id=1966678653]
 autostart = true
 
-[node name="warning_sign" type="Node2D" parent="." unique_id=1771737388]
-position = Vector2(295, 664)
+[node name="warning" type="Node2D" parent="." unique_id=1954291522]
+position = Vector2(487, 345)
+
+[node name="warning_sign" type="Node2D" parent="warning" unique_id=1771737388]
+position = Vector2(-192, 319)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Olá, aventureiro!", "É muito bom vê-lo por aqui.", "Espero que esteja preparado...", "Sua jornada está apenas...", "...COMEÇANDO!"])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sign" unique_id=1133745016]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sign" unique_id=1133745016]
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sign" unique_id=1471857681]
+[node name="area_sign" type="Area2D" parent="warning/warning_sign" unique_id=1471857681]
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sign/area_sign" unique_id=1468885801]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sign/area_sign" unique_id=1468885801]
 position = Vector2(2, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="warning_sing2" type="Node2D" parent="." unique_id=707685460]
-position = Vector2(551, 344)
+[node name="warning_sing2" type="Node2D" parent="warning" unique_id=707685460]
+position = Vector2(64, -1)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Há criaturas espalhadas por este lugar.", "Algumas tentarão impedir sua jornada.", "Mantenha-se atento e siga em frente.", "Sua coragem será colocada à prova."])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sing2" unique_id=598074240]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing2" unique_id=598074240]
 visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sing2" unique_id=302857252]
+[node name="area_sign" type="Area2D" parent="warning/warning_sing2" unique_id=302857252]
 visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sing2/area_sign" unique_id=1748998051]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing2/area_sign" unique_id=1748998051]
 visible = false
 position = Vector2(1.5, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="warning_sing3" type="Node2D" parent="." unique_id=1333985931]
-position = Vector2(487, 345)
+[node name="warning_sing3" type="Node2D" parent="warning" unique_id=1333985931]
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Mais adiante você encontrará", "desafios de raciocínio lógico.", "Pense antes de responder.", "Cada escolha importa...", "Uma resposta errada pode levá-lo", "ao caminho errado!!"])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sing3" unique_id=497116018]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing3" unique_id=497116018]
 visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sing3" unique_id=1751853005]
+[node name="area_sign" type="Area2D" parent="warning/warning_sing3" unique_id=1751853005]
 visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sing3/area_sign" unique_id=847583942]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing3/area_sign" unique_id=847583942]
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="warning_sing4" type="Node2D" parent="." unique_id=622568805]
-position = Vector2(102, 89)
+[node name="warning_sing4" type="Node2D" parent="warning" unique_id=622568805]
+position = Vector2(-385, -256)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Se hoje é terça-feira", "daqui a 3 dias será:"])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sing4" unique_id=1300504227]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing4" unique_id=1300504227]
 visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sing4" unique_id=1995236667]
+[node name="area_sign" type="Area2D" parent="warning/warning_sing4" unique_id=1995236667]
 visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sing4/area_sign" unique_id=334055633]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing4/area_sign" unique_id=334055633]
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="warning_sing5" type="Node2D" parent="." unique_id=1429295373]
-position = Vector2(150, 40)
+[node name="warning_sing5" type="Node2D" parent="warning" unique_id=1429295373]
+position = Vector2(-337, -305)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Sexta"])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sing5" unique_id=1985598325]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing5" unique_id=1985598325]
 visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sing5" unique_id=36044036]
+[node name="area_sign" type="Area2D" parent="warning/warning_sing5" unique_id=36044036]
 visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sing5/area_sign" unique_id=1182433967]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing5/area_sign" unique_id=1182433967]
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="warning_sing6" type="Node2D" parent="." unique_id=498366596]
-position = Vector2(215, 41)
+[node name="warning_sing6" type="Node2D" parent="warning" unique_id=498366596]
+position = Vector2(-272, -304)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Sabado"])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sing6" unique_id=1011118425]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing6" unique_id=1011118425]
 visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sing6" unique_id=248629791]
+[node name="area_sign" type="Area2D" parent="warning/warning_sing6" unique_id=248629791]
 visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sing6/area_sign" unique_id=82902798]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing6/area_sign" unique_id=82902798]
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="warning_sing7" type="Node2D" parent="." unique_id=820047536]
-position = Vector2(855, -151)
+[node name="warning_sing7" type="Node2D" parent="warning" unique_id=820047536]
+position = Vector2(368, -496)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Qual o Padrão?", "▲ ▼ ▼▲ ▼ ▼ ▲ ▼ ▼ ?"])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sing7" unique_id=2049498898]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing7" unique_id=2049498898]
 visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sing7" unique_id=583085153]
+[node name="area_sign" type="Area2D" parent="warning/warning_sing7" unique_id=583085153]
 visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sing7/area_sign" unique_id=983510060]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing7/area_sign" unique_id=983510060]
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="warning_sing8" type="Node2D" parent="." unique_id=1490826392]
-position = Vector2(742, -87)
+[node name="warning_sing8" type="Node2D" parent="warning" unique_id=1490826392]
+position = Vector2(255, -432)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["▼"])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sing8" unique_id=1100972538]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing8" unique_id=1100972538]
 visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sing8" unique_id=306916214]
+[node name="area_sign" type="Area2D" parent="warning/warning_sing8" unique_id=306916214]
 visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sing8/area_sign" unique_id=659209678]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing8/area_sign" unique_id=659209678]
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="warning_sing9" type="Node2D" parent="." unique_id=158786778]
-position = Vector2(839, -88)
+[node name="warning_sing9" type="Node2D" parent="warning" unique_id=158786778]
+position = Vector2(352, -433)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["▲"])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sing9" unique_id=1414114519]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing9" unique_id=1414114519]
 visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sing9" unique_id=2144818012]
+[node name="area_sign" type="Area2D" parent="warning/warning_sing9" unique_id=2144818012]
 visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sing9/area_sign" unique_id=1945246802]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing9/area_sign" unique_id=1945246802]
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="warning_sing10" type="Node2D" parent="." unique_id=2016181786]
-position = Vector2(870, 345)
+[node name="warning_sing10" type="Node2D" parent="warning" unique_id=2016181786]
+position = Vector2(383, 0)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Qual é o maior número?"])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sing10" unique_id=1316751590]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing10" unique_id=1316751590]
 visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sing10" unique_id=2051673686]
+[node name="area_sign" type="Area2D" parent="warning/warning_sing10" unique_id=2051673686]
 visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sing10/area_sign" unique_id=380660004]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing10/area_sign" unique_id=380660004]
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="warning_sing11" type="Node2D" parent="." unique_id=252292846]
-position = Vector2(1110, 424)
+[node name="warning_sing11" type="Node2D" parent="warning" unique_id=252292846]
+position = Vector2(623, 79)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Plataforma de cima: 0,75", "Plataforma de baixo: 0,705"])
 
-[node name="alert_sign" type="Sprite2D" parent="warning_sing11" unique_id=1090241044]
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing11" unique_id=1090241044]
 visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
-[node name="area_sign" type="Area2D" parent="warning_sing11" unique_id=1328871833]
+[node name="area_sign" type="Area2D" parent="warning/warning_sing11" unique_id=1328871833]
 visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning_sing11/area_sign" unique_id=931184063]
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing11/area_sign" unique_id=931184063]
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
+
+[node name="goal" type="Node2D" parent="." unique_id=1159575638]
