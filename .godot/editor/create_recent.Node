@@ -1,4 +1,6 @@
 ColorRect
+Button
+VBoxContainer
 CanvasLayer
 AnimationPlayer
 CollisionShape2D
@@ -10,6 +12,3 @@ Label
 TextureRect
 HBoxContainer
 MarginContainer
-Control
-NinePatchRect
-RayCast2D

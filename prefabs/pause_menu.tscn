@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://cvence5b8xxpw"]
+
+[ext_resource type="FontFile" uid="uid://cw5yhitdwa6ij" path="res://assets/Fontes/PixelOperator8.ttf" id="1_hf53u"]
+[ext_resource type="Script" uid="uid://b5pvim72licxk" path="res://scripts/pause_menu.gd" id="1_ntkjb"]
+[ext_resource type="Theme" uid="uid://dtt881cw14h2g" path="res://tema/new_theme.tres" id="2_atv5q"]
+
+[node name="pause_menu" type="CanvasLayer" unique_id=1799463148]
+process_mode = 3
+script = ExtResource("1_ntkjb")
+
+[node name="bg_overlay" type="ColorRect" parent="." unique_id=313533162]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.33333334)
+
+[node name="menu_houder" type="VBoxContainer" parent="." unique_id=1995855383]
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -33.0
+offset_bottom = 67.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="resume_btn" type="Button" parent="menu_houder" unique_id=1269716974]
+layout_mode = 2
+theme = ExtResource("2_atv5q")
+theme_override_fonts/font = ExtResource("1_hf53u")
+theme_override_font_sizes/font_size = 32
+text = "RESUME"
+
+[node name="quit_btn" type="Button" parent="menu_houder" unique_id=1680864807]
+layout_mode = 2
+theme = ExtResource("2_atv5q")
+theme_override_fonts/font = ExtResource("1_hf53u")
+theme_override_font_sizes/font_size = 32
+text = "QUIT GAME"
+
+[connection signal="pressed" from="menu_houder/resume_btn" to="." method="_on_resume_btn_pressed"]
+[connection signal="pressed" from="menu_houder/quit_btn" to="." method="_on_quit_btn_pressed"]

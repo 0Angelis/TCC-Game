@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://dmp4dti6och6h" path="res://assets/Seasonal Tilesets/1 - Grassland/Background parts/2 - Hills.png" id="8_dp75u"]
 [ext_resource type="Texture2D" uid="uid://uk0wbkmj2bhg" path="res://assets/Seasonal Tilesets/1 - Grassland/Background parts/1 - Foreground_scenery.png" id="9_samdc"]
 [ext_resource type="PackedScene" uid="uid://ct4nxdqyghxxn" path="res://prefabs/coin.tscn" id="10_4qpc8"]
+[ext_resource type="PackedScene" uid="uid://cvence5b8xxpw" path="res://prefabs/pause_menu.tscn" id="15_0uwfl"]
 [ext_resource type="PackedScene" uid="uid://vloijhvrq35x" path="res://actors/enemy.tscn" id="17_athp7"]
 [ext_resource type="PackedScene" uid="uid://c0djf04oijatf" path="res://actors/eneme_2.tscn" id="18_dl4q8"]
 [ext_resource type="Script" uid="uid://drigg0hefx8yg" path="res://scripts/warning_sing.gd" id="20_6ibfi"]
@@ -375,6 +376,9 @@ shader_parameter/line_color_b = Color(0, 0, 0, 1)
 [node name="World-01" type="Node2D" unique_id=540749280]
 position = Vector2(2, 0)
 script = ExtResource("1_dl4q8")
+
+[node name="pause_menu" parent="." unique_id=1799463148 instance=ExtResource("15_0uwfl")]
+visible = false
 
 [node name="level" type="TileMap" parent="." unique_id=2135947595]
 position = Vector2(-1, 0)

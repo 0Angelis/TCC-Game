@@ -1,8 +1,4 @@
-res://levels/world_01.tscn
-res://scripts/goal.gd
-res://prefabs/goal.tscn
 res://shaders/transition.gdshader
-res://scripts/color_rect.gd
-res://scripts/transition.gd
-res://levels/world_02.tscn
-res://scripts/player.gd
+res://prefabs/pause_menu.tscn
+res://scripts/pause_menu.gd
+res://levels/world_01.tscn
