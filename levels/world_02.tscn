@@ -514,9 +514,10 @@ position = Vector2(-16, 347)
 position = Vector2(552, 658)
 
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("15_wguxb")]
-position = Vector2(1883, 656)
+position = Vector2(1141, -412)
 
 [node name="BG" type="ParallaxBackground" parent="." unique_id=2092705572]
+visible = false
 
 [node name="05" type="ParallaxLayer" parent="BG" unique_id=1539018075]
 motion_mirroring = Vector2(1280, 0)
@@ -564,6 +565,7 @@ zoom = Vector2(3.5, 3.5)
 limit_left = 0
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=184126909]
+visible = false
 
 [node name="control" type="Control" parent="HUD" unique_id=1623216057]
 layout_mode = 3
@@ -682,6 +684,7 @@ vertical_alignment = 1
 autostart = true
 
 [node name="warning" type="Node2D" parent="." unique_id=1954291522]
+visible = false
 position = Vector2(487, 345)
 
 [node name="warning_sign" type="Node2D" parent="warning" unique_id=1771737388]
@@ -923,6 +926,7 @@ position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
+visible = false
 script = ExtResource("30_uwxm0")
 
 [node name="color_rect" type="ColorRect" parent="transition" unique_id=1131400237]
