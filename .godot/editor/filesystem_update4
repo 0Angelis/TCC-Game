@@ -1,5 +1,4 @@
 res://levels/world_01.tscn
 res://tema/new_theme.tres
 res://shaders/transition.gdshader
-res://levels/world_02.tscn
-res://scripts/player.gd
+res://scripts/warning_sing.gd
