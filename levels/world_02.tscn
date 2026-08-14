@@ -533,7 +533,6 @@ position = Vector2(2, 0)
 script = ExtResource("1_q6ugd")
 
 [node name="pause_menu" parent="." unique_id=1799463148 instance=ExtResource("2_whufi")]
-visible = false
 
 [node name="level" type="TileMap" parent="." unique_id=2135947595]
 position = Vector2(-1, 0)
@@ -709,7 +708,6 @@ zoom = Vector2(2.7, 2.7)
 limit_left = 0
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=184126909]
-visible = false
 
 [node name="control" type="Control" parent="HUD" unique_id=1623216057]
 layout_mode = 3
@@ -828,7 +826,6 @@ vertical_alignment = 1
 autostart = true
 
 [node name="warning" type="Node2D" parent="." unique_id=1954291522]
-visible = false
 position = Vector2(487, 345)
 
 [node name="warning_sign" type="Node2D" parent="warning" unique_id=1771737388]
@@ -1070,7 +1067,6 @@ position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
-visible = false
 script = ExtResource("30_uwxm0")
 
 [node name="color_rect" type="ColorRect" parent="transition" unique_id=1131400237]

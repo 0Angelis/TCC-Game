@@ -149,7 +149,7 @@ func die():
 	animation.play("hurt")
 
 	# volta para o estado em que entrou na fase
-	Globals.coins = Globals.level_start_coins
+	#Globals.coins = Globals.level_start_coins
 	Globals.score = Globals.level_start_score
 
 	await get_tree().create_timer(1.0).timeout
