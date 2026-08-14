@@ -38,7 +38,7 @@ animations = [{
 "duration": 0.3,
 "texture": SubResource("AtlasTexture_wu64i")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle",
 "speed": 1.0
 }, {
@@ -46,7 +46,7 @@ animations = [{
 "duration": 1.0,
 "texture": ExtResource("3_esgq3")
 }],
-"loop": true,
+"loop": 1,
 "name": &"jump",
 "speed": 5.0
 }, {
@@ -63,7 +63,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_e7yfm")
 }],
-"loop": true,
+"loop": 1,
 "name": &"run",
 "speed": 7.0
 }]
@@ -72,7 +72,7 @@ animations = [{
 size = Vector2(21, 18)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_esgq3"]
-size = Vector2(23, 17)
+size = Vector2(23, 18)
 
 [node name="player" type="CharacterBody2D" unique_id=1042794639]
 collision_mask = 22
@@ -97,7 +97,7 @@ collision_layer = 0
 collision_mask = 4
 
 [node name="collision" type="CollisionShape2D" parent="hurtbox" unique_id=988811623]
-position = Vector2(-1.5, 0.5)
+position = Vector2(-1.5, 1)
 shape = SubResource("RectangleShape2D_esgq3")
 debug_color = Color(0.88573563, 0.2946573, 0.40368244, 0.41960785)
 

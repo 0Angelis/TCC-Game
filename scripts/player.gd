@@ -11,11 +11,15 @@ var can_move := true
 
 @onready var animation = $Anim as AnimatedSprite2D
 @onready var remote_transform = $remote as RemoteTransform2D
+@onready var level = get_tree().current_scene.get_node("level")
 
 
 func _ready():
 	add_to_group("player")
 	Globals.player_life = 3
+
+	print("PLAYER INICIADO")
+	print("TileMap encontrado: ", level)
 
 
 func _physics_process(delta: float) -> void:
@@ -98,6 +102,9 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+	# verifica espinhos do TileMap
+	check_damage_tile()
+
 
 func _on_hurtbox_body_entered(body: Node2D) -> void:
 
@@ -116,12 +123,70 @@ func _on_hurtbox_body_entered(body: Node2D) -> void:
 		)
 
 
+func check_damage_tile() -> void:
+
+	# se está invencível, não verifica
+	if not can_take_damage:
+		return
+
+	if level == null:
+		print("ERRO: TileMap 'level' não encontrado!")
+		return
+
+	# posição dos pés do personagem
+	var feet_position = global_position + Vector2(0, 12)
+
+	# vários pontos ao redor dos pés
+	var positions = [
+		feet_position,
+		feet_position + Vector2(-8, 0),
+		feet_position + Vector2(8, 0),
+		feet_position + Vector2(0, 8),
+		feet_position + Vector2(0, 16)
+	]
+
+	# verifica todas as camadas do TileMap
+	for layer_index in range(level.get_layers_count()):
+
+		for world_position in positions:
+
+			var local_position = level.to_local(world_position)
+
+			var tile_position = level.local_to_map(local_position)
+
+			var tile_data = level.get_cell_tile_data(
+				layer_index,
+				tile_position
+			)
+
+			if tile_data == null:
+				continue
+
+			var damage = tile_data.get_custom_data("damage")
+
+			if damage == true:
+
+				print("================================")
+				print("ESPINHO DETECTADO!")
+				print("Camada: ", layer_index)
+				print("Tile: ", tile_position)
+				print("Damage: ", damage)
+				print("================================")
+
+				# knockback pequeno dos espinhos
+				take_damage(
+					Vector2(0, -60)
+				)
+
+				return
+
+
 func take_damage(
 	knockback_force := Vector2.ZERO,
 	duration := 0.25
 ):
 
-	# evita tomar vários danos seguidos
+	# evita vários danos seguidos
 	if not can_take_damage:
 		return
 
@@ -134,14 +199,14 @@ func take_damage(
 
 		Globals.player_life -= 1
 
-		print("Vida:", Globals.player_life)
+		print("VIDA: ", Globals.player_life)
 
 	else:
 
 		die()
 		return
 
-	# se ficou sem vidas
+	# morreu
 	if Globals.player_life <= 0:
 
 		die()
@@ -199,7 +264,8 @@ func die():
 
 	animation.play("hurt")
 
-	await get_tree().create_timer(1.0).timeout
+	# espera só 0.3 segundos antes de reiniciar
+	await get_tree().create_timer(0.3).timeout
 
 	get_tree().reload_current_scene()
 
