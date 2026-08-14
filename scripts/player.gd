@@ -10,7 +10,7 @@ var can_take_damage := true
 var can_move := true
 
 @onready var animation = $Anim as AnimatedSprite2D
-@onready var remote_transform := $remote as RemoteTransform2D
+@onready var remote_transform = $remote as RemoteTransform2D
 
 
 func _ready():
@@ -24,14 +24,14 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
-	# aplica knockback suave
+	# knockback
 	velocity += knockback_vector
 
 	# pulo
 	if (
-		Input.is_key_pressed(KEY_W) or
-		Input.is_key_pressed(KEY_SPACE) or
-		Input.is_key_pressed(KEY_UP)
+		Input.is_key_pressed(KEY_W)
+		or Input.is_key_pressed(KEY_SPACE)
+		or Input.is_key_pressed(KEY_UP)
 	) and is_on_floor() and can_move:
 
 		velocity.y = JUMP_FORCE
@@ -50,51 +50,78 @@ func _physics_process(delta: float) -> void:
 
 		velocity.x = direction * SPEED
 
-		# virar personagem
 		animation.flip_h = direction < 0
 
 	elif can_move:
 
-		velocity.x = move_toward(velocity.x, 0, SPEED)
+		velocity.x = move_toward(
+			velocity.x,
+			0,
+			SPEED
+		)
 
 	# animações
 	if not is_on_floor():
+
 		animation.play("jump")
 
 	elif direction != 0:
+
 		animation.play("run")
 
 	else:
+
 		animation.play("idle")
 
-	# última vida piscando vermelho
+	# última vida piscando
 	if Globals.player_life == 1 and not taking_damage:
 
-		var blink = abs(sin(Time.get_ticks_msec() * 0.005))
-		animation.modulate = Color(1, blink, blink, 1)
+		var blink = abs(
+			sin(Time.get_ticks_msec() * 0.005)
+		)
+
+		animation.modulate = Color(
+			1,
+			blink,
+			blink,
+			1
+		)
 
 	elif not taking_damage:
 
-		animation.modulate = Color(1, 1, 1, 1)
+		animation.modulate = Color(
+			1,
+			1,
+			1,
+			1
+		)
 
 	move_and_slide()
 
 
 func _on_hurtbox_body_entered(body: Node2D) -> void:
 
+	# dano dos inimigos
 	if body.is_in_group("enemies"):
 
-		var direction = (global_position - body.global_position).normalized()
+		var direction = (
+			global_position - body.global_position
+		).normalized()
 
-		take_damage(Vector2(direction.x * 230, -80))
+		take_damage(
+			Vector2(
+				direction.x * 230,
+				-80
+			)
+		)
 
-	if Globals.player_life <= 0:
-		die()
 
+func take_damage(
+	knockback_force := Vector2.ZERO,
+	duration := 0.25
+):
 
-func take_damage(knockback_force := Vector2.ZERO, duration := 0.1):
-
-	# impede múltiplos danos
+	# evita tomar vários danos seguidos
 	if not can_take_damage:
 		return
 
@@ -102,14 +129,33 @@ func take_damage(knockback_force := Vector2.ZERO, duration := 0.1):
 	can_move = false
 	taking_damage = true
 
-	Globals.player_life -= 1
+	# perde uma vida
+	if Globals.player_life > 0:
 
-	print("Vida:", Globals.player_life)
+		Globals.player_life -= 1
 
-	# vermelho ao tomar dano
-	animation.modulate = Color(1.0, 0.0, 0.0, 1.0)
+		print("Vida:", Globals.player_life)
 
-	# aplica knockback
+	else:
+
+		die()
+		return
+
+	# se ficou sem vidas
+	if Globals.player_life <= 0:
+
+		die()
+		return
+
+	# fica vermelho
+	animation.modulate = Color(
+		1,
+		0,
+		0,
+		1
+	)
+
+	# knockback
 	if knockback_force != Vector2.ZERO:
 
 		knockback_vector = knockback_force
@@ -134,8 +180,13 @@ func take_damage(knockback_force := Vector2.ZERO, duration := 0.1):
 	can_take_damage = true
 	taking_damage = false
 
-	# volta cor normal
-	animation.modulate = Color(1, 1, 1, 1)
+	# volta ao normal
+	animation.modulate = Color(
+		1,
+		1,
+		1,
+		1
+	)
 
 
 func die():
@@ -147,10 +198,6 @@ func die():
 	velocity = Vector2.ZERO
 
 	animation.play("hurt")
-
-	# volta para o estado em que entrou na fase
-	#Globals.coins = Globals.level_start_coins
-	#Globals.score = Globals.level_start_score
 
 	await get_tree().create_timer(1.0).timeout
 
