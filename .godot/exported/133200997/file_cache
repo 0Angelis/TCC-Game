@@ -1,12 +1,12 @@
 res://actors/eneme_2.tscn::4e663d1815a5bbbe85f533f2b169757d::1783596903::res://.godot/exported/133200997/export-d90f7f761436ed955109250e1c17184a-eneme_2.scn
 res://actors/enemy.tscn::6283f2c1955d8c329b04bdea51240799::1783536167::res://.godot/exported/133200997/export-61e27e8a0642b62a00179865da5b591c-enemy.scn
-res://actors/player.tscn::8c78ff56a4e74a2aa84df78799e8435b::1781536624::res://.godot/exported/133200997/export-e86f95e5088e93066d258d9192ab0748-player.scn
-res://levels/world_01.tscn::23ab8ff7f4bcc93fb30ac7feefc703fd::1786562206::res://.godot/exported/133200997/export-bde9b0b2529c5f41f8c8416b7a30fd64-world_01.scn
-res://levels/world_02.tscn::87c4150fc83022373c893236cfd50946::1786670127::res://.godot/exported/133200997/export-9ea0b90961334f0e8e71d2803d6d25db-world_02.scn
+res://actors/player.tscn::5e39e7ce527315dc5891d03a7ec9d8e8::1786736095::res://.godot/exported/133200997/export-e86f95e5088e93066d258d9192ab0748-player.scn
+res://levels/world_01.tscn::7b28883d05eb3ca42b7c58a2ae67fbbc::1786736785::res://.godot/exported/133200997/export-bde9b0b2529c5f41f8c8416b7a30fd64-world_01.scn
+res://levels/world_02.tscn::2819f8e4869c4b926bcc1f3477f2ed1b::1786731801::res://.godot/exported/133200997/export-9ea0b90961334f0e8e71d2803d6d25db-world_02.scn
 res://prefabs/coin.tscn::d6c316ff353996a59889e86489ca8b1e::1781705352::res://.godot/exported/133200997/export-39bbc9b86d6ff472dbd608d74c2b3efc-coin.scn
 res://prefabs/dialog_box.tscn::f95007cc8124a1038792459c58e85980::1783596428::res://.godot/exported/133200997/export-67c1f312581d8577e5e9c471a97f3310-dialog_box.scn
 res://prefabs/goal.tscn::00f4b1f507ca26925171233d6c52a55d::1786381616::res://.godot/exported/133200997/export-570e93fb67e35f6e64cc14fd16437ce6-goal.scn
 res://prefabs/hitbox.tscn::41b0bd0c78ff5791b71c5be4231a9737::1781536624::res://.godot/exported/133200997/export-5e61a6088dbfe8a801584a03fb1f0aa8-hitbox.scn
 res://prefabs/moving_platform.tscn::a4a064bec235d8f455f467e258bb038b::1781536624::res://.godot/exported/133200997/export-b8b4dc3182f88a6c2aaba450ed03da50-moving_platform.scn
 res://prefabs/pause_menu.tscn::87b54b21cf8387edb062b13245b31b02::1786391056::res://.godot/exported/133200997/export-c43a75ce232219e652145b532a63709b-pause_menu.scn
-res://tema/new_theme.tres::8550fbaee6e678e8db6842b070ede2d1::1786669609::res://.godot/exported/133200997/export-1d54f803d7dcaa0c716d16877c8501f0-new_theme.res
+res://tema/new_theme.tres::8550fbaee6e678e8db6842b070ede2d1::1786731700::res://.godot/exported/133200997/export-1d54f803d7dcaa0c716d16877c8501f0-new_theme.res
