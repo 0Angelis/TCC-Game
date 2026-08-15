@@ -37,6 +37,7 @@
 [ext_resource type="Shader" uid="uid://cfqg8x3kad7tx" path="res://shaders/transition.gdshader" id="31_0uwfl"]
 [ext_resource type="Texture2D" uid="uid://daid336cyg8np" path="res://assets/Mini FX, Items & UI/placa e.png" id="31_ud1nb"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="32_ud1nb"]
+[ext_resource type="Texture2D" uid="uid://cpqoiqaqnb706" path="res://new/ChatGPT Image 15 de ago. de 2026, 20_16_14.png" id="35_q0cxt"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_j8rs1"]
 tile_data = PackedInt32Array(0, 65537, 1)
@@ -818,12 +819,10 @@ position = Vector2(-18, 420)
 position = Vector2(-16, 347)
 
 [node name="goal" parent="." unique_id=1383269650 instance=ExtResource("29_gmex4")]
-visible = false
 position = Vector2(3031, 775)
 next_level = "res://levels/world_02.tscn"
 
 [node name="BG" type="ParallaxBackground" parent="." unique_id=2092705572]
-visible = false
 
 [node name="05" type="ParallaxLayer" parent="BG" unique_id=1539018075]
 motion_mirroring = Vector2(1280, 0)
@@ -867,13 +866,11 @@ texture = ExtResource("9_samdc")
 centered = false
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
-visible = false
 zoom = Vector2(3.5, 3.5)
 limit_left = 0
 position_smoothing_enabled = true
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=184126909]
-visible = false
 
 [node name="control" type="Control" parent="HUD" unique_id=1623216057]
 layout_mode = 3
@@ -1281,6 +1278,11 @@ collision_layer = 2
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=563978885]
+position = Vector2(184, 748)
+scale = Vector2(0.15771484, 0.13720694)
+texture = ExtResource("35_q0cxt")
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
 visible = false
