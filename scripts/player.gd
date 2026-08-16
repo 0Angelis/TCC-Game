@@ -3,6 +3,20 @@ extends CharacterBody2D
 const SPEED = 150.0
 const JUMP_FORCE = -300.0
 
+# =========================
+# CONFIGURAÇÃO DO KNOCKBACK
+# =========================
+
+# Quanto menor, menos o personagem é empurrado
+const ENEMY_KNOCKBACK_X = 100.0
+const ENEMY_KNOCKBACK_Y = -40.0
+
+const SPIKE_KNOCKBACK_Y = -35.0
+
+# Limite máximo para evitar knockback exagerado
+const MAX_KNOCKBACK_X = 110.0
+const MAX_KNOCKBACK_Y = 50.0
+
 var knockback_vector := Vector2.ZERO
 
 var taking_damage := false
@@ -24,14 +38,25 @@ func _ready():
 
 func _physics_process(delta: float) -> void:
 
-	# gravidade
+	# =========================
+	# GRAVIDADE
+	# =========================
+
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
-	# knockback
+
+	# =========================
+	# KNOCKBACK
+	# =========================
+
 	velocity += knockback_vector
 
-	# pulo
+
+	# =========================
+	# PULO
+	# =========================
+
 	if (
 		Input.is_key_pressed(KEY_W)
 		or Input.is_key_pressed(KEY_SPACE)
@@ -40,7 +65,11 @@ func _physics_process(delta: float) -> void:
 
 		velocity.y = JUMP_FORCE
 
-	# movimento
+
+	# =========================
+	# MOVIMENTO
+	# =========================
+
 	var direction = 0
 
 	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
@@ -49,7 +78,11 @@ func _physics_process(delta: float) -> void:
 	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
 		direction = 1
 
-	# andar
+
+	# =========================
+	# ANDAR
+	# =========================
+
 	if direction != 0 and can_move:
 
 		velocity.x = direction * SPEED
@@ -64,7 +97,11 @@ func _physics_process(delta: float) -> void:
 			SPEED
 		)
 
-	# animações
+
+	# =========================
+	# ANIMAÇÕES
+	# =========================
+
 	if not is_on_floor():
 
 		animation.play("jump")
@@ -77,7 +114,11 @@ func _physics_process(delta: float) -> void:
 
 		animation.play("idle")
 
-	# última vida piscando
+
+	# =========================
+	# ÚLTIMA VIDA PISCANDO
+	# =========================
+
 	if Globals.player_life == 1 and not taking_damage:
 
 		var blink = abs(
@@ -100,15 +141,23 @@ func _physics_process(delta: float) -> void:
 			1
 		)
 
+
 	move_and_slide()
 
-	# verifica espinhos do TileMap
+
+	# =========================
+	# VERIFICA ESPINHOS
+	# =========================
+
 	check_damage_tile()
 
 
 func _on_hurtbox_body_entered(body: Node2D) -> void:
 
-	# dano dos inimigos
+	# =========================
+	# DANO DOS INIMIGOS
+	# =========================
+
 	if body.is_in_group("enemies"):
 
 		var direction = (
@@ -117,15 +166,15 @@ func _on_hurtbox_body_entered(body: Node2D) -> void:
 
 		take_damage(
 			Vector2(
-				direction.x * 230,
-				-80
+				direction.x * ENEMY_KNOCKBACK_X,
+				ENEMY_KNOCKBACK_Y
 			)
 		)
 
 
 func check_damage_tile() -> void:
 
-	# se está invencível, não verifica
+	# Se está invencível, não verifica
 	if not can_take_damage:
 		return
 
@@ -133,10 +182,15 @@ func check_damage_tile() -> void:
 		print("ERRO: TileMap 'level' não encontrado!")
 		return
 
-	# posição dos pés do personagem
+
+	# =========================
+	# POSIÇÃO DOS PÉS
+	# =========================
+
 	var feet_position = global_position + Vector2(0, 12)
 
-	# vários pontos ao redor dos pés
+
+	# Vários pontos ao redor dos pés
 	var positions = [
 		feet_position,
 		feet_position + Vector2(-8, 0),
@@ -145,7 +199,11 @@ func check_damage_tile() -> void:
 		feet_position + Vector2(0, 16)
 	]
 
-	# verifica todas as camadas do TileMap
+
+	# =========================
+	# VERIFICA TODAS AS CAMADAS
+	# =========================
+
 	for layer_index in range(level.get_layers_count()):
 
 		for world_position in positions:
@@ -173,9 +231,16 @@ func check_damage_tile() -> void:
 				print("Damage: ", damage)
 				print("================================")
 
-				# knockback pequeno dos espinhos
+
+				# =========================
+				# KNOCKBACK PEQUENO DOS ESPINHOS
+				# =========================
+
 				take_damage(
-					Vector2(0, -60)
+					Vector2(
+						0,
+						SPIKE_KNOCKBACK_Y
+					)
 				)
 
 				return
@@ -186,7 +251,10 @@ func take_damage(
 	duration := 0.25
 ):
 
-	# evita vários danos seguidos
+	# =========================
+	# EVITA VÁRIOS DANOS SEGUIDOS
+	# =========================
+
 	if not can_take_damage:
 		return
 
@@ -194,7 +262,11 @@ func take_damage(
 	can_move = false
 	taking_damage = true
 
-	# perde uma vida
+
+	# =========================
+	# PERDE UMA VIDA
+	# =========================
+
 	if Globals.player_life > 0:
 
 		Globals.player_life -= 1
@@ -206,13 +278,21 @@ func take_damage(
 		die()
 		return
 
-	# morreu
+
+	# =========================
+	# MORREU
+	# =========================
+
 	if Globals.player_life <= 0:
 
 		die()
 		return
 
-	# fica vermelho
+
+	# =========================
+	# FICA VERMELHO
+	# =========================
+
 	animation.modulate = Color(
 		1,
 		0,
@@ -220,11 +300,30 @@ func take_damage(
 		1
 	)
 
-	# knockback
+
+	# =========================
+	# KNOCKBACK
+	# =========================
+
 	if knockback_force != Vector2.ZERO:
+
+		# Limita o knockback máximo
+		knockback_force.x = clamp(
+			knockback_force.x,
+			-MAX_KNOCKBACK_X,
+			MAX_KNOCKBACK_X
+		)
+
+		knockback_force.y = clamp(
+			knockback_force.y,
+			-MAX_KNOCKBACK_Y,
+			MAX_KNOCKBACK_Y
+		)
 
 		knockback_vector = knockback_force
 
+
+		# Suaviza o knockback até chegar a zero
 		var knockback_tween := get_tree().create_tween()
 
 		knockback_tween.tween_property(
@@ -234,18 +333,30 @@ func take_damage(
 			duration
 		)
 
-	# pequeno stun
+
+	# =========================
+	# PEQUENO STUN
+	# =========================
+
 	await get_tree().create_timer(0.08).timeout
 
 	can_move = true
 
-	# invencibilidade
+
+	# =========================
+	# INVENCIBILIDADE
+	# =========================
+
 	await get_tree().create_timer(0.4).timeout
 
 	can_take_damage = true
 	taking_damage = false
 
-	# volta ao normal
+
+	# =========================
+	# VOLTA AO NORMAL
+	# =========================
+
 	animation.modulate = Color(
 		1,
 		1,
@@ -262,9 +373,21 @@ func die():
 
 	velocity = Vector2.ZERO
 
+
+	# =========================
+	# RESETA OS DADOS DA PARTIDA
+	# =========================
+
+	Globals.coins = 0
+	Globals.score = 0
+	Globals.level_coins = 0
+	Globals.level_score = 0
+
+
 	animation.play("hurt")
 
-	# espera só 0.3 segundos antes de reiniciar
+
+	# Espera só 0.3 segundos antes de reiniciar
 	await get_tree().create_timer(0.3).timeout
 
 	get_tree().reload_current_scene()

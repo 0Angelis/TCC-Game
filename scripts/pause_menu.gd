@@ -110,8 +110,19 @@ func resume_game():
 
 
 func restart_game():
+	# Despausa antes de reiniciar
 	get_tree().paused = false
 	visible = false
+
+	# =========================
+	# RESET DA PARTIDA
+	# =========================
+	Globals.score = 0
+	Globals.coins = 0
+	Globals.level_score = 0
+	Globals.level_coins = 0
+
+	# Reinicia a cena atual
 	get_tree().reload_current_scene()
 
 
