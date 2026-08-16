@@ -5,7 +5,7 @@ extends Control
 @onready var score_counter = $container/score_container/score_counter as Label
 @onready var life_counter = $container/life_container/life_counter as Label
 
-var time_left := 180.0 # 3 minutos
+var time_left := 300.0 # 5 minutos
 var game_over := false
 
 func _ready():
