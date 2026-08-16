@@ -1286,18 +1286,7 @@ visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=563978885]
-position = Vector2(181.00002, 741.99994)
-scale = Vector2(0.15771484, 0.13720694)
-texture = ExtResource("35_q0cxt")
-
-[node name="Sprite2D2" type="Sprite2D" parent="." unique_id=143338269]
-position = Vector2(822.00006, 730)
-scale = Vector2(0.14422253, 0.12832987)
-texture = ExtResource("36_qh8on")
-
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
-visible = false
 script = ExtResource("30_7k4mt")
 
 [node name="color_rect" type="ColorRect" parent="transition" unique_id=1131400237]
@@ -1308,3 +1297,13 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("32_ud1nb")
+
+[node name="Comandos" type="Sprite2D" parent="." unique_id=563978885]
+position = Vector2(181.00002, 741.99994)
+scale = Vector2(0.15771484, 0.13720694)
+texture = ExtResource("35_q0cxt")
+
+[node name="Comandos2" type="Sprite2D" parent="." unique_id=143338269]
+position = Vector2(822.00006, 730)
+scale = Vector2(0.14422253, 0.12832987)
+texture = ExtResource("36_qh8on")

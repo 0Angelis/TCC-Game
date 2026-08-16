@@ -1,12 +1,3 @@
-res://scripts/player.gd
-res://scripts/pause_menu.gd
 res://levels/world_01.tscn
 res://tema/new_theme.tres
 res://shaders/transition.gdshader
-res://scripts/transition.gd
-res://scripts/goal.gd
-res://singletons/globals.gd
-res://assets/cOMANDOS/comandos.png
-res://assets/Comandos/comandos.png
-res://assets/cOMANDOS/inimigos.png
-res://assets/Comandos/inimigos.png
