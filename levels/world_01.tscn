@@ -37,8 +37,8 @@
 [ext_resource type="Shader" uid="uid://cfqg8x3kad7tx" path="res://shaders/transition.gdshader" id="31_0uwfl"]
 [ext_resource type="Texture2D" uid="uid://daid336cyg8np" path="res://assets/Mini FX, Items & UI/placa e.png" id="31_ud1nb"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="32_ud1nb"]
-[ext_resource type="Texture2D" uid="uid://bqqms6kv0vg7e" path="res://new/comandos.png" id="35_q0cxt"]
-[ext_resource type="Texture2D" uid="uid://dsojatfb02i3a" path="res://new/inimigos.png" id="36_qh8on"]
+[ext_resource type="Texture2D" uid="uid://bqqms6kv0vg7e" path="res://assets/Comandos/comandos.png" id="35_q0cxt"]
+[ext_resource type="Texture2D" uid="uid://dsojatfb02i3a" path="res://assets/Comandos/inimigos.png" id="36_qh8on"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_j8rs1"]
 tile_data = PackedInt32Array(0, 65537, 1)

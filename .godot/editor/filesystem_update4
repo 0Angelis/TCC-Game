@@ -6,3 +6,7 @@ res://shaders/transition.gdshader
 res://scripts/transition.gd
 res://scripts/goal.gd
 res://singletons/globals.gd
+res://assets/cOMANDOS/comandos.png
+res://assets/Comandos/comandos.png
+res://assets/cOMANDOS/inimigos.png
+res://assets/Comandos/inimigos.png
