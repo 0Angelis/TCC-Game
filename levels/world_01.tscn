@@ -36,9 +36,11 @@
 [ext_resource type="Script" uid="uid://dhx83fqukj7ji" path="res://scripts/transition.gd" id="30_7k4mt"]
 [ext_resource type="Shader" uid="uid://cfqg8x3kad7tx" path="res://shaders/transition.gdshader" id="31_0uwfl"]
 [ext_resource type="Texture2D" uid="uid://daid336cyg8np" path="res://assets/Mini FX, Items & UI/placa e.png" id="31_ud1nb"]
+[ext_resource type="Texture2D" uid="uid://bl7actt7grri6" path="res://assets/Fragmentos/FragmentoRaciocinio.png" id="32_brbtt"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="32_ud1nb"]
 [ext_resource type="Texture2D" uid="uid://bqqms6kv0vg7e" path="res://assets/Comandos/comandos.png" id="35_q0cxt"]
 [ext_resource type="Texture2D" uid="uid://dsojatfb02i3a" path="res://assets/Comandos/inimigos.png" id="36_qh8on"]
+[ext_resource type="PackedScene" uid="uid://cu31oefxt7lgm" path="res://prefabs/frag_raciocinio.tscn" id="40_0aqq2"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_j8rs1"]
 tile_data = PackedInt32Array(0, 65537, 1)
@@ -892,6 +894,9 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -2.0
+offset_right = 7.0
+offset_bottom = 192.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 10
@@ -956,6 +961,8 @@ vertical_alignment = 1
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 8
+offset_transform_enabled = true
+offset_transform_position = Vector2(0, -160)
 
 [node name="life_icon" type="TextureRect" parent="HUD/control/container/life_container" unique_id=857280008]
 layout_mode = 2
@@ -993,6 +1000,27 @@ vertical_alignment = 1
 
 [node name="clock_timer" type="Timer" parent="HUD/control/container" unique_id=1966678653]
 autostart = true
+
+[node name="raciocinio_container" type="HBoxContainer" parent="HUD/control/container" unique_id=72001495]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+offset_transform_enabled = true
+offset_transform_position = Vector2(550, 390)
+offset_transform_scale = Vector2(0.09, 0.09)
+
+[node name="raciocinio_icon" type="TextureRect" parent="HUD/control/container/raciocinio_container" unique_id=236319761]
+layout_mode = 2
+texture = ExtResource("32_brbtt")
+
+[node name="raciocinio_counter" type="Label" parent="HUD/control/container/raciocinio_container" unique_id=916055118]
+layout_mode = 2
+offset_transform_enabled = true
+offset_transform_scale = Vector2(30, 30)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("27_gmex4")
+theme_override_font_sizes/font_size = 16
 
 [node name="warning" type="Node2D" parent="." unique_id=1954291522]
 position = Vector2(487, 346)
@@ -1297,6 +1325,21 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("32_ud1nb")
+
+[node name="Fragmentos" type="Node2D" parent="." unique_id=887429600]
+position = Vector2(754, 655)
+
+[node name="frag_raciocinio" parent="Fragmentos" unique_id=1108284432 instance=ExtResource("40_0aqq2")]
+position = Vector2(-555, -934)
+
+[node name="frag_raciocinio2" parent="Fragmentos" unique_id=1768033476 instance=ExtResource("40_0aqq2")]
+position = Vector2(267, -437)
+
+[node name="frag_raciocinio3" parent="Fragmentos" unique_id=1072736906 instance=ExtResource("40_0aqq2")]
+position = Vector2(851, -279)
+
+[node name="frag_raciocinio4" parent="Fragmentos" unique_id=1163845356 instance=ExtResource("40_0aqq2")]
+position = Vector2(2145, 137)
 
 [node name="Comandos" type="Sprite2D" parent="." unique_id=563978885]
 position = Vector2(181.00002, 741.99994)

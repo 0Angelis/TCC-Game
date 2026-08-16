@@ -1,0 +1,60 @@
+[gd_scene format=3 uid="uid://cu31oefxt7lgm"]
+
+[ext_resource type="Script" uid="uid://p3i45mnkijlc" path="res://scripts/frag_raciocinio.gd" id="1_bx6xc"]
+[ext_resource type="Texture2D" uid="uid://dg5q05g3ksajj" path="res://assets/Fragmentos/Fragmento Raciocinio4.png" id="1_y2b5c"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bx6xc"]
+atlas = ExtResource("1_y2b5c")
+region = Rect2(0, 0, 543, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ljsfk"]
+atlas = ExtResource("1_y2b5c")
+region = Rect2(543, 0, 543, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a6p5o"]
+atlas = ExtResource("1_y2b5c")
+region = Rect2(1086, 0, 543, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rbri2"]
+atlas = ExtResource("1_y2b5c")
+region = Rect2(1629, 0, 543, 724)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sob1t"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bx6xc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ljsfk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a6p5o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rbri2")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_5t4lp"]
+radius = 9.0
+
+[node name="frag_raciocinio" type="Area2D" unique_id=1108284432]
+collision_layer = 9
+script = ExtResource("1_bx6xc")
+
+[node name="anim" type="AnimatedSprite2D" parent="." unique_id=654223170]
+position = Vector2(4.7683716e-07, 1.0000005)
+scale = Vector2(0.033580106, 0.04050892)
+sprite_frames = SubResource("SpriteFrames_sob1t")
+animation = &"idle"
+autoplay = "idle"
+frame_progress = 0.054326233
+
+[node name="collision" type="CollisionShape2D" parent="." unique_id=1351668820]
+shape = SubResource("CapsuleShape2D_5t4lp")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

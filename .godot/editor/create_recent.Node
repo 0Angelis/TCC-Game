@@ -1,14 +1,14 @@
-Area2D
 Label
 TextureRect
 HBoxContainer
-Sprite2D
 Node2D
 CollisionShape2D
+AnimatedSprite2D
+Area2D
+Sprite2D
 ColorRect
 Button
 VBoxContainer
 CanvasLayer
 AnimationPlayer
 Timer
-MarginContainer
