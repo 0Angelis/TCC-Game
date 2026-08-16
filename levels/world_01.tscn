@@ -1201,7 +1201,7 @@ shape = SubResource("RectangleShape2D_sob1t")
 [node name="warning_sing11" type="Node2D" parent="warning" unique_id=252292846]
 position = Vector2(687, 63)
 script = ExtResource("20_6ibfi")
-dialog_texts = Array[String](["Plataforma de cima: 0,75", "Plataforma de baixo: 0,705"])
+dialog_texts = Array[String](["↑ 0,75", "↓ 0,705"])
 
 [node name="alert_sign" type="Sprite2D" parent="warning/warning_sing11" unique_id=1090241044]
 visible = false
@@ -1245,7 +1245,7 @@ shape = SubResource("RectangleShape2D_sob1t")
 [node name="warning_sing13" type="Node2D" parent="warning" unique_id=239946918]
 position = Vector2(1648, 480)
 script = ExtResource("20_6ibfi")
-dialog_texts = Array[String](["⬆️ 13", "⬇️ 15"])
+dialog_texts = Array[String](["↑ 13", "↓ 15"])
 
 [node name="alert_sign" type="Sprite2D" parent="warning/warning_sing13" unique_id=992038341]
 visible = false
