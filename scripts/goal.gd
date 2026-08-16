@@ -1,5 +1,6 @@
 extends Area2D
 
+
 @onready var transition = $"../transition"
 
 @export var next_level: String = ""
@@ -10,14 +11,26 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player") and next_level != "":
 
 		# ==========================================
-		# NÃO RESETAR SCORE NEM MOEDAS
+		# RESET AO PASSAR DE FASE
 		# ==========================================
-		# Os valores continuam salvos no Globals
-		# ao mudar de fase.
-		
+
+		Globals.score = 0
+		Globals.coins = 0
+
+		Globals.level_score = 0
+		Globals.level_coins = 0
+
+
+		print("==============================")
 		print("PASSANDO DE FASE")
-		print("MOEDAS: ", Globals.coins)
-		print("SCORE: ", Globals.score)
+		print("SCORE RESETADO: ", Globals.score)
+		print("MOEDAS RESETADAS: ", Globals.coins)
+		print("==============================")
+
+
+		# ==========================================
+		# MUDA PARA A PRÓXIMA FASE
+		# ==========================================
 
 		transition.change_scene(next_level)
 

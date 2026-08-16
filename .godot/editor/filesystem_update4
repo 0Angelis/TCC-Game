@@ -5,3 +5,4 @@ res://tema/new_theme.tres
 res://shaders/transition.gdshader
 res://scripts/transition.gd
 res://scripts/goal.gd
+res://singletons/globals.gd
