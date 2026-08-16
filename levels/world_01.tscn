@@ -1297,7 +1297,6 @@ scale = Vector2(0.14422253, 0.12832987)
 texture = ExtResource("36_qh8on")
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
-visible = false
 script = ExtResource("30_7k4mt")
 
 [node name="color_rect" type="ColorRect" parent="transition" unique_id=1131400237]
