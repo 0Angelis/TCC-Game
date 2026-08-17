@@ -1,31 +1,28 @@
 extends Area2D
 
-var coletado := false
+
+func _ready() -> void:
+	pass
 
 
-func _ready():
-
-	if not body_entered.is_connected(_on_body_entered):
-		body_entered.connect(_on_body_entered)
+func _process(delta: float) -> void:
+	pass
 
 
-func _on_body_entered(body: Node2D):
+func _on_body_entered(body: Node2D) -> void:
 
-	# Verifica se é o player
-	if not body.is_in_group("player"):
-		return
+	if body.name == "player":
 
-	# Evita coletar duas vezes
-	if coletado:
-		return
+		monitoring = false
 
-	coletado = true
+		# Adiciona 1 fragmento
+		Globals.raciocinio_fragments += 1
 
-	# Guarda que o fragmento foi coletado
-	Globals.raciocinio_fragments += 1
+		print("FRAGMENTO DE RACIOCÍNIO: ", Globals.raciocinio_fragments)
 
-	print("FRAGMENTO DE RACIOCÍNIO COLETADO!")
-	print("Fragmentos: ", Globals.raciocinio_fragments)
+		# Toca a animação de coleta
+		$anim.play("collect")
 
-	# Remove o fragmento da fase
-	queue_free()
+		await get_tree().create_timer(0.1).timeout
+
+		queue_free()

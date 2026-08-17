@@ -8,32 +8,78 @@ extends Area2D
 
 func _on_body_entered(body: Node2D) -> void:
 
-	if body.is_in_group("player") and next_level != "":
+	if not body.is_in_group("player"):
+		return
 
-		# ==========================================
-		# RESET AO PASSAR DE FASE
-		# ==========================================
 
-		Globals.score = 0
-		Globals.coins = 0
+	# ==========================================
+	# VERIFICA SE PEGOU TODOS OS FRAGMENTOS
+	# ==========================================
 
-		Globals.level_score = 0
-		Globals.level_coins = 0
-
+	if Globals.raciocinio_fragments < 4:
 
 		print("==============================")
-		print("PASSANDO DE FASE")
-		print("SCORE RESETADO: ", Globals.score)
-		print("MOEDAS RESETADAS: ", Globals.coins)
+		print("FASE BLOQUEADA!")
+		print(
+			"FRAGMENTOS: ",
+			Globals.raciocinio_fragments,
+			"/4"
+		)
+		print("Pegue todos os fragmentos!")
 		print("==============================")
 
 
-		# ==========================================
-		# MUDA PARA A PRÓXIMA FASE
-		# ==========================================
+		# Não passa de fase
+		return
 
-		transition.change_scene(next_level)
 
-	else:
+	# ==========================================
+	# VERIFICA SE EXISTE PRÓXIMA FASE
+	# ==========================================
 
-		print("Cena carregada")
+	if next_level == "":
+		return
+
+
+	# ==========================================
+	# TODOS OS FRAGMENTOS FORAM COLETADOS
+	# ==========================================
+
+	print("==============================")
+	print("TODOS OS FRAGMENTOS COLETADOS!")
+	print("PASSANDO DE FASE!")
+	print("==============================")
+
+
+	# ==========================================
+	# RESET SCORE E MOEDAS
+	# ==========================================
+
+	Globals.score = 0
+	Globals.coins = 0
+
+	Globals.level_score = 0
+	Globals.level_coins = 0
+
+
+	# ==========================================
+	# RESET DOS FRAGMENTOS
+	# ==========================================
+	#
+	# A próxima fase terá seus próprios 4
+	# fragmentos.
+	#
+
+	Globals.raciocinio_fragments = 0
+
+
+	print("SCORE RESETADO: ", Globals.score)
+	print("MOEDAS RESETADAS: ", Globals.coins)
+	print("FRAGMENTOS RESETADOS: ", Globals.raciocinio_fragments)
+
+
+	# ==========================================
+	# MUDA PARA A PRÓXIMA FASE
+	# ==========================================
+
+	transition.change_scene(next_level)

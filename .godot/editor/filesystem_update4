@@ -1,7 +1,8 @@
 res://levels/world_01.tscn
 res://tema/new_theme.tres
 res://shaders/transition.gdshader
-res://prefabs/frag_raciocinio.tscn
-res://scripts/frag_raciocinio.gd
 res://singletons/globals.gd
 res://scripts/hud_manager.gd
+res://scripts/frag_raciocinio.gd
+res://scripts/goal.gd
+res://prefabs/dialog_box.tscn

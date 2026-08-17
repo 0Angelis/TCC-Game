@@ -1,11 +1,28 @@
 extends Control
 
 
+# ==========================================
+# CONTADORES DO HUD
+# ==========================================
+
 @onready var coins_counter = $container/coins_container/coins_counter as Label
 @onready var timer_counter = $container/tiemer_container/timer_counter as Label
 @onready var score_counter = $container/score_container/score_counter as Label
 @onready var life_counter = $container/life_container/life_counter as Label
 
+
+# ==========================================
+# FRAGMENTO DE RACIOCÍNIO
+# ==========================================
+
+@onready var raciocinio_counter = get_node_or_null(
+	"container/raciocinio_container/raciocinio_counter"
+) as Label
+
+
+# ==========================================
+# TIMER
+# ==========================================
 
 var time_left := 300.0
 var game_over := false
@@ -13,23 +30,86 @@ var game_over := false
 
 func _ready():
 
+	# ==========================================
+	# MOEDAS
+	# ==========================================
+
 	coins_counter.text = "%03d" % Globals.coins
+
+
+	# ==========================================
+	# SCORE
+	# ==========================================
+
 	score_counter.text = "%06d" % Globals.score
+
+
+	# ==========================================
+	# VIDAS
+	# ==========================================
+
 	life_counter.text = "%02d" % Globals.player_life
+
+
+	# ==========================================
+	# FRAGMENTOS
+	# ==========================================
+
+	if raciocinio_counter != null:
+
+		raciocinio_counter.text = "%d/4" % Globals.raciocinio_fragments
+
+		print(
+			"HUD: contador de raciocínio encontrado!"
+		)
+
+	else:
+
+		print(
+			"HUD: contador de raciocínio não existe nesta fase."
+		)
 
 
 func _process(delta):
 
-	# Atualiza HUD
+	# ==========================================
+	# MOEDAS
+	# ==========================================
+
 	coins_counter.text = "%03d" % Globals.coins
+
+
+	# ==========================================
+	# SCORE
+	# ==========================================
+
 	score_counter.text = "%06d" % Globals.score
+
+
+	# ==========================================
+	# VIDAS
+	# ==========================================
+
 	life_counter.text = "%02d" % Globals.player_life
 
 
-	# Timer
+	# ==========================================
+	# FRAGMENTOS
+	# ==========================================
+
+	if raciocinio_counter != null:
+
+		raciocinio_counter.text = "     %d/4" % Globals.raciocinio_fragments
+
+
+	# ==========================================
+	# TIMER
+	# ==========================================
+
 	if not game_over:
 
 		time_left -= delta
+
 
 		if time_left <= 0:
 
@@ -38,13 +118,25 @@ func _process(delta):
 
 			print("Tempo esgotado!")
 
+
 			var player = get_tree().get_first_node_in_group("player")
 
+
 			if player:
+
 				player.die()
 
 
+	# ==========================================
+	# MOSTRA TIMER
+	# ==========================================
+
 	var minutes = int(time_left) / 60
+
 	var seconds = int(time_left) % 60
 
-	timer_counter.text = "%02d:%02d" % [minutes, seconds]
+
+	timer_counter.text = "%02d:%02d" % [
+		minutes,
+		seconds
+	]
