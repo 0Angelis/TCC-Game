@@ -1,10 +1,11 @@
 [gd_scene format=3 uid="uid://c05me6gpn8c70"]
 
 [ext_resource type="Script" uid="uid://d1o2xui8lewyk" path="res://scripts/goal.gd" id="1_15wru"]
-[ext_resource type="Texture2D" uid="uid://cs6m0x4l0p3k2" path="res://assets/Mini FX, Items & UI/Food Items/Pancake_Stack (16 x 16).png" id="1_lm043"]
+[ext_resource type="Texture2D" uid="uid://bwxyvg5nonmw8" path="res://assets/Fragmentos/Portalfragracio.png" id="2_15wru"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_sob1t"]
-radius = 15.0
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_15wru"]
+radius = 12.0
+height = 38.0
 
 [sub_resource type="Animation" id="Animation_15wru"]
 length = 0.001
@@ -47,12 +48,12 @@ _data = {
 script = ExtResource("1_15wru")
 
 [node name="sprite" type="Sprite2D" parent="." unique_id=427735680]
-scale = Vector2(1.6562499, 1.53125)
-texture = ExtResource("1_lm043")
+scale = Vector2(0.04850907, 0.05120869)
+texture = ExtResource("2_15wru")
 
 [node name="collision" type="CollisionShape2D" parent="." unique_id=1137894934]
-position = Vector2(0, -1)
-shape = SubResource("CircleShape2D_sob1t")
+position = Vector2(0, 6)
+shape = SubResource("CapsuleShape2D_15wru")
 
 [node name="anim" type="AnimationPlayer" parent="." unique_id=22912563]
 libraries/ = SubResource("AnimationLibrary_b3wvb")

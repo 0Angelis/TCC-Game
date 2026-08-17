@@ -16,14 +16,14 @@ func _on_body_entered(body: Node2D) -> void:
 	# VERIFICA SE PEGOU TODOS OS FRAGMENTOS
 	# ==========================================
 
-	if Globals.raciocinio_fragments < 4:
+	if Globals.raciocinio_fragments < 5:
 
 		print("==============================")
 		print("FASE BLOQUEADA!")
 		print(
 			"FRAGMENTOS: ",
 			Globals.raciocinio_fragments,
-			"/4"
+			"/5"
 		)
 		print("Pegue todos os fragmentos!")
 		print("==============================")
@@ -46,7 +46,7 @@ func _on_body_entered(body: Node2D) -> void:
 	# ==========================================
 
 	print("==============================")
-	print("TODOS OS FRAGMENTOS COLETADOS!")
+	print("TODOS OS 5 FRAGMENTOS COLETADOS!")
 	print("PASSANDO DE FASE!")
 	print("==============================")
 
@@ -66,7 +66,7 @@ func _on_body_entered(body: Node2D) -> void:
 	# RESET DOS FRAGMENTOS
 	# ==========================================
 	#
-	# A próxima fase terá seus próprios 4
+	# A próxima fase terá seus próprios
 	# fragmentos.
 	#
 
@@ -75,7 +75,10 @@ func _on_body_entered(body: Node2D) -> void:
 
 	print("SCORE RESETADO: ", Globals.score)
 	print("MOEDAS RESETADAS: ", Globals.coins)
-	print("FRAGMENTOS RESETADOS: ", Globals.raciocinio_fragments)
+	print(
+		"FRAGMENTOS RESETADOS: ",
+		Globals.raciocinio_fragments
+	)
 
 
 	# ==========================================
