@@ -1080,7 +1080,7 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("27_gmex4")
 theme_override_font_sizes/font_size = 16
-text = "     0/4"
+text = "     0/5"
 
 [node name="warning" type="Node2D" parent="." unique_id=1954291522]
 position = Vector2(487, 346)
