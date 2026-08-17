@@ -86,7 +86,7 @@ func _process(delta):
 
 	if raciocinio_counter != null:
 
-		raciocinio_counter.text = "%d/5" % Globals.raciocinio_fragments
+		raciocinio_counter.text = "      %d/5" % Globals.raciocinio_fragments
 
 
 	# ==========================================
