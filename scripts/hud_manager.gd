@@ -10,11 +10,6 @@ extends Control
 @onready var score_counter = $container/score_container/score_counter as Label
 @onready var life_counter = $container/life_container/life_counter as Label
 
-
-# ==========================================
-# FRAGMENTO DE RACIOCÍNIO
-# ==========================================
-
 @onready var raciocinio_counter = get_node_or_null(
 	"container/raciocinio_container/raciocinio_counter"
 ) as Label
@@ -24,7 +19,9 @@ extends Control
 # TIMER
 # ==========================================
 
-var time_left := 300.0
+# 10 minutos
+var time_left := 600.0
+
 var game_over := false
 
 
@@ -57,49 +54,39 @@ func _ready():
 
 	if raciocinio_counter != null:
 
-		raciocinio_counter.text = "%d/4" % Globals.raciocinio_fragments
-
-		print(
-			"HUD: contador de raciocínio encontrado!"
-		)
-
-	else:
-
-		print(
-			"HUD: contador de raciocínio não existe nesta fase."
-		)
+		raciocinio_counter.text = "%d/5" % Globals.raciocinio_fragments
 
 
 func _process(delta):
 
 	# ==========================================
-	# MOEDAS
+	# ATUALIZA MOEDAS
 	# ==========================================
 
 	coins_counter.text = "%03d" % Globals.coins
 
 
 	# ==========================================
-	# SCORE
+	# ATUALIZA SCORE
 	# ==========================================
 
 	score_counter.text = "%06d" % Globals.score
 
 
 	# ==========================================
-	# VIDAS
+	# ATUALIZA VIDAS
 	# ==========================================
 
 	life_counter.text = "%02d" % Globals.player_life
 
 
 	# ==========================================
-	# FRAGMENTOS
+	# ATUALIZA FRAGMENTOS
 	# ==========================================
 
 	if raciocinio_counter != null:
 
-		raciocinio_counter.text = "     %d/5" % Globals.raciocinio_fragments
+		raciocinio_counter.text = "%d/5" % Globals.raciocinio_fragments
 
 
 	# ==========================================
