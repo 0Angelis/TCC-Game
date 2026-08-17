@@ -69,7 +69,7 @@ func die():
 "
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ho334"]
-size = Vector2(27, 8)
+size = Vector2(27, 10)
 
 [sub_resource type="Animation" id="Animation_c6xed"]
 length = 0.001
@@ -200,7 +200,7 @@ _data = {
 }
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_34jws"]
-size = Vector2(12, 3.5)
+size = Vector2(18, 4)
 
 [node name="enemy" type="CharacterBody2D" unique_id=310052193]
 collision_layer = 4
@@ -213,7 +213,7 @@ texture = ExtResource("1_ho334")
 hframes = 3
 
 [node name="collision" type="CollisionShape2D" parent="." unique_id=853398990]
-position = Vector2(-0.5, 15)
+position = Vector2(-0.5, 14)
 shape = SubResource("RectangleShape2D_ho334")
 
 [node name="anim" type="AnimationPlayer" parent="." unique_id=2023916758]
@@ -229,7 +229,7 @@ collision_mask = 6
 [node name="hitbox" parent="." unique_id=1812316366 instance=ExtResource("3_8yred")]
 
 [node name="collision2" type="CollisionShape2D" parent="hitbox" unique_id=1264996259]
-position = Vector2(0, 7.75)
+position = Vector2(0, 8)
 shape = SubResource("RectangleShape2D_34jws")
 
 [connection signal="animation_finished" from="anim" to="." method="_on_anim_animation_finished"]
