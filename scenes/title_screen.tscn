@@ -1,11 +1,12 @@
 [gd_scene format=3 uid="uid://b5numoi147cuk"]
 
 [ext_resource type="Script" uid="uid://cdpkrk77js0ql" path="res://scripts/title_screen.gd" id="1_e54dn"]
-[ext_resource type="Texture2D" uid="uid://caje1wl53vpyi" path="res://assets/Game over/fundoperfil.png" id="1_mgrm8"]
+[ext_resource type="Texture2D" uid="uid://caje1wl53vpyi" path="res://assets/Telas/fundoperfil.png" id="1_mgrm8"]
 [ext_resource type="Texture2D" uid="uid://beqxtn4nrkgp7" path="res://assets/Sprite Pack 2/2 - Mr. Mochi/Jumping (32 x 32).png" id="2_dc4i4"]
-[ext_resource type="Texture2D" uid="uid://cagecckmhe33g" path="res://assets/Game over/title.png" id="3_e54dn"]
+[ext_resource type="Texture2D" uid="uid://cagecckmhe33g" path="res://assets/Telas/title.png" id="3_e54dn"]
 [ext_resource type="FontFile" uid="uid://b7ufykalnyges" path="res://assets/Fontes/PixelOperatorHBSC.ttf" id="4_3yumr"]
 [ext_resource type="Theme" uid="uid://dtt881cw14h2g" path="res://tema/new_theme.tres" id="4_dc4i4"]
+[ext_resource type="Texture2D" uid="uid://b65wc2vkn68qv" path="res://assets/Telas/thumb frag.png" id="5_3yumr"]
 
 [sub_resource type="Animation" id="Animation_3yumr"]
 length = 0.001
@@ -73,19 +74,28 @@ texture = ExtResource("2_dc4i4")
 
 [node name="title" type="TextureRect" parent="." unique_id=1716029166]
 layout_mode = 0
-offset_left = 381.0
-offset_top = 56.0
-offset_right = 2343.0
-offset_bottom = 857.0
+offset_left = 376.0
+offset_top = 74.0
+offset_right = 2338.0
+offset_bottom = 875.0
 scale = Vector2(0.6, 0.6)
 texture = ExtResource("3_e54dn")
+
+[node name="frag" type="TextureRect" parent="." unique_id=202565001]
+layout_mode = 0
+offset_left = 786.0
+offset_top = 783.99994
+offset_right = 2458.0
+offset_bottom = 1807.9998
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("5_3yumr")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1969307613]
 layout_mode = 0
 offset_left = 784.0
-offset_top = 532.0
+offset_top = 528.0
 offset_right = 1132.0
-offset_bottom = 804.0
+offset_bottom = 800.0
 
 [node name="start_btn" type="Button" parent="VBoxContainer" unique_id=189990371]
 layout_mode = 2

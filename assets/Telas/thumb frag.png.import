@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://caje1wl53vpyi"
-path="res://.godot/imported/fundoperfil.png-bec7cdb2df2bd121dcc73d36ee27b99c.ctex"
+uid="uid://b65wc2vkn68qv"
+path="res://.godot/imported/thumb frag.png-014dcda1b81494c336e20329041fc556.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Game over/fundoperfil.png"
-dest_files=["res://.godot/imported/fundoperfil.png-bec7cdb2df2bd121dcc73d36ee27b99c.ctex"]
+source_file="res://assets/Telas/thumb frag.png"
+dest_files=["res://.godot/imported/thumb frag.png-014dcda1b81494c336e20329041fc556.ctex"]
 
 [params]
 

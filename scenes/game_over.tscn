@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dakcwnuggrn76"]
 
 [ext_resource type="Script" uid="uid://bea01p2lqyki" path="res://scripts/game_over.gd" id="1_racf3"]
-[ext_resource type="Texture2D" uid="uid://h7y68uv8nb1h" path="res://assets/Game over/gameover.png" id="1_tbwuq"]
+[ext_resource type="Texture2D" uid="uid://h7y68uv8nb1h" path="res://assets/Telas/gameover.png" id="1_tbwuq"]
 [ext_resource type="Theme" uid="uid://dtt881cw14h2g" path="res://tema/new_theme.tres" id="2_racf3"]
 [ext_resource type="FontFile" uid="uid://b7ufykalnyges" path="res://assets/Fontes/PixelOperatorHBSC.ttf" id="3_7m3ot"]
 
