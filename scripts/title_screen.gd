@@ -16,61 +16,25 @@ extends Control
 
 func _ready():
 
-	# ==========================================
-	# PROCESSAMENTO
-	# ==========================================
-
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
 	# ==========================================
-	# CONFIGURAÇÃO DOS BOTÕES
+	# DESATIVA MOUSE
 	# ==========================================
 
-	start_btn.process_mode = Node.PROCESS_MODE_ALWAYS
-	credits_btn.process_mode = Node.PROCESS_MODE_ALWAYS
-	quit_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+	start_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	credits_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	quit_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
-	start_btn.mouse_filter = Control.MOUSE_FILTER_STOP
-	credits_btn.mouse_filter = Control.MOUSE_FILTER_STOP
-	quit_btn.mouse_filter = Control.MOUSE_FILTER_STOP
-
+	# ==========================================
+	# FOCO PELO TECLADO
+	# ==========================================
 
 	start_btn.focus_mode = Control.FOCUS_ALL
 	credits_btn.focus_mode = Control.FOCUS_ALL
 	quit_btn.focus_mode = Control.FOCUS_ALL
-
-
-	# ==========================================
-	# CONECTA OS BOTÕES
-	# ==========================================
-
-	if not start_btn.pressed.is_connected(
-		_on_start_btn_pressed
-	):
-
-		start_btn.pressed.connect(
-			_on_start_btn_pressed
-		)
-
-
-	if not credits_btn.pressed.is_connected(
-		_on_credits_btn_pressed
-	):
-
-		credits_btn.pressed.connect(
-			_on_credits_btn_pressed
-		)
-
-
-	if not quit_btn.pressed.is_connected(
-		_on_quit_btn_pressed
-	):
-
-		quit_btn.pressed.connect(
-			_on_quit_btn_pressed
-		)
 
 
 	# ==========================================
@@ -81,79 +45,90 @@ func _ready():
 
 
 # ==========================================
-# CONTROLE DO TECLADO
+# INPUT DO TECLADO
 # ==========================================
 
 func _unhandled_input(event):
 
-	if event is InputEventKey and event.pressed:
+	if not (event is InputEventKey):
+		return
 
-		# ==========================================
-		# CIMA
-		# ==========================================
-
-		if event.keycode == KEY_W or event.keycode == KEY_UP:
-
-			if start_btn.has_focus():
-
-				quit_btn.grab_focus()
-
-			elif credits_btn.has_focus():
-
-				start_btn.grab_focus()
-
-			elif quit_btn.has_focus():
-
-				credits_btn.grab_focus()
-
-			else:
-
-				start_btn.grab_focus()
+	if not event.pressed:
+		return
 
 
-		# ==========================================
-		# BAIXO
-		# ==========================================
+	# ==========================================
+	# CIMA
+	# ==========================================
 
-		elif event.keycode == KEY_S or event.keycode == KEY_DOWN:
+	if (
+		event.keycode == KEY_W
+		or event.keycode == KEY_UP
+	):
 
-			if start_btn.has_focus():
+		if start_btn.has_focus():
 
-				credits_btn.grab_focus()
+			quit_btn.grab_focus()
 
-			elif credits_btn.has_focus():
+		elif credits_btn.has_focus():
 
-				quit_btn.grab_focus()
+			start_btn.grab_focus()
 
-			elif quit_btn.has_focus():
+		elif quit_btn.has_focus():
 
-				start_btn.grab_focus()
+			credits_btn.grab_focus()
 
-			else:
+		else:
 
-				start_btn.grab_focus()
+			start_btn.grab_focus()
 
 
-		# ==========================================
-		# ENTER
-		# ==========================================
+	# ==========================================
+	# BAIXO
+	# ==========================================
 
-		elif (
-			event.keycode == KEY_ENTER
-			or event.keycode == KEY_KP_ENTER
-		):
+	elif (
+		event.keycode == KEY_S
+		or event.keycode == KEY_DOWN
+	):
 
-			if start_btn.has_focus():
+		if start_btn.has_focus():
 
-				start_game()
+			credits_btn.grab_focus()
 
-			elif credits_btn.has_focus():
+		elif credits_btn.has_focus():
 
-				open_credits()
+			quit_btn.grab_focus()
 
-			elif quit_btn.has_focus():
+		elif quit_btn.has_focus():
 
-				quit_game()
+			start_btn.grab_focus()
+
+		else:
+
+			start_btn.grab_focus()
+
+
+	# ==========================================
+	# ENTER
+	# ==========================================
+
+	elif (
+		event.keycode == KEY_ENTER
+		or event.keycode == KEY_KP_ENTER
+	):
+
+		if start_btn.has_focus():
+
+			start_game()
+
+		elif credits_btn.has_focus():
+
+			open_credits()
+
+		elif quit_btn.has_focus():
+
+			quit_game()
 
 
 # ==========================================
@@ -183,10 +158,8 @@ func open_credits():
 	print("==============================")
 
 
-	# POR ENQUANTO
-	# apenas mostra no console.
+	# Por enquanto não troca de cena.
 	# Depois criamos a tela de créditos.
-
 	print("Tela de créditos ainda será criada.")
 
 
@@ -197,35 +170,8 @@ func open_credits():
 func quit_game():
 
 	print("==============================")
-	print("SAINDO DO JOGO")
+	print("FECHANDO JOGO")
 	print("==============================")
 
 
 	get_tree().quit()
-
-
-# ==========================================
-# BOTÃO JOGAR
-# ==========================================
-
-func _on_start_btn_pressed():
-
-	start_game()
-
-
-# ==========================================
-# BOTÃO CRÉDITOS
-# ==========================================
-
-func _on_credits_btn_pressed():
-
-	open_credits()
-
-
-# ==========================================
-# BOTÃO SAIR
-# ==========================================
-
-func _on_quit_btn_pressed():
-
-	quit_game()

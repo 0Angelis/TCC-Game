@@ -27,6 +27,7 @@ var knockback_vector := Vector2.ZERO
 var taking_damage := false
 var can_take_damage := true
 var can_move := true
+var is_dead := false
 
 
 # ==========================================
@@ -49,6 +50,11 @@ func _ready():
 	# 5 vidas
 	Globals.player_life = 5
 
+	is_dead = false
+	taking_damage = false
+	can_take_damage = true
+	can_move = true
+
 	print("PLAYER INICIADO")
 	print("Vidas: ", Globals.player_life)
 	print("TileMap encontrado: ", level)
@@ -59,6 +65,14 @@ func _ready():
 # ==========================================
 
 func _physics_process(delta: float) -> void:
+
+	if is_dead:
+		return
+
+
+	# ==========================================
+	# GRAVIDADE
+	# ==========================================
 
 	if not is_on_floor():
 
@@ -177,6 +191,9 @@ func _physics_process(delta: float) -> void:
 
 func _on_hurtbox_body_entered(body: Node2D) -> void:
 
+	if is_dead:
+		return
+
 	if body.is_in_group("enemies"):
 
 		var direction = (
@@ -197,8 +214,12 @@ func _on_hurtbox_body_entered(body: Node2D) -> void:
 
 func check_damage_tile() -> void:
 
+	if is_dead:
+		return
+
 	if not can_take_damage:
 		return
+
 
 	if level == null:
 
@@ -277,6 +298,9 @@ func take_damage(
 	duration := 0.20
 ):
 
+	if is_dead:
+		return
+
 	if not can_take_damage:
 		return
 
@@ -348,10 +372,13 @@ func take_damage(
 
 
 	# ==========================================
-	# STUN
+	# PEQUENO STUN
 	# ==========================================
 
 	await get_tree().create_timer(0.08).timeout
+
+	if is_dead:
+		return
 
 	can_move = true
 
@@ -361,6 +388,9 @@ func take_damage(
 	# ==========================================
 
 	await get_tree().create_timer(0.4).timeout
+
+	if is_dead:
+		return
 
 	can_take_damage = true
 	taking_damage = false
@@ -379,16 +409,24 @@ func take_damage(
 
 
 # ==========================================
-# MORTE DEFINITIVA
+# MORTE DEFINITIVA / GAME OVER
 # ==========================================
 
 func die():
+
+	# Já morreu? Não executa novamente.
+	if is_dead:
+		return
+
+
+	is_dead = true
 
 	can_move = false
 	can_take_damage = false
 	taking_damage = true
 
 	velocity = Vector2.ZERO
+	knockback_vector = Vector2.ZERO
 
 
 	# ==========================================
@@ -401,7 +439,7 @@ func die():
 
 
 	# ==========================================
-	# GUARDA A CENA ATUAL
+	# GUARDA A CENA ATUAL PARA O RESTART
 	# ==========================================
 
 	get_tree().set_meta(
@@ -441,13 +479,13 @@ func die():
 
 
 	# ==========================================
-	# ANIMAÇÃO DE MORTE
+	# SOME IMEDIATAMENTE
 	# ==========================================
 
-	animation.play("hurt")
+	animation.visible = false
 
-
-	await get_tree().create_timer(0.3).timeout
+	# Desabilita o processamento físico
+	set_physics_process(false)
 
 
 	# ==========================================

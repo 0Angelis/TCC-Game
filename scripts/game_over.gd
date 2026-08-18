@@ -15,55 +15,27 @@ extends Control
 
 func _ready():
 
-	# Permite que o Game Over funcione mesmo
-	# se o jogo estiver pausado
+	# Continua funcionando normalmente
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
 	# ==========================================
-	# CONFIGURAÇÃO DOS BOTÕES
+	# DESATIVA MOUSE
 	# ==========================================
 
-	restart_btn.process_mode = Node.PROCESS_MODE_ALWAYS
-	menu_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+	restart_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	menu_btn.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	restart_btn.mouse_filter = Control.MOUSE_FILTER_STOP
-	menu_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	# ==========================================
+	# FOCO PELO TECLADO
+	# ==========================================
 
 	restart_btn.focus_mode = Control.FOCUS_ALL
 	menu_btn.focus_mode = Control.FOCUS_ALL
 
 
-	# ==========================================
-	# CONECTA RESTART
-	# ==========================================
-
-	if not restart_btn.pressed.is_connected(
-		_on_restart_btn_pressed
-	):
-
-		restart_btn.pressed.connect(
-			_on_restart_btn_pressed
-		)
-
-
-	# ==========================================
-	# CONECTA MENU
-	# ==========================================
-
-	if not menu_btn.pressed.is_connected(
-		_on_menu_btn_pressed
-	):
-
-		menu_btn.pressed.connect(
-			_on_menu_btn_pressed
-		)
-
-
-	# ==========================================
-	# FOCO INICIAL
-	# ==========================================
-
+	# Começa no Restart
 	restart_btn.grab_focus()
 
 
@@ -73,73 +45,79 @@ func _ready():
 
 func _unhandled_input(event):
 
-	if event is InputEventKey and event.pressed:
+
+	if not (event is InputEventKey):
+		return
 
 
-		# ==========================================
-		# CIMA
-		# ==========================================
-
-		if (
-			event.keycode == KEY_W
-			or event.keycode == KEY_UP
-		):
-
-			if restart_btn.has_focus():
-
-				menu_btn.grab_focus()
-
-			elif menu_btn.has_focus():
-
-				restart_btn.grab_focus()
-
-			else:
-
-				restart_btn.grab_focus()
+	if not event.pressed:
+		return
 
 
-		# ==========================================
-		# BAIXO
-		# ==========================================
+	# ==========================================
+	# CIMA
+	# ==========================================
 
-		elif (
-			event.keycode == KEY_S
-			or event.keycode == KEY_DOWN
-		):
+	if (
+		event.keycode == KEY_W
+		or event.keycode == KEY_UP
+	):
 
-			if restart_btn.has_focus():
+		if restart_btn.has_focus():
 
-				menu_btn.grab_focus()
+			menu_btn.grab_focus()
 
-			elif menu_btn.has_focus():
+		elif menu_btn.has_focus():
 
-				restart_btn.grab_focus()
+			restart_btn.grab_focus()
 
-			else:
+		else:
 
-				restart_btn.grab_focus()
+			restart_btn.grab_focus()
 
 
-		# ==========================================
-		# ENTER
-		# ==========================================
+	# ==========================================
+	# BAIXO
+	# ==========================================
 
-		elif (
-			event.keycode == KEY_ENTER
-			or event.keycode == KEY_KP_ENTER
-		):
+	elif (
+		event.keycode == KEY_S
+		or event.keycode == KEY_DOWN
+	):
 
-			if restart_btn.has_focus():
+		if restart_btn.has_focus():
 
-				restart_game()
+			menu_btn.grab_focus()
 
-			elif menu_btn.has_focus():
+		elif menu_btn.has_focus():
 
-				go_to_menu()
+			restart_btn.grab_focus()
+
+		else:
+
+			restart_btn.grab_focus()
+
+
+	# ==========================================
+	# ENTER
+	# ==========================================
+
+	elif (
+		event.keycode == KEY_ENTER
+		or event.keycode == KEY_KP_ENTER
+	):
+
+		if restart_btn.has_focus():
+
+			restart_game()
+
+		elif menu_btn.has_focus():
+
+			go_to_menu()
 
 
 # ==========================================
-# RESTART DO JOGO
+# RESTART
 # ==========================================
 
 func restart_game():
@@ -147,13 +125,6 @@ func restart_game():
 	print("==============================")
 	print("REINICIANDO JOGO")
 	print("==============================")
-
-
-	# ==========================================
-	# GARANTE QUE NÃO ESTÁ PAUSADO
-	# ==========================================
-
-	get_tree().paused = false
 
 
 	# ==========================================
@@ -167,18 +138,24 @@ func restart_game():
 	Globals.level_score = 0
 
 	Globals.raciocinio_fragments = 0
+	Globals.player_life = 5
 
 
 	print("MOEDAS: ", Globals.coins)
 	print("SCORE: ", Globals.score)
-	print(
-		"FRAGMENTOS: ",
-		Globals.raciocinio_fragments
-	)
+	print("FRAGMENTOS: ", Globals.raciocinio_fragments)
+	print("VIDAS: ", Globals.player_life)
 
 
 	# ==========================================
-	# VOLTA PARA A PRIMEIRA FASE
+	# DESPAUSA
+	# ==========================================
+
+	get_tree().paused = false
+
+
+	# ==========================================
+	# VOLTA PARA A FASE 1
 	# ==========================================
 
 	get_tree().change_scene_to_file(
@@ -197,35 +174,9 @@ func go_to_menu():
 	print("==============================")
 
 
-	# ==========================================
-	# GARANTE QUE NÃO ESTÁ PAUSADO
-	# ==========================================
-
 	get_tree().paused = false
 
-
-	# ==========================================
-	# VOLTA PARA A TELA INICIAL
-	# ==========================================
 
 	get_tree().change_scene_to_file(
 		"res://scenes/title_screen.tscn"
 	)
-
-
-# ==========================================
-# BOTÃO RESTART
-# ==========================================
-
-func _on_restart_btn_pressed():
-
-	restart_game()
-
-
-# ==========================================
-# BOTÃO MENU
-# ==========================================
-
-func _on_menu_btn_pressed():
-
-	go_to_menu()
