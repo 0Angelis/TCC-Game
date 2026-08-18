@@ -902,7 +902,6 @@ position = Vector2(4199, 624)
 next_level = "res://levels/world_02.tscn"
 
 [node name="BG" type="ParallaxBackground" parent="." unique_id=2092705572]
-visible = false
 
 [node name="05" type="ParallaxLayer" parent="BG" unique_id=1539018075]
 motion_mirroring = Vector2(1280, 0)
