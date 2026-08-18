@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bea01p2lqyki" path="res://scripts/game_over.gd" id="1_racf3"]
 [ext_resource type="Texture2D" uid="uid://h7y68uv8nb1h" path="res://assets/Telas/gameover.png" id="1_tbwuq"]
 [ext_resource type="Theme" uid="uid://dtt881cw14h2g" path="res://tema/new_theme.tres" id="2_racf3"]
-[ext_resource type="FontFile" uid="uid://b7ufykalnyges" path="res://assets/Fontes/PixelOperatorHBSC.ttf" id="3_7m3ot"]
+[ext_resource type="FontFile" uid="uid://dawcynbe612wd" path="res://assets/Fontes/Pixeloid_Font_1_0/OpenType (.otf)/PixeloidSans-Bold.otf" id="4_racf3"]
 
 [sub_resource type="Animation" id="Animation_tbwuq"]
 length = 0.001
@@ -110,9 +110,11 @@ color = Color(0, 0, 0, 1)
 
 [node name="GameOver_Title" type="TextureRect" parent="." unique_id=323842158]
 layout_mode = 0
-offset_left = -120.0
-offset_right = 2052.0
-offset_bottom = 724.0
+offset_left = -224.0
+offset_top = -55.999996
+offset_right = 1948.0
+offset_bottom = 668.0
+scale = Vector2(0.8, 0.8)
 offset_transform_enabled = true
 offset_transform_scale = Vector2(0.6, 0.6)
 texture = ExtResource("1_tbwuq")
@@ -134,15 +136,15 @@ grow_vertical = 2
 [node name="Restart_Btn" type="Button" parent="VBoxContainer" unique_id=1810008481]
 layout_mode = 2
 theme = ExtResource("2_racf3")
-theme_override_fonts/font = ExtResource("3_7m3ot")
-theme_override_font_sizes/font_size = 80
+theme_override_fonts/font = ExtResource("4_racf3")
+theme_override_font_sizes/font_size = 50
 text = "RESTART"
 
 [node name="menu_Btn" type="Button" parent="VBoxContainer" unique_id=53899203]
 layout_mode = 2
 theme = ExtResource("2_racf3")
-theme_override_fonts/font = ExtResource("3_7m3ot")
-theme_override_font_sizes/font_size = 80
+theme_override_fonts/font = ExtResource("4_racf3")
+theme_override_font_sizes/font_size = 50
 text = "MENU"
 
 [node name="anim" type="AnimationPlayer" parent="." unique_id=785574573]

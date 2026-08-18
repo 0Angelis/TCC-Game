@@ -1,10 +1,25 @@
 extends MarginContainer
 
+
 @onready var text_label = $label_margin/text_label
 @onready var counter_label = $counter_label
 @onready var letter_timer_display = $letter_timer_display
 
-const MAX_WIDTH = 256
+
+# ==========================================
+# CONFIGURAÇÕES
+# ==========================================
+
+const MAX_WIDTH = 384
+
+const TEXT_FONT_SIZE = 8
+
+const COUNTER_FONT_SIZE = 4
+
+
+# ==========================================
+# VARIÁVEIS
+# ==========================================
 
 var text = ""
 var letter_index = 0
@@ -13,10 +28,27 @@ var letter_display_timer := 0.07
 var space_display_timer := 0.05
 var punctuation_display_timer := 0.2
 
+
 signal text_display_finished
 
 
+# ==========================================
+# READY
+# ==========================================
+
 func _ready():
+
+	# ==========================================
+	# CONFIGURAÇÃO DO TEXTO
+	# ==========================================
+
+	text_label.add_theme_font_size_override(
+		"font_size",
+		TEXT_FONT_SIZE
+	)
+
+	text_label.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
 
 	# ==========================================
 	# CONFIGURAÇÃO DO CONTADOR
@@ -26,18 +58,22 @@ func _ready():
 
 	counter_label.z_index = 100
 
-	# Tamanho da fonte do contador
 	counter_label.add_theme_font_size_override(
 		"font_size",
-		8
+		COUNTER_FONT_SIZE
 	)
 
-	# Cor roxa do contador
 	counter_label.add_theme_color_override(
 		"font_color",
-		Color("#7B35B2")
+		Color("#7046A3")
 	)
 
+	counter_label.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+
+# ==========================================
+# MOSTRAR TEXTO
+# ==========================================
 
 func display_text(
 	text_to_display: String,
@@ -46,6 +82,7 @@ func display_text(
 ):
 
 	letter_index = 0
+
 	text = text_to_display
 
 
@@ -60,10 +97,9 @@ func display_text(
 
 	counter_label.add_theme_font_size_override(
 		"font_size",
-		8
+		COUNTER_FONT_SIZE
 	)
 
-	# Faz o Label calcular seu tamanho real
 	counter_label.reset_size()
 
 
@@ -101,16 +137,21 @@ func display_text(
 	# ==========================================
 
 	global_position.x -= size.x / 2
+
 	global_position.y -= size.y + 24
 
 
-	# Espera o Godot terminar o layout
+	# ==========================================
+	# ESPERA O LAYOUT
+	# ==========================================
+
 	await get_tree().process_frame
+
 	await get_tree().process_frame
 
 
 	# ==========================================
-	# PEGA O RETÂNGULO REAL DA CAIXA
+	# RETÂNGULO DA CAIXA
 	# ==========================================
 
 	var box_rect = get_global_rect()
@@ -122,7 +163,8 @@ func display_text(
 
 	counter_label.global_position = Vector2(
 		box_rect.end.x - counter_label.size.x - 2,
-		box_rect.position.y - 1
+		box_rect.position.y + 1
+		
 	)
 
 
@@ -132,6 +174,10 @@ func display_text(
 
 	text_display_finished.emit()
 
+
+# ==========================================
+# MOSTRA LETRAS
+# ==========================================
 
 func display_letter():
 
@@ -167,6 +213,10 @@ func display_letter():
 				letter_display_timer
 			)
 
+
+# ==========================================
+# TIMER DAS LETRAS
+# ==========================================
 
 func _on_letter_timer_display_timeout():
 

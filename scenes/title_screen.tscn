@@ -4,9 +4,9 @@
 [ext_resource type="Texture2D" uid="uid://caje1wl53vpyi" path="res://assets/Telas/fundoperfil.png" id="1_mgrm8"]
 [ext_resource type="Texture2D" uid="uid://beqxtn4nrkgp7" path="res://assets/Sprite Pack 2/2 - Mr. Mochi/Jumping (32 x 32).png" id="2_dc4i4"]
 [ext_resource type="Texture2D" uid="uid://cagecckmhe33g" path="res://assets/Telas/title.png" id="3_e54dn"]
-[ext_resource type="FontFile" uid="uid://b7ufykalnyges" path="res://assets/Fontes/PixelOperatorHBSC.ttf" id="4_3yumr"]
 [ext_resource type="Theme" uid="uid://dtt881cw14h2g" path="res://tema/new_theme.tres" id="4_dc4i4"]
 [ext_resource type="Texture2D" uid="uid://b65wc2vkn68qv" path="res://assets/Telas/thumb frag.png" id="5_3yumr"]
+[ext_resource type="FontFile" uid="uid://dawcynbe612wd" path="res://assets/Fontes/Pixeloid_Font_1_0/OpenType (.otf)/PixeloidSans-Bold.otf" id="7_3yumr"]
 
 [sub_resource type="Animation" id="Animation_3yumr"]
 length = 0.001
@@ -55,8 +55,12 @@ script = ExtResource("1_e54dn")
 
 [node name="bg" type="TextureRect" parent="." unique_id=638729430]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -321.0
+offset_top = -182.0
+offset_right = 1599.0
+offset_bottom = 898.0
+offset_transform_enabled = true
+offset_transform_scale = Vector2(0.67, 0.67)
 texture = ExtResource("1_mgrm8")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=2052317615]
@@ -70,52 +74,53 @@ offset_left = -210.0
 offset_top = -9.0
 offset_right = 899.0
 offset_bottom = 1094.0
+scale = Vector2(0.7, 0.7)
 texture = ExtResource("2_dc4i4")
 
 [node name="title" type="TextureRect" parent="." unique_id=1716029166]
 layout_mode = 0
-offset_left = 376.0
-offset_top = 74.0
-offset_right = 2338.0
-offset_bottom = 875.0
-scale = Vector2(0.6, 0.6)
+offset_left = 251.0
+offset_top = 42.0
+offset_right = 2213.0
+offset_bottom = 843.0
+scale = Vector2(0.4, 0.4)
 texture = ExtResource("3_e54dn")
 
 [node name="frag" type="TextureRect" parent="." unique_id=202565001]
 layout_mode = 0
-offset_left = 786.0
-offset_top = 783.99994
-offset_right = 2458.0
-offset_bottom = 1807.9998
-scale = Vector2(0.2, 0.2)
+offset_left = 541.0
+offset_top = 530.00006
+offset_right = 2213.0
+offset_bottom = 1553.9998
+scale = Vector2(0.12, 0.12)
 texture = ExtResource("5_3yumr")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1969307613]
 layout_mode = 0
-offset_left = 784.0
-offset_top = 528.0
-offset_right = 1132.0
-offset_bottom = 800.0
+offset_left = 468.0
+offset_top = 346.0
+offset_right = 816.0
+offset_bottom = 618.0
 
 [node name="start_btn" type="Button" parent="VBoxContainer" unique_id=189990371]
 layout_mode = 2
 theme = ExtResource("4_dc4i4")
-theme_override_fonts/font = ExtResource("4_3yumr")
-theme_override_font_sizes/font_size = 80
+theme_override_fonts/font = ExtResource("7_3yumr")
+theme_override_font_sizes/font_size = 50
 text = "START"
 
 [node name="credits_btn" type="Button" parent="VBoxContainer" unique_id=223347712]
 layout_mode = 2
 theme = ExtResource("4_dc4i4")
-theme_override_fonts/font = ExtResource("4_3yumr")
-theme_override_font_sizes/font_size = 80
+theme_override_fonts/font = ExtResource("7_3yumr")
+theme_override_font_sizes/font_size = 50
 text = "CREDITS"
 
 [node name="quit_btn" type="Button" parent="VBoxContainer" unique_id=1666492906]
 layout_mode = 2
 theme = ExtResource("4_dc4i4")
-theme_override_fonts/font = ExtResource("4_3yumr")
-theme_override_font_sizes/font_size = 80
+theme_override_fonts/font = ExtResource("7_3yumr")
+theme_override_font_sizes/font_size = 50
 text = "QUIT GAME
 "
 

@@ -945,7 +945,7 @@ texture = ExtResource("9_samdc")
 centered = false
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
-zoom = Vector2(3.5, 3.5)
+zoom = Vector2(2.3, 2.3)
 limit_left = 0
 position_smoothing_enabled = true
 
@@ -965,11 +965,11 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -2.0
-offset_right = 7.0
-offset_bottom = 192.0
+offset_right = 48.0
+offset_bottom = 554.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.964, 0.964)
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
@@ -1042,7 +1042,7 @@ layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 offset_transform_enabled = true
-offset_transform_position = Vector2(-24, -24)
+offset_transform_position = Vector2(-24, -364)
 offset_transform_position_ratio = Vector2(8, -1)
 offset_transform_scale = Vector2(5, 5)
 texture = ExtResource("28_14a6h")
@@ -1051,7 +1051,7 @@ texture = ExtResource("28_14a6h")
 layout_mode = 2
 size_flags_horizontal = 0
 offset_transform_enabled = true
-offset_transform_position = Vector2(0, -30)
+offset_transform_position = Vector2(0, -370)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("27_gmex4")
@@ -1072,11 +1072,14 @@ offset_transform_scale = Vector2(0.09, 0.09)
 
 [node name="raciocinio_icon" type="TextureRect" parent="HUD/control/container/raciocinio_container" unique_id=236319761]
 layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(1600, -3750)
 texture = ExtResource("32_brbtt")
 
 [node name="raciocinio_counter" type="Label" parent="HUD/control/container/raciocinio_container" unique_id=916055118]
 layout_mode = 2
 offset_transform_enabled = true
+offset_transform_position = Vector2(-300, -3600)
 offset_transform_scale = Vector2(30, 30)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4

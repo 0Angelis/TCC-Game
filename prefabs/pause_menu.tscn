@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://b5pvim72licxk" path="res://scripts/pause_menu.gd" id="1_ntkjb"]
 [ext_resource type="Theme" uid="uid://dtt881cw14h2g" path="res://tema/new_theme.tres" id="2_atv5q"]
 [ext_resource type="Texture2D" uid="uid://bv63u1rqqm4pl" path="res://assets/Telas/PAUSE.png" id="2_cpmee"]
-[ext_resource type="FontFile" uid="uid://b7ufykalnyges" path="res://assets/Fontes/PixelOperatorHBSC.ttf" id="3_ntkjb"]
+[ext_resource type="FontFile" uid="uid://dawcynbe612wd" path="res://assets/Fontes/Pixeloid_Font_1_0/OpenType (.otf)/PixeloidSans-Bold.otf" id="4_atv5q"]
 
 [node name="pause_menu" type="CanvasLayer" unique_id=1799463148]
 process_mode = 3
@@ -18,11 +18,11 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.7411765)
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=793947209]
-offset_left = 296.0
-offset_top = 80.0
-offset_right = 2468.0
-offset_bottom = 820.0
-scale = Vector2(0.6, 0.6)
+offset_left = 208.0
+offset_top = 64.0
+offset_right = 2380.0
+offset_bottom = 804.0
+scale = Vector2(0.4, 0.4)
 texture = ExtResource("2_cpmee")
 
 [node name="menu_houder" type="VBoxContainer" parent="." unique_id=1995855383]
@@ -40,22 +40,22 @@ grow_vertical = 2
 [node name="resume_btn" type="Button" parent="menu_houder" unique_id=1269716974]
 layout_mode = 2
 theme = ExtResource("2_atv5q")
-theme_override_fonts/font = ExtResource("3_ntkjb")
-theme_override_font_sizes/font_size = 80
+theme_override_fonts/font = ExtResource("4_atv5q")
+theme_override_font_sizes/font_size = 50
 text = "RESUME"
 
 [node name="restart_btn" type="Button" parent="menu_houder" unique_id=2020633351]
 layout_mode = 2
 theme = ExtResource("2_atv5q")
-theme_override_fonts/font = ExtResource("3_ntkjb")
-theme_override_font_sizes/font_size = 80
+theme_override_fonts/font = ExtResource("4_atv5q")
+theme_override_font_sizes/font_size = 50
 text = "RESTART"
 
 [node name="menu_btn" type="Button" parent="menu_houder" unique_id=1680864807]
 layout_mode = 2
 theme = ExtResource("2_atv5q")
-theme_override_fonts/font = ExtResource("3_ntkjb")
-theme_override_font_sizes/font_size = 80
+theme_override_fonts/font = ExtResource("4_atv5q")
+theme_override_font_sizes/font_size = 50
 text = "MENU"
 
 [connection signal="pressed" from="menu_houder/resume_btn" to="." method="_on_resume_btn_pressed"]
