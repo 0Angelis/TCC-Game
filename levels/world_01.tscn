@@ -902,6 +902,7 @@ position = Vector2(4199, 624)
 next_level = "res://levels/world_02.tscn"
 
 [node name="BG" type="ParallaxBackground" parent="." unique_id=2092705572]
+visible = false
 
 [node name="05" type="ParallaxLayer" parent="BG" unique_id=1539018075]
 motion_mirroring = Vector2(1280, 0)
@@ -945,7 +946,7 @@ texture = ExtResource("9_samdc")
 centered = false
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
-zoom = Vector2(2.3, 2.3)
+zoom = Vector2(2.5, 2.5)
 limit_left = 0
 position_smoothing_enabled = true
 
