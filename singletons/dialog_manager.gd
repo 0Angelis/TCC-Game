@@ -15,10 +15,16 @@ var can_advance_message := false
 var current_source = null
 
 
-func start_message(position: Vector2, lines: Array[String], source = null):
+func start_message(
+	position: Vector2,
+	lines: Array[String],
+	source = null
+):
 
-	# Se existe uma mensagem de outra placa,
-	# fecha a anterior e abre a nova.
+	# ==========================================
+	# TROCA DE PLACA
+	# ==========================================
+
 	if is_message_active and current_source != source:
 
 		if dialog_box != null:
@@ -35,7 +41,10 @@ func start_message(position: Vector2, lines: Array[String], source = null):
 		return
 
 
-	# Abre uma nova mensagem normalmente
+	# ==========================================
+	# NOVA MENSAGEM
+	# ==========================================
+
 	message_lines = lines
 	dialog_box_position = position
 	current_line = 0
@@ -48,27 +57,31 @@ func start_message(position: Vector2, lines: Array[String], source = null):
 
 func show_text():
 
-	# Segurança para não deixar duas caixas abertas
+	# ==========================================
+	# FECHA CAIXA ANTERIOR
+	# ==========================================
+
 	if dialog_box != null:
 		dialog_box.queue_free()
 
-	# Cria a caixa de diálogo
+
+	# ==========================================
+	# CRIA NOVA CAIXA
+	# ==========================================
+
 	dialog_box = dialog_box_scene.instantiate()
 
-	# Conecta o sinal de quando o texto terminou
 	dialog_box.text_display_finished.connect(
 		_on_all_text_displayed
 	)
 
-	# Adiciona a caixa na cena
 	get_tree().root.add_child(dialog_box)
 
-	# Posiciona a caixa
 	dialog_box.global_position = dialog_box_position
 
 
 	# ==========================================
-	# CONTADOR
+	# MOSTRA TEXTO + CONTADOR
 	# ==========================================
 
 	dialog_box.display_text(
@@ -76,7 +89,6 @@ func show_text():
 		current_line + 1,
 		message_lines.size()
 	)
-
 
 	can_advance_message = false
 
@@ -92,11 +104,17 @@ func _unhandled_input(event):
 	and is_message_active \
 	and can_advance_message:
 
-		# Fecha o texto atual
+		# ==========================================
+		# FECHA TEXTO ATUAL
+		# ==========================================
+
 		if dialog_box != null:
 			dialog_box.queue_free()
 
-		# Vai para o próximo texto
+		# ==========================================
+		# PRÓXIMO TEXTO
+		# ==========================================
+
 		current_line += 1
 
 
@@ -120,7 +138,7 @@ func _unhandled_input(event):
 
 
 		# ==========================================
-		# MOSTRA O PRÓXIMO TEXTO
+		# MOSTRA PRÓXIMO TEXTO
 		# ==========================================
 
 		show_text()

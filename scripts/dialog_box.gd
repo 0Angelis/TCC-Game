@@ -18,15 +18,25 @@ signal text_display_finished
 
 func _ready():
 
+	# ==========================================
+	# CONFIGURAÇÃO DO CONTADOR
+	# ==========================================
+
 	counter_label.top_level = true
 
+	counter_label.z_index = 100
+
+	# Tamanho da fonte do contador
 	counter_label.add_theme_font_size_override(
 		"font_size",
 		8
 	)
 
-	counter_label.custom_minimum_size = Vector2(0, 0)
-	counter_label.size = Vector2(40, 14)
+	# Cor roxa do contador
+	counter_label.add_theme_color_override(
+		"font_color",
+		Color("#7B35B2")
+	)
 
 
 func display_text(
@@ -37,6 +47,7 @@ func display_text(
 
 	letter_index = 0
 	text = text_to_display
+
 
 	# ==========================================
 	# CONTADOR
@@ -52,6 +63,10 @@ func display_text(
 		8
 	)
 
+	# Faz o Label calcular seu tamanho real
+	counter_label.reset_size()
+
+
 	# ==========================================
 	# TEXTO
 	# ==========================================
@@ -60,10 +75,16 @@ func display_text(
 
 	await resized
 
+
+	# ==========================================
+	# TAMANHO DA CAIXA
+	# ==========================================
+
 	custom_minimum_size.x = min(
 		size.x,
 		MAX_WIDTH
 	)
+
 
 	if size.x > MAX_WIDTH:
 
@@ -74,6 +95,7 @@ func display_text(
 
 		custom_minimum_size.y = size.y
 
+
 	# ==========================================
 	# POSIÇÃO DA CAIXA
 	# ==========================================
@@ -81,16 +103,28 @@ func display_text(
 	global_position.x -= size.x / 2
 	global_position.y -= size.y + 24
 
+
+	# Espera o Godot terminar o layout
 	await get_tree().process_frame
+	await get_tree().process_frame
+
+
+	# ==========================================
+	# PEGA O RETÂNGULO REAL DA CAIXA
+	# ==========================================
+
+	var box_rect = get_global_rect()
+
 
 	# ==========================================
 	# POSIÇÃO DO CONTADOR
 	# ==========================================
 
 	counter_label.global_position = Vector2(
-		global_position.x + size.x - 17,
-		global_position.y - 1
+		box_rect.end.x - counter_label.size.x - 2,
+		box_rect.position.y - 1
 	)
+
 
 	# ==========================================
 	# FINALIZA
@@ -105,11 +139,13 @@ func display_letter():
 
 	letter_index += 1
 
+
 	if letter_index >= text.length():
 
 		text_display_finished.emit()
 
 		return
+
 
 	match text[letter_index]:
 

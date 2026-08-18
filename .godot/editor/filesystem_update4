@@ -1,7 +1,6 @@
 res://levels/world_01.tscn
 res://tema/new_theme.tres
 res://shaders/transition.gdshader
-res://prefabs/dialog_box.tscn
-res://scripts/warning_sing.gd
 res://singletons/dialog_manager.gd
 res://scripts/dialog_box.gd
+res://prefabs/dialog_box.tscn

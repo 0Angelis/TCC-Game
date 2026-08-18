@@ -41,7 +41,7 @@ vertical_alignment = 1
 [node name="counter_label" type="Label" parent="." unique_id=1290004086]
 layout_mode = 2
 offset_transform_enabled = true
-theme_override_colors/font_color = Color(0.48235294, 0.20784314, 0.69803923, 1)
+theme_override_colors/font_color = Color(0.41960785, 0.29803923, 0.5411765, 1)
 theme_override_fonts/font = ExtResource("3_d17km")
 text = "1/6"
 
