@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cgxe6ywbw43rw" path="res://scripts/dialog_box.gd" id="1_d17km"]
 [ext_resource type="Texture2D" uid="uid://bc2i0xvm51i4m" path="res://assets/Mini FX, Items & UI/Mini UI/Dialog_Box(16 x 16).png" id="1_t14ly"]
-[ext_resource type="FontFile" uid="uid://dnd0tyrvum15f" path="res://assets/Fontes/PixelOperatorSC-Bold.ttf" id="3_d17km"]
+[ext_resource type="FontFile" uid="uid://b7ufykalnyges" path="res://assets/Fontes/PixelOperatorHBSC.ttf" id="3_d17km"]
 
 [node name="dialog_box" type="MarginContainer" unique_id=1328486254]
 offset_right = 16.0
@@ -12,6 +12,7 @@ script = ExtResource("1_d17km")
 [node name="background" type="NinePatchRect" parent="." unique_id=1694148070]
 custom_minimum_size = Vector2(1, 1)
 layout_mode = 2
+offset_transform_enabled = true
 texture = ExtResource("1_t14ly")
 region_rect = Rect2(0, 0, 16, 16)
 patch_margin_left = 4
@@ -36,5 +37,12 @@ theme_override_font_sizes/font_size = 10
 text = "a"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="counter_label" type="Label" parent="." unique_id=1290004086]
+layout_mode = 2
+offset_transform_enabled = true
+theme_override_colors/font_color = Color(0.48235294, 0.20784314, 0.69803923, 1)
+theme_override_fonts/font = ExtResource("3_d17km")
+text = "1/6"
 
 [node name="letter_timer_display" type="Timer" parent="." unique_id=1306918375]
