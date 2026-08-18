@@ -4,3 +4,12 @@ res://shaders/transition.gdshader
 res://singletons/dialog_manager.gd
 res://scripts/dialog_box.gd
 res://prefabs/dialog_box.tscn
+res://prefabs/pause_menu.tscn
+res://scenes/game_over.tscn
+res://scripts/game_over.gd
+res://scripts/hud_manager.gd
+res://scripts/player.gd
+res://scripts/world_01.gd
+res://scenes/title_screen.tscn
+res://scripts/title_screen.gd
+res://scripts/pause_menu.gd

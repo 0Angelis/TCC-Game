@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Memória Zero"
-run/main_scene="uid://bwceyn2b0ln4k"
+run/main_scene="uid://b5numoi147cuk"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 

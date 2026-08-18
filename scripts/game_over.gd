@@ -1,16 +1,12 @@
-extends CanvasLayer
+extends Control
 
 
 # ==========================================
 # BOTÕES
 # ==========================================
 
-@onready var resume_btn = $menu_houder/resume_btn
-@onready var restart_btn = $menu_houder/restart_btn
-@onready var menu_btn = $menu_houder/menu_btn
-
-@onready var bg_overlay = $bg_overlay
-@onready var texture_rect = $TextureRect
+@onready var restart_btn = $VBoxContainer/Restart_Btn
+@onready var menu_btn = $VBoxContainer/menu_Btn
 
 
 # ==========================================
@@ -19,51 +15,28 @@ extends CanvasLayer
 
 func _ready():
 
-	# Permite o menu continuar funcionando
-	# mesmo com o jogo pausado
+	# Permite que o Game Over funcione mesmo
+	# se o jogo estiver pausado
 	process_mode = Node.PROCESS_MODE_ALWAYS
-
-	# Começa escondido
-	visible = false
-
-
-	# ==========================================
-	# FUNDOS NÃO BLOQUEIAM O MOUSE
-	# ==========================================
-
-	bg_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 	# ==========================================
 	# CONFIGURAÇÃO DOS BOTÕES
 	# ==========================================
 
-	resume_btn.process_mode = Node.PROCESS_MODE_ALWAYS
 	restart_btn.process_mode = Node.PROCESS_MODE_ALWAYS
 	menu_btn.process_mode = Node.PROCESS_MODE_ALWAYS
 
-	resume_btn.mouse_filter = Control.MOUSE_FILTER_STOP
 	restart_btn.mouse_filter = Control.MOUSE_FILTER_STOP
 	menu_btn.mouse_filter = Control.MOUSE_FILTER_STOP
 
-	resume_btn.focus_mode = Control.FOCUS_ALL
 	restart_btn.focus_mode = Control.FOCUS_ALL
 	menu_btn.focus_mode = Control.FOCUS_ALL
 
 
 	# ==========================================
-	# CONECTA OS BOTÕES
+	# CONECTA RESTART
 	# ==========================================
-
-	if not resume_btn.pressed.is_connected(
-		_on_resume_btn_pressed
-	):
-
-		resume_btn.pressed.connect(
-			_on_resume_btn_pressed
-	)
-
 
 	if not restart_btn.pressed.is_connected(
 		_on_restart_btn_pressed
@@ -71,8 +44,12 @@ func _ready():
 
 		restart_btn.pressed.connect(
 			_on_restart_btn_pressed
-	)
+		)
 
+
+	# ==========================================
+	# CONECTA MENU
+	# ==========================================
 
 	if not menu_btn.pressed.is_connected(
 		_on_menu_btn_pressed
@@ -80,39 +57,21 @@ func _ready():
 
 		menu_btn.pressed.connect(
 			_on_menu_btn_pressed
-	)
+		)
+
+
+	# ==========================================
+	# FOCO INICIAL
+	# ==========================================
+
+	restart_btn.grab_focus()
 
 
 # ==========================================
-# INPUT
+# INPUT DO TECLADO
 # ==========================================
 
 func _unhandled_input(event):
-
-	# ==========================================
-	# ESC / UI CANCEL
-	# ==========================================
-
-	if event.is_action_pressed("ui_cancel"):
-
-		if get_tree().paused:
-
-			resume_game()
-
-		else:
-
-			pause_game()
-
-		return
-
-
-	# ==========================================
-	# NAVEGAÇÃO DO MENU
-	# ==========================================
-
-	if not get_tree().paused:
-		return
-
 
 	if event is InputEventKey and event.pressed:
 
@@ -126,13 +85,9 @@ func _unhandled_input(event):
 			or event.keycode == KEY_UP
 		):
 
-			if resume_btn.has_focus():
+			if restart_btn.has_focus():
 
 				menu_btn.grab_focus()
-
-			elif restart_btn.has_focus():
-
-				resume_btn.grab_focus()
 
 			elif menu_btn.has_focus():
 
@@ -140,7 +95,7 @@ func _unhandled_input(event):
 
 			else:
 
-				resume_btn.grab_focus()
+				restart_btn.grab_focus()
 
 
 		# ==========================================
@@ -152,21 +107,17 @@ func _unhandled_input(event):
 			or event.keycode == KEY_DOWN
 		):
 
-			if resume_btn.has_focus():
-
-				restart_btn.grab_focus()
-
-			elif restart_btn.has_focus():
+			if restart_btn.has_focus():
 
 				menu_btn.grab_focus()
 
 			elif menu_btn.has_focus():
 
-				resume_btn.grab_focus()
+				restart_btn.grab_focus()
 
 			else:
 
-				resume_btn.grab_focus()
+				restart_btn.grab_focus()
 
 
 		# ==========================================
@@ -178,11 +129,7 @@ func _unhandled_input(event):
 			or event.keycode == KEY_KP_ENTER
 		):
 
-			if resume_btn.has_focus():
-
-				resume_game()
-
-			elif restart_btn.has_focus():
+			if restart_btn.has_focus():
 
 				restart_game()
 
@@ -192,50 +139,21 @@ func _unhandled_input(event):
 
 
 # ==========================================
-# ABRIR PAUSE
-# ==========================================
-
-func pause_game():
-
-	print("==============================")
-	print("JOGO PAUSADO")
-	print("==============================")
-
-
-	visible = true
-
-	get_tree().paused = true
-
-
-	# Coloca foco no primeiro botão
-	resume_btn.grab_focus()
-
-
-# ==========================================
-# CONTINUAR
-# ==========================================
-
-func resume_game():
-
-	print("==============================")
-	print("CONTINUANDO JOGO")
-	print("==============================")
-
-
-	get_tree().paused = false
-
-	visible = false
-
-
-# ==========================================
-# RESTART
+# RESTART DO JOGO
 # ==========================================
 
 func restart_game():
 
 	print("==============================")
-	print("REINICIANDO FASE")
+	print("REINICIANDO JOGO")
 	print("==============================")
+
+
+	# ==========================================
+	# GARANTE QUE NÃO ESTÁ PAUSADO
+	# ==========================================
+
+	get_tree().paused = false
 
 
 	# ==========================================
@@ -260,23 +178,16 @@ func restart_game():
 
 
 	# ==========================================
-	# DESPAUSA
+	# VOLTA PARA A PRIMEIRA FASE
 	# ==========================================
 
-	get_tree().paused = false
-
-	visible = false
-
-
-	# ==========================================
-	# RECARREGA A FASE
-	# ==========================================
-
-	get_tree().reload_current_scene()
+	get_tree().change_scene_to_file(
+		"res://levels/world_01.tscn"
+	)
 
 
 # ==========================================
-# VOLTAR PARA A TELA INICIAL
+# VOLTAR PARA O MENU
 # ==========================================
 
 func go_to_menu():
@@ -287,30 +198,19 @@ func go_to_menu():
 
 
 	# ==========================================
-	# DESPAUSA
+	# GARANTE QUE NÃO ESTÁ PAUSADO
 	# ==========================================
 
 	get_tree().paused = false
 
-	visible = false
-
 
 	# ==========================================
-	# TELA INICIAL
+	# VOLTA PARA A TELA INICIAL
 	# ==========================================
 
 	get_tree().change_scene_to_file(
 		"res://scenes/title_screen.tscn"
 	)
-
-
-# ==========================================
-# BOTÃO RESUME
-# ==========================================
-
-func _on_resume_btn_pressed():
-
-	resume_game()
 
 
 # ==========================================

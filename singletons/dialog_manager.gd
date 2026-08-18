@@ -1,5 +1,6 @@
 extends Node
 
+
 var dialog_box_scene = preload("res://prefabs/dialog_box.tscn")
 
 var message_lines: Array[String] = []
@@ -22,6 +23,14 @@ func start_message(
 ):
 
 	# ==========================================
+	# SE NÃO EXISTE TEXTO, NÃO ABRE
+	# ==========================================
+
+	if lines.is_empty():
+		return
+
+
+	# ==========================================
 	# TROCA DE PLACA
 	# ==========================================
 
@@ -42,7 +51,7 @@ func start_message(
 
 
 	# ==========================================
-	# NOVA MENSAGEM
+	# ABRE NOVA MENSAGEM
 	# ==========================================
 
 	message_lines = lines
@@ -58,11 +67,20 @@ func start_message(
 func show_text():
 
 	# ==========================================
+	# SEGURANÇA
+	# ==========================================
+
+	if message_lines.is_empty():
+		return
+
+
+	# ==========================================
 	# FECHA CAIXA ANTERIOR
 	# ==========================================
 
 	if dialog_box != null:
 		dialog_box.queue_free()
+		dialog_box = null
 
 
 	# ==========================================
@@ -98,6 +116,39 @@ func _on_all_text_displayed():
 	can_advance_message = true
 
 
+# ==========================================
+# FECHAR DIÁLOGO FORÇADAMENTE
+# ==========================================
+
+func close_message():
+
+	# Fecha a caixa visual
+	if dialog_box != null:
+
+		dialog_box.queue_free()
+		dialog_box = null
+
+
+	# Limpa todos os dados
+	message_lines.clear()
+
+	current_line = 0
+
+	dialog_box_position = Vector2.ZERO
+
+	is_message_active = false
+	can_advance_message = false
+
+	current_source = null
+
+
+	print("DIÁLOGO FECHADO")
+
+
+# ==========================================
+# AVANÇAR DIÁLOGO
+# ==========================================
+
 func _unhandled_input(event):
 
 	if event.is_action_pressed("advance_message") \
@@ -109,7 +160,10 @@ func _unhandled_input(event):
 		# ==========================================
 
 		if dialog_box != null:
+
 			dialog_box.queue_free()
+			dialog_box = null
+
 
 		# ==========================================
 		# PRÓXIMO TEXTO
@@ -119,26 +173,21 @@ func _unhandled_input(event):
 
 
 		# ==========================================
-		# TERMINOU TODOS OS TEXTOS
+		# TERMINOU TODOS
 		# ==========================================
 
 		if current_line >= message_lines.size():
 
 			is_message_active = false
-
 			current_line = 0
-
-			dialog_box = null
-
 			current_source = null
-
 			can_advance_message = false
 
 			return
 
 
 		# ==========================================
-		# MOSTRA PRÓXIMO TEXTO
+		# MOSTRA PRÓXIMO
 		# ==========================================
 
 		show_text()

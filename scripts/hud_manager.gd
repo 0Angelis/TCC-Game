@@ -6,9 +6,13 @@ extends Control
 # ==========================================
 
 @onready var coins_counter = $container/coins_container/coins_counter as Label
+
 @onready var timer_counter = $container/tiemer_container/timer_counter as Label
+
 @onready var score_counter = $container/score_container/score_counter as Label
+
 @onready var life_counter = $container/life_container/life_counter as Label
+
 
 @onready var raciocinio_counter = get_node_or_null(
 	"container/raciocinio_container/raciocinio_counter"
@@ -26,6 +30,7 @@ var game_over := false
 
 
 func _ready():
+
 
 	# ==========================================
 	# MOEDAS
@@ -58,6 +63,7 @@ func _ready():
 
 
 func _process(delta):
+
 
 	# ==========================================
 	# ATUALIZA MOEDAS
@@ -101,12 +107,15 @@ func _process(delta):
 		if time_left <= 0:
 
 			time_left = 0
+
 			game_over = true
 
 			print("Tempo esgotado!")
 
 
-			var player = get_tree().get_first_node_in_group("player")
+			var player = get_tree().get_first_node_in_group(
+				"player"
+			)
 
 
 			if player:

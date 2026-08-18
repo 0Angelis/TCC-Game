@@ -1,25 +1,49 @@
 extends CharacterBody2D
 
+
+# ==========================================
+# MOVIMENTO
+# ==========================================
+
 const SPEED = 150.0
 const JUMP_FORCE = -300.0
 
-# Knockback reduzido
+
+# ==========================================
+# KNOCKBACK
+# ==========================================
+
 const ENEMY_KNOCKBACK_X = 120.0
 const ENEMY_KNOCKBACK_Y = -45.0
 const SPIKE_KNOCKBACK_Y = -35.0
 
 var knockback_vector := Vector2.ZERO
 
+
+# ==========================================
+# ESTADOS
+# ==========================================
+
 var taking_damage := false
 var can_take_damage := true
 var can_move := true
+
+
+# ==========================================
+# NÓS
+# ==========================================
 
 @onready var animation = $Anim as AnimatedSprite2D
 @onready var remote_transform = $remote as RemoteTransform2D
 @onready var level = get_tree().current_scene.get_node("level")
 
 
+# ==========================================
+# READY
+# ==========================================
+
 func _ready():
+
 	add_to_group("player")
 
 	# 5 vidas
@@ -30,13 +54,14 @@ func _ready():
 	print("TileMap encontrado: ", level)
 
 
+# ==========================================
+# FÍSICA
+# ==========================================
+
 func _physics_process(delta: float) -> void:
 
-	# ==========================================
-	# GRAVIDADE
-	# ==========================================
-
 	if not is_on_floor():
+
 		velocity += get_gravity() * delta
 
 
@@ -66,10 +91,14 @@ func _physics_process(delta: float) -> void:
 
 	var direction = 0
 
+
 	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+
 		direction = -1
 
+
 	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+
 		direction = 1
 
 
@@ -142,11 +171,11 @@ func _physics_process(delta: float) -> void:
 	check_damage_tile()
 
 
-func _on_hurtbox_body_entered(body: Node2D) -> void:
+# ==========================================
+# DANO DOS INIMIGOS
+# ==========================================
 
-	# ==========================================
-	# DANO DOS INIMIGOS
-	# ==========================================
+func _on_hurtbox_body_entered(body: Node2D) -> void:
 
 	if body.is_in_group("enemies"):
 
@@ -162,43 +191,47 @@ func _on_hurtbox_body_entered(body: Node2D) -> void:
 		)
 
 
+# ==========================================
+# VERIFICA ESPINHOS
+# ==========================================
+
 func check_damage_tile() -> void:
 
 	if not can_take_damage:
 		return
 
 	if level == null:
+
 		print("ERRO: TileMap 'level' não encontrado!")
+
 		return
 
-
-	# ==========================================
-	# POSIÇÃO DOS PÉS
-	# ==========================================
 
 	var feet_position = global_position + Vector2(0, 12)
 
 
 	var positions = [
+
 		feet_position,
 		feet_position + Vector2(-8, 0),
 		feet_position + Vector2(8, 0),
 		feet_position + Vector2(0, 8),
 		feet_position + Vector2(0, 16)
+
 	]
 
-
-	# ==========================================
-	# VERIFICA TODAS AS CAMADAS
-	# ==========================================
 
 	for layer_index in range(level.get_layers_count()):
 
 		for world_position in positions:
 
-			var local_position = level.to_local(world_position)
+			var local_position = level.to_local(
+				world_position
+			)
 
-			var tile_position = level.local_to_map(local_position)
+			var tile_position = level.local_to_map(
+				local_position
+			)
 
 			var tile_data = level.get_cell_tile_data(
 				layer_index,
@@ -210,7 +243,9 @@ func check_damage_tile() -> void:
 				continue
 
 
-			var damage = tile_data.get_custom_data("damage")
+			var damage = tile_data.get_custom_data(
+				"damage"
+			)
 
 
 			if damage == true:
@@ -223,7 +258,6 @@ func check_damage_tile() -> void:
 				print("================================")
 
 
-				# Knockback pequeno dos espinhos
 				take_damage(
 					Vector2(
 						0,
@@ -234,14 +268,14 @@ func check_damage_tile() -> void:
 				return
 
 
+# ==========================================
+# RECEBE DANO
+# ==========================================
+
 func take_damage(
 	knockback_force := Vector2.ZERO,
 	duration := 0.20
 ):
-
-	# ==========================================
-	# EVITA DANO REPETIDO
-	# ==========================================
 
 	if not can_take_damage:
 		return
@@ -303,9 +337,7 @@ func take_damage(
 
 		knockback_vector = knockback_force
 
-
 		var knockback_tween := get_tree().create_tween()
-
 
 		knockback_tween.tween_property(
 			self,
@@ -316,7 +348,7 @@ func take_damage(
 
 
 	# ==========================================
-	# PEQUENO STUN
+	# STUN
 	# ==========================================
 
 	await get_tree().create_timer(0.08).timeout
@@ -346,6 +378,10 @@ func take_damage(
 	)
 
 
+# ==========================================
+# MORTE DEFINITIVA
+# ==========================================
+
 func die():
 
 	can_move = false
@@ -353,6 +389,31 @@ func die():
 	taking_damage = true
 
 	velocity = Vector2.ZERO
+
+
+	# ==========================================
+	# FECHA QUALQUER WARNING ABERTO
+	# ==========================================
+
+	if DialogManager.is_message_active:
+
+		DialogManager.close_message()
+
+
+	# ==========================================
+	# GUARDA A CENA ATUAL
+	# ==========================================
+
+	get_tree().set_meta(
+		"restart_scene",
+		get_tree().current_scene.scene_file_path
+	)
+
+
+	print(
+		"PRÓXIMA CENA DE RESTART: ",
+		get_tree().current_scene.scene_file_path
+	)
 
 
 	# ==========================================
@@ -379,13 +440,28 @@ func die():
 	print("==============================")
 
 
+	# ==========================================
+	# ANIMAÇÃO DE MORTE
+	# ==========================================
+
 	animation.play("hurt")
 
 
 	await get_tree().create_timer(0.3).timeout
 
-	get_tree().reload_current_scene()
 
+	# ==========================================
+	# GAME OVER
+	# ==========================================
+
+	get_tree().change_scene_to_file(
+		"res://scenes/game_over.tscn"
+	)
+
+
+# ==========================================
+# CÂMERA
+# ==========================================
 
 func follow_camera(camera):
 

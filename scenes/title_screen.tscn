@@ -1,0 +1,114 @@
+[gd_scene format=3 uid="uid://b5numoi147cuk"]
+
+[ext_resource type="Script" uid="uid://cdpkrk77js0ql" path="res://scripts/title_screen.gd" id="1_e54dn"]
+[ext_resource type="Texture2D" uid="uid://caje1wl53vpyi" path="res://assets/Game over/fundoperfil.png" id="1_mgrm8"]
+[ext_resource type="Texture2D" uid="uid://beqxtn4nrkgp7" path="res://assets/Sprite Pack 2/2 - Mr. Mochi/Jumping (32 x 32).png" id="2_dc4i4"]
+[ext_resource type="Texture2D" uid="uid://cagecckmhe33g" path="res://assets/Game over/title.png" id="3_e54dn"]
+[ext_resource type="FontFile" uid="uid://b7ufykalnyges" path="res://assets/Fontes/PixelOperatorHBSC.ttf" id="4_3yumr"]
+[ext_resource type="Theme" uid="uid://dtt881cw14h2g" path="res://tema/new_theme.tres" id="4_dc4i4"]
+
+[sub_resource type="Animation" id="Animation_3yumr"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("mochi:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_cs5ya"]
+resource_name = "inicio"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("mochi:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.3, 0.7),
+"transitions": PackedFloat32Array(6.062864, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_mykxm"]
+_data = {
+&"RESET": SubResource("Animation_3yumr"),
+&"inicio": SubResource("Animation_cs5ya")
+}
+
+[node name="TitleScreen" type="Control" unique_id=1156713052]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_e54dn")
+
+[node name="bg" type="TextureRect" parent="." unique_id=638729430]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("1_mgrm8")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=2052317615]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="mochi" type="TextureRect" parent="." unique_id=577795352]
+layout_mode = 0
+offset_left = -210.0
+offset_top = -9.0
+offset_right = 899.0
+offset_bottom = 1094.0
+texture = ExtResource("2_dc4i4")
+
+[node name="title" type="TextureRect" parent="." unique_id=1716029166]
+layout_mode = 0
+offset_left = 381.0
+offset_top = 56.0
+offset_right = 2343.0
+offset_bottom = 857.0
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("3_e54dn")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1969307613]
+layout_mode = 0
+offset_left = 784.0
+offset_top = 532.0
+offset_right = 1132.0
+offset_bottom = 804.0
+
+[node name="start_btn" type="Button" parent="VBoxContainer" unique_id=189990371]
+layout_mode = 2
+theme = ExtResource("4_dc4i4")
+theme_override_fonts/font = ExtResource("4_3yumr")
+theme_override_font_sizes/font_size = 80
+text = "START"
+
+[node name="credits_btn" type="Button" parent="VBoxContainer" unique_id=223347712]
+layout_mode = 2
+theme = ExtResource("4_dc4i4")
+theme_override_fonts/font = ExtResource("4_3yumr")
+theme_override_font_sizes/font_size = 80
+text = "CREDITS"
+
+[node name="quit_btn" type="Button" parent="VBoxContainer" unique_id=1666492906]
+layout_mode = 2
+theme = ExtResource("4_dc4i4")
+theme_override_fonts/font = ExtResource("4_3yumr")
+theme_override_font_sizes/font_size = 80
+text = "QUIT GAME
+"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=841297950]
+libraries/ = SubResource("AnimationLibrary_mykxm")
+autoplay = &"inicio"
