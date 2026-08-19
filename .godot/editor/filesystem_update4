@@ -2,3 +2,4 @@ res://scripts/player.gd
 res://actors/player.tscn
 res://tema/new_theme.tres
 res://shaders/transition.gdshader
+res://levels/world_01.tscn

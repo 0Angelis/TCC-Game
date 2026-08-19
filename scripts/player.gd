@@ -91,6 +91,7 @@ func _unhandled_input(event):
 				or event.keycode == KEY_W
 				or event.keycode == KEY_UP
 				or event.keycode == KEY_DOWN
+				or event.keycode == KEY_S
 				or event.keycode == KEY_SPACE
 			):
 
@@ -126,10 +127,14 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# SETA PARA BAIXO
+	# AGACHAR
+	# S OU SETA PARA BAIXO
 	# ==========================================
 
-	var moving_down := Input.is_key_pressed(KEY_DOWN)
+	var moving_down := (
+		Input.is_key_pressed(KEY_DOWN)
+		or Input.is_key_pressed(KEY_S)
+	)
 
 
 	# ==========================================
@@ -168,7 +173,7 @@ func _physics_process(delta: float) -> void:
 
 	if moving_down:
 
-		# ↓ = não anda
+		# ↓ ou S = não anda
 		velocity.x = 0
 
 	elif direction != 0 and can_move:
@@ -200,6 +205,7 @@ func _physics_process(delta: float) -> void:
 			or Input.is_key_pressed(KEY_W)
 			or Input.is_key_pressed(KEY_UP)
 			or Input.is_key_pressed(KEY_DOWN)
+			or Input.is_key_pressed(KEY_S)
 			or Input.is_key_pressed(KEY_SPACE)
 		):
 
@@ -244,7 +250,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ------------------------------------------
-	# 4. ARRASTAR
+	# 4. AGACHAR / ARRASTAR
 	# ------------------------------------------
 
 	elif moving_down and is_on_floor():
