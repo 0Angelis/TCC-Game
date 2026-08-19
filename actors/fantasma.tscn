@@ -29,7 +29,7 @@ animations = [{
 size = Vector2(12, 10)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uxckq"]
-size = Vector2(8, 3.5)
+size = Vector2(12, 3.75)
 
 [node name="fantasma" type="CharacterBody2D" unique_id=725779105]
 collision_layer = 4
@@ -52,6 +52,6 @@ collision_mask = 3
 [node name="Area2D" type="Area2D" parent="." unique_id=448673243]
 
 [node name="hitbox" type="CollisionShape2D" parent="Area2D" unique_id=199698192]
-position = Vector2(0, -4)
+position = Vector2(0, -4.125)
 shape = SubResource("RectangleShape2D_uxckq")
 debug_color = Color(0.97, 0.048500013, 0.46317485, 0.21960784)
