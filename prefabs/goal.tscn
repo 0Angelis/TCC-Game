@@ -1,62 +1,87 @@
 [gd_scene format=3 uid="uid://c05me6gpn8c70"]
 
 [ext_resource type="Script" uid="uid://d1o2xui8lewyk" path="res://scripts/goal.gd" id="1_15wru"]
-[ext_resource type="Texture2D" uid="uid://bwxyvg5nonmw8" path="res://assets/Fragmentos/Portalfragracio.png" id="2_15wru"]
+[ext_resource type="Texture2D" uid="uid://cy62ymdr60bfu" path="res://assets/Telas/portal-Sheet (1).png" id="2_15wru"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bnsmo"]
+atlas = ExtResource("2_15wru")
+region = Rect2(0, 0, 64, 63)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b3wvb"]
+atlas = ExtResource("2_15wru")
+region = Rect2(64, 0, 64, 63)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cnojs"]
+atlas = ExtResource("2_15wru")
+region = Rect2(128, 0, 64, 63)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hxbgi"]
+atlas = ExtResource("2_15wru")
+region = Rect2(192, 0, 64, 63)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rcers"]
+atlas = ExtResource("2_15wru")
+region = Rect2(256, 0, 64, 63)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mcab7"]
+atlas = ExtResource("2_15wru")
+region = Rect2(320, 0, 64, 63)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v32su"]
+atlas = ExtResource("2_15wru")
+region = Rect2(384, 0, 64, 63)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sgtk8"]
+atlas = ExtResource("2_15wru")
+region = Rect2(448, 0, 64, 63)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sob1t"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bnsmo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b3wvb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cnojs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hxbgi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rcers")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mcab7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v32su")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sgtk8")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_15wru"]
-radius = 12.0
-height = 38.0
-
-[sub_resource type="Animation" id="Animation_15wru"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("sprite:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(0, 0)]
-}
-
-[sub_resource type="Animation" id="Animation_bnsmo"]
-resource_name = "float"
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("sprite:position")
-tracks/0/interp = 2
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.50022477),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Vector2(0, 0), Vector2(0, -12)]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_b3wvb"]
-_data = {
-&"RESET": SubResource("Animation_15wru"),
-&"float": SubResource("Animation_bnsmo")
-}
+radius = 9.0
+height = 44.0
 
 [node name="goal" type="Area2D" unique_id=1383269650]
 script = ExtResource("1_15wru")
 
-[node name="sprite" type="Sprite2D" parent="." unique_id=427735680]
-scale = Vector2(0.04850907, 0.05120869)
-texture = ExtResource("2_15wru")
+[node name="sprite" type="AnimatedSprite2D" parent="." unique_id=1189597905]
+position = Vector2(3, 4)
+scale = Vector2(1, 1.041)
+sprite_frames = SubResource("SpriteFrames_sob1t")
+autoplay = "default"
 
 [node name="collision" type="CollisionShape2D" parent="." unique_id=1137894934]
-position = Vector2(0, 6)
+position = Vector2(0, 7)
 shape = SubResource("CapsuleShape2D_15wru")
-
-[node name="anim" type="AnimationPlayer" parent="." unique_id=22912563]
-libraries/ = SubResource("AnimationLibrary_b3wvb")
-autoplay = &"float"
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

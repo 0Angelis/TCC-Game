@@ -900,7 +900,7 @@ position = Vector2(-16, 347)
 
 [node name="goal" parent="." unique_id=1383269650 instance=ExtResource("29_gmex4")]
 position = Vector2(4199, 624)
-next_level = "res://levels/world_02.tscn"
+next_level = "uid://2lrgxc7earf0"
 
 [node name="BG" type="ParallaxBackground" parent="." unique_id=2092705572]
 
@@ -1095,7 +1095,7 @@ position = Vector2(487, 346)
 [node name="warning_sign" type="Node2D" parent="warning" unique_id=1771737388]
 position = Vector2(-192, 319)
 script = ExtResource("20_6ibfi")
-dialog_texts = Array[String](["Olá, aventureiro!", "Bem-vindo à primeira etapa da sua jornada!", "Espero que esteja preparado...", "Seu objetivo é encontrar os 5 fragmentos de raciocínio espalhados pela fase.", "Para encontrá-los, você precisará resolver diferentes desafios de lógica.", "Pense com cuidado antes de escolher sua resposta.", ""])
+dialog_texts = Array[String](["Olá, aventureiro!", "Bem-vindo à primeira etapa da sua jornada!", "Espero que esteja preparado...", "Seu objetivo é encontrar os 5 fragmentos de raciocínio espalhados pela fase.", "Para encontrá-los, você precisará resolver diferentes desafios de lógica.", "Pense com cuidado antes de escolher sua resposta."])
 
 [node name="alert_sign" type="Sprite2D" parent="warning/warning_sign" unique_id=1133745016]
 position = Vector2(0, -13)

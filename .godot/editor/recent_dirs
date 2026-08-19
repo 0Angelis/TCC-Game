@@ -1,8 +1,12 @@
+res://actors/
+res://scripts/
+res://assets/Sprite Pack 2/3 - Octi/
+res://assets/Telas/
+/Users/felipeangelis/Documents/GitHub/TCC-Game/scripts/
 /Users/felipeangelis/Documents/GitHub/
 res://assets/Sprite Pack 6/1 - Penguin/
 res://assets/Sprite Pack 6/3 - Skeleton/
 res://scenes/
-res://scripts/
 res://
 res://prefabs/
 res://assets/Fragmentos/
@@ -10,7 +14,6 @@ res://assets/Fragmentos/
 res://tema/
 res://shaders/
 res://singletons/
-res://actors/
 res://assets/Mini FX, Items & UI/Effects/
 res://assets/Mini FX, Items & UI/Common Pick-ups/
 res://assets/Sprite Pack 2/2 - Mr. Mochi/

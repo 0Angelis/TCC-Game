@@ -5,7 +5,6 @@
 [ext_resource type="Texture2D" uid="uid://c8kijta6gaf1h" path="res://assets/Sprite Pack 6/1 - Penguin/Jump (16 x 16).png" id="3_3yumr"]
 [ext_resource type="Texture2D" uid="uid://cagecckmhe33g" path="res://assets/Telas/title.png" id="3_e54dn"]
 [ext_resource type="Theme" uid="uid://dtt881cw14h2g" path="res://tema/new_theme.tres" id="4_dc4i4"]
-[ext_resource type="Texture2D" uid="uid://b65wc2vkn68qv" path="res://assets/Telas/thumb frag.png" id="5_3yumr"]
 [ext_resource type="FontFile" uid="uid://dawcynbe612wd" path="res://assets/Fontes/Pixeloid_Font_1_0/OpenType (.otf)/PixeloidSans-Bold.otf" id="7_3yumr"]
 
 [sub_resource type="Animation" id="Animation_3yumr"]
@@ -85,15 +84,6 @@ offset_right = 2213.0
 offset_bottom = 843.0
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("3_e54dn")
-
-[node name="frag" type="TextureRect" parent="." unique_id=202565001]
-layout_mode = 0
-offset_left = 541.0
-offset_top = 530.00006
-offset_right = 2213.0
-offset_bottom = 1553.9998
-scale = Vector2(0.12, 0.12)
-texture = ExtResource("5_3yumr")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1969307613]
 layout_mode = 0

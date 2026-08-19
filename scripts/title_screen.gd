@@ -138,12 +138,34 @@ func _unhandled_input(event):
 func start_game():
 
 	print("==============================")
-	print("INICIANDO JOGO")
+	print("INICIANDO NOVO JOGO")
 	print("==============================")
 
 
+	# ==========================================
+	# RESET DOS DADOS
+	# ==========================================
+
+	Globals.score = 0
+	Globals.coins = 0
+
+	Globals.level_score = 0
+	Globals.level_coins = 0
+
+	Globals.raciocinio_fragments = 0
+
+
+	print("SCORE: ", Globals.score)
+	print("MOEDAS: ", Globals.coins)
+	print("FRAGMENTOS: ", Globals.raciocinio_fragments)
+
+
+	# ==========================================
+	# COMEÇA PELO TUTORIAL
+	# ==========================================
+
 	get_tree().change_scene_to_file(
-		"res://levels/world_01.tscn"
+		"res://levels/world_00.tscn"
 	)
 
 
@@ -160,6 +182,7 @@ func open_credits():
 
 	# Por enquanto não troca de cena.
 	# Depois criamos a tela de créditos.
+
 	print("Tela de créditos ainda será criada.")
 
 

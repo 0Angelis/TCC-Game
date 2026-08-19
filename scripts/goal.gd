@@ -3,8 +3,38 @@ extends Area2D
 
 @onready var transition = $"../transition"
 
-@export var next_level: String = ""
 
+# ==========================================
+# CONFIGURAÇÕES
+# ==========================================
+
+@export_file("*.tscn") var next_level: String = ""
+
+
+# ==========================================
+# CONTROLE
+# ==========================================
+
+var can_change_scene: bool = true
+
+
+# ==========================================
+# VERIFICA SE É O TUTORIAL
+# ==========================================
+
+func is_tutorial() -> bool:
+
+	var current_scene := get_tree().current_scene
+
+	if current_scene == null:
+		return false
+
+	return current_scene.scene_file_path.ends_with("world_00.tscn")
+
+
+# ==========================================
+# PLAYER ENTROU NO GOAL
+# ==========================================
 
 func _on_body_entered(body: Node2D) -> void:
 
@@ -12,42 +42,76 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 
 
-	# ==========================================
-	# VERIFICA SE PEGOU TODOS OS FRAGMENTOS
-	# ==========================================
-
-	if Globals.raciocinio_fragments < 5:
-
-		print("==============================")
-		print("FASE BLOQUEADA!")
-		print(
-			"FRAGMENTOS: ",
-			Globals.raciocinio_fragments,
-			"/5"
-		)
-		print("Pegue todos os fragmentos!")
-		print("==============================")
-
-
-		# Não passa de fase
+	if not can_change_scene:
 		return
 
 
 	# ==========================================
-	# VERIFICA SE EXISTE PRÓXIMA FASE
+	# VERIFICA SE É O TUTORIAL
+	# ==========================================
+
+	var tutorial := is_tutorial()
+
+
+	# ==========================================
+	# FASES NORMAIS EXIGEM 5 FRAGMENTOS
+	# ==========================================
+
+	if not tutorial:
+
+		if Globals.raciocinio_fragments < 5:
+
+			print("==============================")
+			print("FASE BLOQUEADA!")
+			print(
+				"FRAGMENTOS: ",
+				Globals.raciocinio_fragments,
+				"/5"
+			)
+			print("Pegue todos os fragmentos!")
+			print("==============================")
+
+			return
+
+
+	# ==========================================
+	# VERIFICA PRÓXIMA FASE
 	# ==========================================
 
 	if next_level == "":
+
+		print("==============================")
+		print("ERRO: PRÓXIMA FASE NÃO DEFINIDA!")
+		print("==============================")
+
 		return
 
 
 	# ==========================================
-	# TODOS OS FRAGMENTOS FORAM COLETADOS
+	# IMPEDE DUPLA ATIVAÇÃO
+	# ==========================================
+
+	can_change_scene = false
+
+
+	# ==========================================
+	# MENSAGEM
 	# ==========================================
 
 	print("==============================")
-	print("TODOS OS 5 FRAGMENTOS COLETADOS!")
+
+	if tutorial:
+
+		print("TUTORIAL CONCLUÍDO!")
+
+	else:
+
+		print("TODOS OS 5 FRAGMENTOS COLETADOS!")
+
+
 	print("PASSANDO DE FASE!")
+	print("PRÓXIMA FASE: ", next_level)
+
 	print("==============================")
 
 
@@ -65,10 +129,6 @@ func _on_body_entered(body: Node2D) -> void:
 	# ==========================================
 	# RESET DOS FRAGMENTOS
 	# ==========================================
-	#
-	# A próxima fase terá seus próprios
-	# fragmentos.
-	#
 
 	Globals.raciocinio_fragments = 0
 
@@ -82,7 +142,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# MUDA PARA A PRÓXIMA FASE
+	# MUDA DE FASE
 	# ==========================================
 
 	transition.change_scene(next_level)

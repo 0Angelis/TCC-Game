@@ -950,9 +950,8 @@ position = Vector2(-18, 420)
 position = Vector2(-16, 347)
 
 [node name="goal" parent="." unique_id=1383269650 instance=ExtResource("23_pbxfe")]
-visible = false
-position = Vector2(4199, 624)
-next_level = "res://levels/world_02.tscn"
+position = Vector2(138, 455)
+next_level = "uid://2lrgxc7earf0"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
 visible = false

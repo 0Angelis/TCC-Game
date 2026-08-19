@@ -6,3 +6,10 @@ res://levels/teste.tscn
 res://levels/world_00.tscn
 res://levels/world_03.tscn
 res://actors/eneme_2.tscn
+res://scripts/goal.gd
+res://scripts/title_screen.gd
+res://prefabs/goal.tscn
+res://scripts/fantasma.gd
+res://actors/fantasma.tscn
+res://scenes/title_screen.tscn
+res://scripts/hud_manager.gd

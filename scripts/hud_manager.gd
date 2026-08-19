@@ -36,6 +36,7 @@ func _ready():
 	# MOEDAS
 	# ==========================================
 
+
 	coins_counter.text = "%03d" % Globals.coins
 
 
