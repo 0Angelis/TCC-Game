@@ -1485,7 +1485,7 @@ shape = SubResource("RectangleShape2D_sob1t")
 [node name="warning_sing14" type="Node2D" parent="warning" unique_id=932250580]
 position = Vector2(3574, 313)
 script = ExtResource("20_6ibfi")
-dialog_texts = Array[String](["Você chegou ao fim deste caminho...", "À` sua frente existe um portal. ele não vai levar você para casa... ainda.", "Esse portal leva a um novo lugar, onde outro desafio espera por você. desta vez, não será preciso apenas pensar. você precisará observar, prestar atenção e perceber até os menores detalhes ao seu redor.", "O que estiver procurando pode estar bem diante dos seus olhos.", "Prepare-se. o próximo mundo vai testar a sua atenção."])
+dialog_texts = Array[String](["Você chegou ao fim deste caminho...", "À sua frente existe um portal. ele não vai levar você para casa... ainda.", "Esse portal leva a um novo lugar, onde outro desafio espera por você. desta vez, não será preciso apenas pensar. você precisará observar, prestar atenção e perceber até os menores detalhes ao seu redor.", "O que estiver procurando pode estar bem diante dos seus olhos.", "Prepare-se. O próximo mundo vai testar a sua atenção."])
 
 [node name="alert_sign" type="Sprite2D" parent="warning/warning_sing14" unique_id=2100529148]
 visible = false
