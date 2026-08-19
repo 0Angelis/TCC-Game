@@ -1,15 +1,3 @@
-res://levels/world_01.tscn
+res://levels/world_00.tscn
 res://tema/new_theme.tres
 res://shaders/transition.gdshader
-res://levels/world_02.tscn
-res://levels/teste.tscn
-res://levels/world_00.tscn
-res://levels/world_03.tscn
-res://actors/eneme_2.tscn
-res://scripts/goal.gd
-res://scripts/title_screen.gd
-res://prefabs/goal.tscn
-res://scripts/fantasma.gd
-res://actors/fantasma.tscn
-res://scenes/title_screen.tscn
-res://scripts/hud_manager.gd
