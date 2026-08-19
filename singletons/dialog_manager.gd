@@ -16,6 +16,119 @@ var can_advance_message := false
 var current_source = null
 
 
+# ==========================================
+# AVISO DE COMANDO
+# ==========================================
+
+var command_canvas: CanvasLayer
+var command_label: Label
+
+var command_font = preload(
+	"res://assets/Fontes/Pixeloid_Font_1_0/OpenType (.otf)/PixeloidSans-Bold.otf"
+)
+
+
+# ==========================================
+# READY
+# ==========================================
+
+func _ready():
+
+	# ==========================================
+	# CANVAS FIXO NA TELA
+	# ==========================================
+
+	command_canvas = CanvasLayer.new()
+	command_canvas.layer = 100
+
+	get_tree().root.add_child(command_canvas)
+
+
+	# ==========================================
+	# LABEL DO COMANDO
+	# ==========================================
+
+	command_label = Label.new()
+
+	command_label.position = Vector2(20, 15)
+
+	command_label.text = ""
+
+	# Fonte
+	command_label.add_theme_font_override(
+		"font",
+		command_font
+	)
+
+	# Tamanho
+	command_label.add_theme_font_size_override(
+		"font_size",
+		8
+	)
+
+	# Mesma cor roxa do contador 1 / 3
+	command_label.add_theme_color_override(
+		"font_color",
+		Color("#7046A3")
+	)
+
+	# Pixel art
+	command_label.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+	# Não interfere no jogo
+	command_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	command_canvas.add_child(command_label)
+
+
+	# ==========================================
+	# COMEÇA ESCONDIDO
+	# ==========================================
+
+	command_label.hide()
+
+
+# ==========================================
+# ATUALIZA TEXTO DO COMANDO
+# ==========================================
+
+func update_command():
+
+	if command_label == null:
+		return
+
+
+	# ==========================================
+	# SEM DIÁLOGO
+	# ==========================================
+
+	if not is_message_active:
+
+		command_label.hide()
+
+		return
+
+
+	# ==========================================
+	# ÚLTIMA PÁGINA
+	# ==========================================
+
+	if current_line >= message_lines.size() - 1:
+
+		command_label.text = "E - fechar"
+
+	else:
+
+		command_label.text = "E - próximo"
+
+
+	command_label.show()
+
+
+# ==========================================
+# INICIAR MENSAGEM
+# ==========================================
+
 func start_message(
 	position: Vector2,
 	lines: Array[String],
@@ -47,6 +160,8 @@ func start_message(
 
 		show_text()
 
+		update_command()
+
 		return
 
 
@@ -59,10 +174,16 @@ func start_message(
 	current_line = 0
 	current_source = source
 
-	show_text()
-
 	is_message_active = true
 
+	show_text()
+
+	update_command()
+
+
+# ==========================================
+# MOSTRAR TEXTO
+# ==========================================
 
 func show_text():
 
@@ -111,6 +232,17 @@ func show_text():
 	can_advance_message = false
 
 
+	# ==========================================
+	# ATUALIZA AVISO
+	# ==========================================
+
+	update_command()
+
+
+# ==========================================
+# TEXTO TERMINOU DE APARECER
+# ==========================================
+
 func _on_all_text_displayed():
 
 	can_advance_message = true
@@ -122,14 +254,20 @@ func _on_all_text_displayed():
 
 func close_message():
 
-	# Fecha a caixa visual
+	# ==========================================
+	# FECHA A CAIXA VISUAL
+	# ==========================================
+
 	if dialog_box != null:
 
 		dialog_box.queue_free()
 		dialog_box = null
 
 
-	# Limpa todos os dados
+	# ==========================================
+	# LIMPA TODOS OS DADOS
+	# ==========================================
+
 	message_lines.clear()
 
 	current_line = 0
@@ -140,6 +278,15 @@ func close_message():
 	can_advance_message = false
 
 	current_source = null
+
+
+	# ==========================================
+	# ESCONDE AVISO
+	# ==========================================
+
+	if command_label != null:
+
+		command_label.hide()
 
 
 	print("DIÁLOGO FECHADO")
@@ -183,6 +330,16 @@ func _unhandled_input(event):
 			current_source = null
 			can_advance_message = false
 
+
+			# ==========================================
+			# ESCONDE AVISO
+			# ==========================================
+
+			if command_label != null:
+
+				command_label.hide()
+
+
 			return
 
 
@@ -191,3 +348,5 @@ func _unhandled_input(event):
 		# ==========================================
 
 		show_text()
+
+		update_command()

@@ -1,5 +1,6 @@
-res://levels/world_01.tscn
+res://singletons/dialog_manager.gd
+res://scripts/game_over.gd
+res://prefabs/frag_raciocinio.tscn
 res://tema/new_theme.tres
 res://shaders/transition.gdshader
 res://levels/world_02.tscn
-res://prefabs/frag_raciocinio.tscn

@@ -157,7 +157,7 @@ func close_dialog():
 func restart_game():
 
 	print("==============================")
-	print("REINICIANDO JOGO")
+	print("REINICIANDO FASE")
 	print("==============================")
 
 
@@ -173,6 +173,35 @@ func restart_game():
 	# ==========================================
 
 	get_tree().paused = false
+
+
+	# ==========================================
+	# PEGA A FASE ONDE O PLAYER MORREU
+	# ==========================================
+
+	var restart_scene = ""
+
+
+	if get_tree().has_meta("restart_scene"):
+
+		restart_scene = get_tree().get_meta(
+			"restart_scene"
+		)
+
+		print(
+			"FASE SALVA PARA RESTART: ",
+			restart_scene
+		)
+
+	else:
+
+		# Caso não exista nenhuma fase salva,
+		# usa a fase 00 como segurança.
+		restart_scene = "res://levels/world_00.tscn"
+
+		print(
+			"NENHUMA FASE SALVA. USANDO WORLD_00."
+		)
 
 
 	# ==========================================
@@ -197,18 +226,18 @@ func restart_game():
 
 
 	# ==========================================
-	# GARANTE QUE A CAIXA SUMIU
+	# ESPERA O FRAME ATUAL TERMINAR
 	# ==========================================
 
 	await get_tree().process_frame
 
 
 	# ==========================================
-	# VOLTA PARA A PRIMEIRA FASE
+	# REINICIA A FASE ONDE MORREU
 	# ==========================================
 
 	get_tree().change_scene_to_file(
-		"res://levels/world_01.tscn"
+		restart_scene
 	)
 
 
@@ -245,7 +274,7 @@ func go_to_menu():
 
 
 	# ==========================================
-	# VOLTA PARA A TELA INICIAL
+	# VOLTA PARA O MENU
 	# ==========================================
 
 	get_tree().change_scene_to_file(
