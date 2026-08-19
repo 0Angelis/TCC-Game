@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cgb4agatf44f5"
-path="res://.godot/imported/comandos.png-97982986b21b774b8797847b62c9a7b3.ctex"
+uid="uid://bbfvyi2perfgh"
+path="res://.godot/imported/inimigos.png-d9c2eabf5dc22f2db142395a6035d254.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Comandos/comandos.png"
-dest_files=["res://.godot/imported/comandos.png-97982986b21b774b8797847b62c9a7b3.ctex"]
+source_file="res://assets/Comandos/inimigos.png"
+dest_files=["res://.godot/imported/inimigos.png-d9c2eabf5dc22f2db142395a6035d254.ctex"]
 
 [params]
 

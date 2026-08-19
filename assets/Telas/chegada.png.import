@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ha552cmye4no"
-path="res://.godot/imported/inimigo.png-0dd6f36a5a0c4014bcd11025ecc49982.ctex"
+uid="uid://c8lf8vdqratxm"
+path="res://.godot/imported/chegada.png-9dad495b9e4a218a7f002aba29238f83.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Comandos/inimigo.png"
-dest_files=["res://.godot/imported/inimigo.png-0dd6f36a5a0c4014bcd11025ecc49982.ctex"]
+source_file="res://assets/Telas/chegada.png"
+dest_files=["res://.godot/imported/chegada.png-9dad495b9e4a218a7f002aba29238f83.ctex"]
 
 [params]
 

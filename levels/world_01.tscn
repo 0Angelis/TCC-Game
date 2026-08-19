@@ -38,9 +38,7 @@
 [ext_resource type="Texture2D" uid="uid://daid336cyg8np" path="res://assets/Mini FX, Items & UI/placa e.png" id="31_ud1nb"]
 [ext_resource type="Texture2D" uid="uid://bl7actt7grri6" path="res://assets/Fragmentos/FragmentoRaciocinio.png" id="32_brbtt"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="32_ud1nb"]
-[ext_resource type="Texture2D" uid="uid://c81grcm4o2qxq" path="res://assets/Comandos/comandos.png" id="35_q0cxt"]
 [ext_resource type="PackedScene" uid="uid://cu31oefxt7lgm" path="res://prefabs/frag_raciocinio.tscn" id="40_0aqq2"]
-[ext_resource type="Texture2D" uid="uid://ha552cmye4no" path="res://assets/Comandos/inimigo.png" id="41_brbtt"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_j8rs1"]
 tile_data = PackedInt32Array(0, 65537, 1)
@@ -1097,7 +1095,7 @@ position = Vector2(487, 346)
 [node name="warning_sign" type="Node2D" parent="warning" unique_id=1771737388]
 position = Vector2(-192, 319)
 script = ExtResource("20_6ibfi")
-dialog_texts = Array[String](["Olá, aventureiro!", "Bem-vindo à primeira etapa da sua jornada!", "Espero que esteja preparado...", "Seu objetivo é encontrar os 5 fragmentos de raciocínio espalhados pela fase.", "Para encontrá-los, você precisará resolver diferentes desafios de lógica.", "Pense com cuidado antes de escolher sua resposta."])
+dialog_texts = Array[String](["Olá, aventureiro!", "Bem-vindo à primeira etapa da sua jornada!", "Espero que esteja preparado...", "Seu objetivo é encontrar os 5 fragmentos de raciocínio espalhados pela fase.", "Para encontrá-los, você precisará resolver diferentes desafios de lógica.", "Pense com cuidado antes de escolher sua resposta.", ""])
 
 [node name="alert_sign" type="Sprite2D" parent="warning/warning_sign" unique_id=1133745016]
 position = Vector2(0, -13)
@@ -1521,13 +1519,3 @@ position = Vector2(2145, 137)
 
 [node name="frag_raciocinio5" parent="Fragmentos" unique_id=1284541050 instance=ExtResource("40_0aqq2")]
 position = Vector2(3130, -40)
-
-[node name="Comandos" type="Sprite2D" parent="." unique_id=563978885]
-position = Vector2(127.00003, 742.99994)
-scale = Vector2(0.15, 0.13)
-texture = ExtResource("35_q0cxt")
-
-[node name="Comandos2" type="Sprite2D" parent="." unique_id=143338269]
-position = Vector2(805.00006, 741)
-scale = Vector2(0.134, 0.12)
-texture = ExtResource("41_brbtt")
