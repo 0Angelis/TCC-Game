@@ -5,7 +5,7 @@ extends CharacterBody2D
 # MOVIMENTO
 # ==========================================
 
-const SPEED = 150.0
+const SPEED = 120.0
 const JUMP_FORCE = -300.0
 
 

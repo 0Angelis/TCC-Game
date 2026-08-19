@@ -1,7 +1,4 @@
+res://scripts/player.gd
 res://actors/player.tscn
 res://tema/new_theme.tres
 res://shaders/transition.gdshader
-res://scripts/player.gd
-res://scripts/frag_raciocinio.gd
-res://scripts/warning_sing.gd
-res://scenes/title_screen.tscn
