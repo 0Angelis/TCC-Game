@@ -29,6 +29,12 @@ var can_take_damage := true
 var can_move := true
 var is_dead := false
 
+# Warning da placa
+var showing_warning := false
+
+# Vitória ao pegar fragmento
+var celebrating := false
+
 
 # ==========================================
 # NÓS
@@ -54,10 +60,43 @@ func _ready():
 	taking_damage = false
 	can_take_damage = true
 	can_move = true
+	showing_warning = false
+	celebrating = false
 
 	print("PLAYER INICIADO")
 	print("Vidas: ", Globals.player_life)
 	print("TileMap encontrado: ", level)
+
+
+# ==========================================
+# INPUT
+# ==========================================
+
+func _unhandled_input(event):
+
+	if is_dead:
+		return
+
+	# Se estiver dançando, uma NOVA tecla
+	# de movimento cancela a dança.
+	if celebrating:
+
+		if event is InputEventKey and event.pressed and not event.echo:
+
+			if (
+				event.keycode == KEY_A
+				or event.keycode == KEY_D
+				or event.keycode == KEY_LEFT
+				or event.keycode == KEY_RIGHT
+				or event.keycode == KEY_W
+				or event.keycode == KEY_UP
+				or event.keycode == KEY_DOWN
+				or event.keycode == KEY_SPACE
+			):
+
+				celebrating = false
+
+				print("DANÇA CANCELADA")
 
 
 # ==========================================
@@ -87,6 +126,30 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
+	# SETA PARA BAIXO
+	# ==========================================
+
+	var moving_down := Input.is_key_pressed(KEY_DOWN)
+
+
+	# ==========================================
+	# DIREÇÃO HORIZONTAL
+	# ==========================================
+
+	var direction := 0
+
+	if not moving_down:
+
+		if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+
+			direction = -1
+
+		elif Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+
+			direction = 1
+
+
+	# ==========================================
 	# PULO
 	# ==========================================
 
@@ -94,29 +157,21 @@ func _physics_process(delta: float) -> void:
 		Input.is_key_pressed(KEY_W)
 		or Input.is_key_pressed(KEY_SPACE)
 		or Input.is_key_pressed(KEY_UP)
-	) and is_on_floor() and can_move:
+	) and is_on_floor() and can_move and not moving_down:
 
 		velocity.y = JUMP_FORCE
 
 
 	# ==========================================
-	# MOVIMENTO
+	# MOVIMENTO HORIZONTAL
 	# ==========================================
 
-	var direction = 0
+	if moving_down:
 
+		# ↓ = não anda
+		velocity.x = 0
 
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
-
-		direction = -1
-
-
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
-
-		direction = 1
-
-
-	if direction != 0 and can_move:
+	elif direction != 0 and can_move:
 
 		velocity.x = direction * SPEED
 
@@ -132,20 +187,115 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
+	# CANCELA WARNING AO MOVIMENTAR
+	# ==========================================
+
+	if showing_warning:
+
+		if (
+			Input.is_key_pressed(KEY_A)
+			or Input.is_key_pressed(KEY_D)
+			or Input.is_key_pressed(KEY_LEFT)
+			or Input.is_key_pressed(KEY_RIGHT)
+			or Input.is_key_pressed(KEY_W)
+			or Input.is_key_pressed(KEY_UP)
+			or Input.is_key_pressed(KEY_DOWN)
+			or Input.is_key_pressed(KEY_SPACE)
+		):
+
+			showing_warning = false
+
+
+	# ==========================================
 	# ANIMAÇÕES
 	# ==========================================
 
-	if not is_on_floor():
+	# ------------------------------------------
+	# 1. HURT
+	# ------------------------------------------
 
-		animation.play("jump")
+	if taking_damage:
+
+		if animation.animation != "hurt":
+
+			animation.play("hurt")
+
+
+	# ------------------------------------------
+	# 2. VITÓRIA
+	# ------------------------------------------
+
+	elif celebrating:
+
+		if animation.animation != "vitoria":
+
+			animation.play("vitoria")
+
+
+	# ------------------------------------------
+	# 3. WARNING
+	# ------------------------------------------
+
+	elif showing_warning:
+
+		if animation.animation != "warning":
+
+			animation.play("warning")
+
+
+	# ------------------------------------------
+	# 4. ARRASTAR
+	# ------------------------------------------
+
+	elif moving_down and is_on_floor():
+
+		if animation.animation != "arrastar":
+
+			animation.play("arrastar")
+
+
+	# ------------------------------------------
+	# 5. FALLING
+	# ------------------------------------------
+
+	elif not is_on_floor() and velocity.y > 0:
+
+		if animation.animation != "falling":
+
+			animation.play("falling")
+
+
+	# ------------------------------------------
+	# 6. JUMP
+	# ------------------------------------------
+
+	elif not is_on_floor():
+
+		if animation.animation != "jump":
+
+			animation.play("jump")
+
+
+	# ------------------------------------------
+	# 7. RUN
+	# ------------------------------------------
 
 	elif direction != 0:
 
-		animation.play("run")
+		if animation.animation != "run":
+
+			animation.play("run")
+
+
+	# ------------------------------------------
+	# 8. IDLE
+	# ------------------------------------------
 
 	else:
 
-		animation.play("idle")
+		if animation.animation != "idle":
+
+			animation.play("idle")
 
 
 	# ==========================================
@@ -174,6 +324,10 @@ func _physics_process(delta: float) -> void:
 			1
 		)
 
+
+	# ==========================================
+	# MOVIMENTO
+	# ==========================================
 
 	move_and_slide()
 
@@ -261,6 +415,7 @@ func check_damage_tile() -> void:
 
 
 			if tile_data == null:
+
 				continue
 
 
@@ -309,6 +464,9 @@ func take_damage(
 	can_move = false
 	taking_damage = true
 
+	showing_warning = false
+	celebrating = false
+
 
 	# ==========================================
 	# PERDE UMA VIDA
@@ -342,14 +500,21 @@ func take_damage(
 
 
 	# ==========================================
-	# FICA VERMELHO
+	# HURT
+	# ==========================================
+
+	animation.play("hurt")
+
+
+	# ==========================================
+	# VERMELHO SUAVE
 	# ==========================================
 
 	animation.modulate = Color(
-		1,
-		0,
-		0,
-		1
+		1.0,
+		0.55,
+		0.55,
+		1.0
 	)
 
 
@@ -409,12 +574,83 @@ func take_damage(
 
 
 # ==========================================
-# MORTE DEFINITIVA / GAME OVER
+# WARNING
+# ==========================================
+
+func play_warning():
+
+	if is_dead:
+		return
+
+	if taking_damage:
+		return
+
+	if celebrating:
+		return
+
+	showing_warning = true
+
+	animation.play("warning")
+
+	print("WARNING DO PLAYER!")
+
+
+# ==========================================
+# PARA WARNING
+# ==========================================
+
+func stop_warning():
+
+	if is_dead:
+		return
+
+	if taking_damage:
+		return
+
+	if celebrating:
+		return
+
+	showing_warning = false
+
+
+# ==========================================
+# VITÓRIA
+# ==========================================
+
+func play_victory():
+
+	if is_dead:
+		return
+
+	if taking_damage:
+		return
+
+
+	showing_warning = false
+
+	celebrating = true
+
+	# NÃO trava o player
+	can_move = true
+
+	# NÃO zera velocity
+	# Assim ele continua caindo normalmente.
+
+	animation.stop()
+	animation.play("vitoria")
+
+	print("================================")
+	print("FRAGMENTO PEGADO!")
+	print("ANIMAÇÃO DE VITÓRIA!")
+	print("================================")
+
+
+# ==========================================
+# MORTE
 # ==========================================
 
 func die():
 
-	# Já morreu? Não executa novamente.
 	if is_dead:
 		return
 
@@ -425,12 +661,15 @@ func die():
 	can_take_damage = false
 	taking_damage = true
 
+	showing_warning = false
+	celebrating = false
+
 	velocity = Vector2.ZERO
 	knockback_vector = Vector2.ZERO
 
 
 	# ==========================================
-	# FECHA QUALQUER WARNING ABERTO
+	# FECHA WARNING
 	# ==========================================
 
 	if DialogManager.is_message_active:
@@ -439,7 +678,7 @@ func die():
 
 
 	# ==========================================
-	# GUARDA A CENA ATUAL PARA O RESTART
+	# GUARDA CENA
 	# ==========================================
 
 	get_tree().set_meta(
@@ -455,7 +694,7 @@ func die():
 
 
 	# ==========================================
-	# RESET DOS DADOS
+	# RESET
 	# ==========================================
 
 	Globals.coins = 0
@@ -479,12 +718,11 @@ func die():
 
 
 	# ==========================================
-	# SOME IMEDIATAMENTE
+	# SOME
 	# ==========================================
 
 	animation.visible = false
 
-	# Desabilita o processamento físico
 	set_physics_process(false)
 
 

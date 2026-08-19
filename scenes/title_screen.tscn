@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cdpkrk77js0ql" path="res://scripts/title_screen.gd" id="1_e54dn"]
 [ext_resource type="Texture2D" uid="uid://caje1wl53vpyi" path="res://assets/Telas/fundoperfil.png" id="1_mgrm8"]
-[ext_resource type="Texture2D" uid="uid://beqxtn4nrkgp7" path="res://assets/Sprite Pack 2/2 - Mr. Mochi/Jumping (32 x 32).png" id="2_dc4i4"]
+[ext_resource type="Texture2D" uid="uid://c8kijta6gaf1h" path="res://assets/Sprite Pack 6/1 - Penguin/Jump (16 x 16).png" id="3_3yumr"]
 [ext_resource type="Texture2D" uid="uid://cagecckmhe33g" path="res://assets/Telas/title.png" id="3_e54dn"]
 [ext_resource type="Theme" uid="uid://dtt881cw14h2g" path="res://tema/new_theme.tres" id="4_dc4i4"]
 [ext_resource type="Texture2D" uid="uid://b65wc2vkn68qv" path="res://assets/Telas/thumb frag.png" id="5_3yumr"]
@@ -13,7 +13,7 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("mochi:modulate")
+tracks/0/path = NodePath("pinguin:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -28,7 +28,7 @@ resource_name = "inicio"
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("mochi:modulate")
+tracks/0/path = NodePath("pinguin:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -68,14 +68,14 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="mochi" type="TextureRect" parent="." unique_id=577795352]
+[node name="pinguin" type="TextureRect" parent="." unique_id=577795352]
 layout_mode = 0
-offset_left = -112.0
-offset_top = 66.0
-offset_right = 997.0
-offset_bottom = 1169.0
-scale = Vector2(0.6, 0.6)
-texture = ExtResource("2_dc4i4")
+offset_left = 22.0
+offset_top = 363.0
+offset_right = 1131.0
+offset_bottom = 1466.0
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("3_3yumr")
 
 [node name="title" type="TextureRect" parent="." unique_id=1716029166]
 layout_mode = 0
