@@ -1,30 +1,27 @@
 [gd_scene format=3 uid="uid://cu31oefxt7lgm"]
 
 [ext_resource type="Script" uid="uid://p3i45mnkijlc" path="res://scripts/frag_raciocinio.gd" id="1_bx6xc"]
-[ext_resource type="Texture2D" uid="uid://dg5q05g3ksajj" path="res://assets/Fragmentos/Fragmento Raciocinio4.png" id="1_y2b5c"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_bx6xc"]
-atlas = ExtResource("1_y2b5c")
-region = Rect2(0, 0, 543, 724)
+[ext_resource type="Texture2D" uid="uid://d0xe0tyouqqob" path="res://assets/Fragmentos/Fragmento atencao4.png" id="2_bx6xc"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ljsfk"]
-atlas = ExtResource("1_y2b5c")
-region = Rect2(543, 0, 543, 724)
+atlas = ExtResource("2_bx6xc")
+region = Rect2(0, 0, 443, 887)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_a6p5o"]
-atlas = ExtResource("1_y2b5c")
-region = Rect2(1086, 0, 543, 724)
+atlas = ExtResource("2_bx6xc")
+region = Rect2(443, 0, 443, 887)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_rbri2"]
-atlas = ExtResource("1_y2b5c")
-region = Rect2(1629, 0, 543, 724)
+atlas = ExtResource("2_bx6xc")
+region = Rect2(886, 0, 443, 887)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vhydf"]
+atlas = ExtResource("2_bx6xc")
+region = Rect2(1329, 0, 443, 887)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_sob1t"]
 animations = [{
 "frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_bx6xc")
-}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_ljsfk")
 }, {
@@ -33,6 +30,9 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_rbri2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vhydf")
 }],
 "loop": 1,
 "name": &"idle",
