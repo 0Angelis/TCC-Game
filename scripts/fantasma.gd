@@ -172,6 +172,13 @@ func matar_fantasma() -> void:
 
 
 	# ==========================================
+	# ADICIONA SCORE
+	# ==========================================
+
+	Globals.score += 50
+
+
+	# ==========================================
 	# PARA TUDO
 	# ==========================================
 
@@ -210,12 +217,12 @@ func matar_fantasma() -> void:
 
 	tween.set_parallel(true)
 
-	# Gira suavemente 360 graus
+	# Gira mais devagar
 	tween.tween_property(
 		animated_sprite,
 		"rotation_degrees",
 		360.0,
-		0.45
+		0.9
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
 
 	# Cai um pouco
@@ -223,7 +230,7 @@ func matar_fantasma() -> void:
 		animated_sprite,
 		"position:y",
 		animated_sprite.position.y + 28.0,
-		0.45
+		0.9
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 	# Vai ficando transparente
@@ -231,7 +238,7 @@ func matar_fantasma() -> void:
 		animated_sprite,
 		"modulate:a",
 		0.0,
-		0.45
+		0.9
 	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 
