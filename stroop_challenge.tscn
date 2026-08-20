@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://0fyk46lijo1j" path="res://assets/Seasonal Tilesets/1 - Grassland/Terrain (16 x 16).png" id="2_82nfw"]
 [ext_resource type="Texture2D" uid="uid://b6gh7p3ydemrw" path="res://Sunny-land-files/Assets/environment/Background/back.png" id="2_pdijl"]
 [ext_resource type="Texture2D" uid="uid://c5wxdxmb13d41" path="res://assets/Seasonal Tilesets/1 - Grassland/Grassland_entities (16 x 16).png" id="3_5hghr"]
+[ext_resource type="Texture2D" uid="uid://k1lrsupgeu5t" path="res://assets/Comandos/comando stroop.png" id="4_5hghr"]
 [ext_resource type="Texture2D" uid="uid://cib62si4x0n1f" path="res://Sunny-land-files/Assets/environment/tileset.png" id="4_pb2ve"]
 [ext_resource type="Texture2D" uid="uid://d3qvsema2motn" path="res://assets/Sprite Pack 6/1 - Penguin/Looking_Off (16 x 16).png" id="4_y85ea"]
 [ext_resource type="Texture2D" uid="uid://gtrw5tcogyhu" path="res://assets/Seasonal Tilesets/Spike.png" id="5_agayc"]
@@ -688,6 +689,30 @@ scale = Vector2(2.128472, 1.3076922)
 texture = ExtResource("5_k604q")
 centered = false
 
+[node name="tutorial" type="Control" parent="." unique_id=211962290]
+anchors_preset = 0
+offset_left = 640.0
+offset_top = 482.0
+offset_right = 680.0
+offset_bottom = 522.0
+
+[node name="tutorial_stroop" type="TextureRect" parent="tutorial" unique_id=166132751]
+layout_mode = 0
+offset_left = -429.0
+offset_top = -469.0
+offset_right = 1247.0
+offset_bottom = 472.0
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("4_5hghr")
+
+[node name="Button" type="Button" parent="tutorial" unique_id=110131191]
+layout_mode = 0
+offset_left = -133.0
+offset_top = -67.0
+offset_right = -106.0
+offset_bottom = -36.0
+text = "aa"
+
 [node name="level" type="TileMap" parent="." unique_id=1161693319]
 position = Vector2(-1, 0)
 tile_set = SubResource("TileSet_vu8ra")
@@ -753,6 +778,6 @@ size_flags_horizontal = 4
 text = "CORRETO"
 
 [node name="LookingOff(16X16)" type="Sprite2D" parent="." unique_id=2313427]
-position = Vector2(1000, 488)
-scale = Vector2(15, 15)
+position = Vector2(1000, 512)
+scale = Vector2(12, 12)
 texture = ExtResource("4_y85ea")
