@@ -96,12 +96,9 @@ signal challenge_completed
 
 const TOTAL_ACERTOS := 10
 
-# Roxo continua sendo usado apenas nos elementos normais
-# do desafio. O resultado final usa outra identidade.
 const PURPLE_COLOR := Color("#7046A3")
 
 
-# Cores das respostas.
 var colors := {
 	"vermelho": Color("#E84B4B"),
 	"azul": Color("#4D8FE8"),
@@ -145,24 +142,13 @@ var current_color: String = ""
 var last_word: String = ""
 var last_color: String = ""
 
-
-# Sequência atual de acertos.
 var correct_answers: int = 0
-
-
-# Total de erros cometidos.
 var error_count: int = 0
-
 
 var challenge_active: bool = false
 var can_answer: bool = false
 
-
-# Tutorial aberto.
 var tutorial_active: bool = true
-
-
-# Tela final aberta.
 var result_screen_active: bool = false
 
 
@@ -195,49 +181,41 @@ func _ready() -> void:
 	# =====================================================
 
 	if main_container != null:
-
 		main_container.modulate = Color.WHITE
 		main_container.self_modulate = Color.WHITE
 
 
 	if instruction_label != null:
-
 		instruction_label.modulate = Color.WHITE
 		instruction_label.self_modulate = Color.WHITE
 
 
 	if word_label != null:
-
 		word_label.modulate = Color.WHITE
 		word_label.self_modulate = Color.WHITE
 
 
 	if progress_label != null:
-
 		progress_label.modulate = Color.WHITE
 		progress_label.self_modulate = Color.WHITE
 
 
 	if result_label != null:
-
 		result_label.modulate = Color.WHITE
 		result_label.self_modulate = Color.WHITE
 
 
 	if red_button != null:
-
 		red_button.modulate = Color.WHITE
 		red_button.self_modulate = Color.WHITE
 
 
 	if blue_button != null:
-
 		blue_button.modulate = Color.WHITE
 		blue_button.self_modulate = Color.WHITE
 
 
 	if green_button != null:
-
 		green_button.modulate = Color.WHITE
 		green_button.self_modulate = Color.WHITE
 
@@ -247,65 +225,31 @@ func _ready() -> void:
 	# =====================================================
 
 	if instruction_label == null:
-
-		print(
-			"ERRO: InstructionLabel não encontrado!"
-		)
-
+		print("ERRO: InstructionLabel não encontrado!")
 		return
-
 
 	if word_label == null:
-
-		print(
-			"ERRO: WordLabel não encontrado!"
-		)
-
+		print("ERRO: WordLabel não encontrado!")
 		return
-
 
 	if red_button == null:
-
-		print(
-			"ERRO: RedButton não encontrado!"
-		)
-
+		print("ERRO: RedButton não encontrado!")
 		return
-
 
 	if blue_button == null:
-
-		print(
-			"ERRO: BlueButton não encontrado!"
-		)
-
+		print("ERRO: BlueButton não encontrado!")
 		return
-
 
 	if green_button == null:
-
-		print(
-			"ERRO: GreenButton não encontrado!"
-		)
-
+		print("ERRO: GreenButton não encontrado!")
 		return
-
 
 	if progress_label == null:
-
-		print(
-			"ERRO: ProgressLabel não encontrado!"
-		)
-
+		print("ERRO: ProgressLabel não encontrado!")
 		return
 
-
 	if result_label == null:
-
-		print(
-			"ERRO: ResultLabel não encontrado!"
-		)
-
+		print("ERRO: ResultLabel não encontrado!")
 		return
 
 
@@ -314,24 +258,13 @@ func _ready() -> void:
 	# =====================================================
 
 	if tutorial == null:
-
-		print(
-			"ERRO: nó 'tutorial' não encontrado!"
-		)
-
+		print("ERRO: nó 'tutorial' não encontrado!")
 
 	if tutorial_stroop == null:
-
-		print(
-			"ERRO: nó 'tutorial_stroop' não encontrado!"
-		)
-
+		print("ERRO: nó 'tutorial_stroop' não encontrado!")
 
 	if tutorial_button == null:
-
-		print(
-			"ERRO: botão do tutorial não encontrado!"
-		)
+		print("ERRO: botão do tutorial não encontrado!")
 
 
 	# =====================================================
@@ -339,15 +272,13 @@ func _ready() -> void:
 	# =====================================================
 
 	if background != null:
-
 		background.color = Color("#101827")
-
 		background.modulate = Color.WHITE
 		background.self_modulate = Color.WHITE
 
 
 	# =====================================================
-	# TEXTOS INICIAIS
+	# TEXTOS
 	# =====================================================
 
 	instruction_label.text = (
@@ -517,7 +448,6 @@ func _ready() -> void:
 	if not red_button.pressed.is_connected(
 		_on_red_button_pressed
 	):
-
 		red_button.pressed.connect(
 			_on_red_button_pressed
 		)
@@ -526,7 +456,6 @@ func _ready() -> void:
 	if not blue_button.pressed.is_connected(
 		_on_blue_button_pressed
 	):
-
 		blue_button.pressed.connect(
 			_on_blue_button_pressed
 		)
@@ -535,10 +464,9 @@ func _ready() -> void:
 	if not green_button.pressed.is_connected(
 		_on_green_button_pressed
 	):
-
 		green_button.pressed.connect(
 			_on_green_button_pressed
-		)
+	)
 
 
 	# =====================================================
@@ -572,14 +500,11 @@ func _ready() -> void:
 func _setup_tutorial() -> void:
 
 	if tutorial == null:
-
 		return
 
 
 	tutorial.show()
-
 	tutorial_active = true
-
 	tutorial.z_index = 1000
 
 	tutorial.mouse_filter = (
@@ -617,7 +542,6 @@ func _setup_tutorial() -> void:
 		)
 
 		tutorial_button.disabled = false
-
 		tutorial_button.z_index = 50
 
 
@@ -637,7 +561,6 @@ func _setup_tutorial() -> void:
 
 		_create_enter_label()
 
-
 		tutorial_button.grab_focus()
 
 
@@ -648,7 +571,6 @@ func _setup_tutorial() -> void:
 func _create_enter_label() -> void:
 
 	if tutorial_button == null:
-
 		return
 
 
@@ -665,7 +587,6 @@ func _create_enter_label() -> void:
 		"font_size",
 		9
 	)
-
 
 	enter_label.add_theme_color_override(
 		"font_color",
@@ -697,13 +618,10 @@ func _create_enter_label() -> void:
 		14
 	)
 
-
-	# Um pouco acima de onde estava.
 	enter_label.position = Vector2(
 		40,
 		40
 	)
-
 
 	enter_label.z_index = 10
 
@@ -719,14 +637,9 @@ func _create_enter_label() -> void:
 
 func _input(event: InputEvent) -> void:
 
-	# =====================================================
-	# TUTORIAL
-	# =====================================================
-
 	if tutorial_active:
 
 		if tutorial_button == null:
-
 			return
 
 
@@ -736,19 +649,16 @@ func _input(event: InputEvent) -> void:
 
 
 		if mouse_event == null:
-
 			return
 
 
 		if mouse_event.button_index != (
 			MOUSE_BUTTON_LEFT
 		):
-
 			return
 
 
 		if not mouse_event.pressed:
-
 			return
 
 
@@ -802,7 +712,6 @@ func _input(event: InputEvent) -> void:
 func _on_tutorial_button_pressed() -> void:
 
 	if not tutorial_active:
-
 		return
 
 
@@ -827,7 +736,6 @@ func _on_tutorial_button_pressed() -> void:
 
 
 	if tutorial != null:
-
 		tutorial.hide()
 
 
@@ -1032,24 +940,15 @@ func _style_tutorial_button(
 # =========================================================
 
 func _on_red_button_pressed() -> void:
-
-	_answer(
-		"vermelho"
-	)
+	_answer("vermelho")
 
 
 func _on_blue_button_pressed() -> void:
-
-	_answer(
-		"azul"
-	)
+	_answer("azul")
 
 
 func _on_green_button_pressed() -> void:
-
-	_answer(
-		"verde"
-	)
+	_answer("verde")
 
 
 # =========================================================
@@ -1082,7 +981,6 @@ func _unhandled_input(
 	# =====================================================
 
 	if result_screen_active:
-
 		return
 
 
@@ -1091,22 +989,15 @@ func _unhandled_input(
 	# =====================================================
 
 	if not challenge_active:
-
 		return
-
 
 	if not can_answer:
-
 		return
-
 
 	if not event.is_pressed():
-
 		return
 
-
 	if event.is_echo():
-
 		return
 
 
@@ -1120,27 +1011,21 @@ func _unhandled_input(
 
 			KEY_1:
 
-				_answer(
-					"vermelho"
-				)
+				_answer("vermelho")
 
 				get_viewport().set_input_as_handled()
 
 
 			KEY_2:
 
-				_answer(
-					"azul"
-				)
+				_answer("azul")
 
 				get_viewport().set_input_as_handled()
 
 
 			KEY_3:
 
-				_answer(
-					"verde"
-				)
+				_answer("verde")
 
 				get_viewport().set_input_as_handled()
 
@@ -1159,7 +1044,6 @@ func _build_combinations() -> void:
 		for color in color_names:
 
 			if word == color:
-
 				continue
 
 
@@ -1218,9 +1102,7 @@ func _get_next_combination() -> Dictionary:
 					]
 				)
 
-				stroop_combinations[
-					swap_index
-				] = temp
+				stroop_combinations[swap_index] = temp
 
 
 	return stroop_combinations[
@@ -1461,18 +1343,11 @@ func _style_button(
 
 func start_challenge() -> void:
 
-	# =====================================================
-	# RESET
-	# =====================================================
-
 	correct_answers = 0
-
 	error_count = 0
 
 	result_screen_active = false
-
 	challenge_active = true
-
 	can_answer = false
 
 
@@ -1483,10 +1358,6 @@ func start_challenge() -> void:
 
 	result_label.text = ""
 
-
-	# =====================================================
-	# OS BOTÕES VOLTAM AO NORMAL
-	# =====================================================
 
 	red_button.mouse_filter = (
 		Control.MOUSE_FILTER_STOP
@@ -1513,7 +1384,6 @@ func start_challenge() -> void:
 func _new_round() -> void:
 
 	if not challenge_active:
-
 		return
 
 
@@ -1526,7 +1396,6 @@ func _new_round() -> void:
 
 
 	current_word = combination["word"]
-
 	current_color = combination["color"]
 
 
@@ -1551,7 +1420,6 @@ func _new_round() -> void:
 
 
 	if not challenge_active:
-
 		return
 
 
@@ -1567,22 +1435,15 @@ func _answer(
 ) -> void:
 
 	if tutorial_active:
-
 		return
-
 
 	if result_screen_active:
-
 		return
-
 
 	if not challenge_active:
-
 		return
 
-
 	if not can_answer:
-
 		return
 
 
@@ -1607,9 +1468,7 @@ func _answer(
 		)
 
 
-		result_label.text = (
-			"CORRETO!"
-		)
+		result_label.text = "CORRETO!"
 
 
 		result_label.add_theme_color_override(
@@ -1626,10 +1485,6 @@ func _answer(
 		)
 
 
-		# =================================================
-		# TERMINOU
-		# =================================================
-
 		if correct_answers >= TOTAL_ACERTOS:
 
 			_complete_challenge()
@@ -1644,7 +1499,6 @@ func _answer(
 	else:
 
 		error_count += 1
-
 
 		print(
 			"ERRO #",
@@ -1682,7 +1536,6 @@ func _answer(
 
 
 	if not challenge_active:
-
 		return
 
 
@@ -1697,21 +1550,13 @@ func _answer(
 
 func _complete_challenge() -> void:
 
-	# =====================================================
-	# DESATIVA LÓGICA
-	# =====================================================
-
 	challenge_active = false
-
 	can_answer = false
-
 	result_screen_active = true
 
 
 	# =====================================================
-	# IMPORTANTE:
 	# NÃO DESABILITA OS BOTÕES
-	# PARA ELES NÃO FICAREM CINZAS.
 	# =====================================================
 
 	red_button.mouse_filter = (
@@ -1745,21 +1590,20 @@ func _complete_challenge() -> void:
 
 
 	# =====================================================
-	# RESULTADO
+	# RESULTADO FINAL
 	# =====================================================
 
 	result_label.text = (
 		"DESAFIO CONCLUÍDO!\n\n"
-		+ "ACERTOS: 10\n"
 		+ "ERROS: "
 		+ str(error_count)
 		+ "\n\n"
-		+ "PRESSIONE ENTER PARA CONTINUAR"
+		+ ""
 	)
 
 
 	# =====================================================
-	# CORES MAIS ELEGANTES
+	# COR DO RESULTADO
 	# =====================================================
 
 	result_label.add_theme_color_override(
@@ -1778,9 +1622,13 @@ func _complete_challenge() -> void:
 	)
 
 
+	# =====================================================
+	# FONTE DA TELA FINAL
+	# =====================================================
+
 	result_label.add_theme_font_size_override(
 		"font_size",
-		25
+		19
 	)
 
 
@@ -1797,10 +1645,6 @@ func _complete_challenge() -> void:
 
 	print(
 		"STROOP CONCLUÍDO!"
-	)
-
-	print(
-		"ACERTOS: 10"
 	)
 
 	print(
@@ -1826,28 +1670,15 @@ func _complete_challenge() -> void:
 
 func _create_final_enter_label() -> void:
 
-	# =====================================================
-	# REMOVE ANTERIOR
-	# =====================================================
-
 	if final_enter_label != null:
 
 		final_enter_label.queue_free()
-
 		final_enter_label = null
 
 
-	# =====================================================
-	# CRIA
-	# =====================================================
-
 	final_enter_label = Label.new()
 
-
-	final_enter_label.text = (
-		"↵ ENTER"
-	)
-
+	final_enter_label.text = "↵ ENTER"
 
 	final_enter_label.mouse_filter = (
 		Control.MOUSE_FILTER_IGNORE
@@ -1913,7 +1744,6 @@ func _create_final_enter_label() -> void:
 func _close_result_screen() -> void:
 
 	if not result_screen_active:
-
 		return
 
 
@@ -1929,26 +1759,17 @@ func _close_result_screen() -> void:
 	result_screen_active = false
 
 
-	# =====================================================
-	# REMOVE ENTER
-	# =====================================================
-
 	if final_enter_label != null:
 
 		final_enter_label.queue_free()
-
 		final_enter_label = null
 
-
-	# =====================================================
-	# AVISA O TRIGGER
-	# =====================================================
 
 	challenge_completed.emit()
 
 
 # =========================================================
-# FUNÇÃO MANTIDA PARA NÃO QUEBRAR OUTROS CHAMADOS
+# FUNÇÃO MANTIDA
 # =========================================================
 
 func _enable_buttons(

@@ -802,7 +802,6 @@ position = Vector2(1816, 710)
 position = Vector2(3957, 545)
 
 [node name="enemys" type="Node2D" parent="." unique_id=571055843]
-visible = false
 position = Vector2(754, 655)
 
 [node name="enemy" parent="enemys" unique_id=310052193 instance=ExtResource("21_36tbm")]
@@ -846,12 +845,12 @@ position = Vector2(101, -436)
 collision_layer = 6
 
 [node name="eneme6" parent="enemys" unique_id=666653096 instance=ExtResource("22_yjlik")]
-position = Vector2(-516, -316)
+position = Vector2(-173, -208)
 collision_layer = 6
 collision_mask = 2
 
 [node name="eneme7" parent="enemys" unique_id=2143564980 instance=ExtResource("22_yjlik")]
-position = Vector2(-461, -315)
+position = Vector2(-124, -208)
 collision_layer = 6
 collision_mask = 2
 
