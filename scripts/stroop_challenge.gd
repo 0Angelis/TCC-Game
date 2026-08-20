@@ -2,6 +2,15 @@ extends Control
 
 
 # =========================================================
+# SINAL
+# =========================================================
+# Avisará o StroopTrigger quando o desafio terminar.
+# =========================================================
+
+signal challenge_completed
+
+
+# =========================================================
 # REFERÊNCIAS
 # =========================================================
 
@@ -66,14 +75,15 @@ extends Control
 
 const TOTAL_ACERTOS := 10
 
-# Roxo usado no seu jogo
 const PURPLE_COLOR := Color("#7046A3")
+
 
 var colors := {
 	"vermelho": Color("#E84B4B"),
 	"azul": Color("#4D8FE8"),
 	"verde": Color("#55B86A")
 }
+
 
 var color_names := [
 	"vermelho",
@@ -177,25 +187,31 @@ func _ready():
 		print("ERRO: InstructionLabel não encontrado!")
 		return
 
+
 	if word_label == null:
 		print("ERRO: WordLabel não encontrado!")
 		return
+
 
 	if red_button == null:
 		print("ERRO: RedButton não encontrado!")
 		return
 
+
 	if blue_button == null:
 		print("ERRO: BlueButton não encontrado!")
 		return
+
 
 	if green_button == null:
 		print("ERRO: GreenButton não encontrado!")
 		return
 
+
 	if progress_label == null:
 		print("ERRO: ProgressLabel não encontrado!")
 		return
+
 
 	if result_label == null:
 		print("ERRO: ResultLabel não encontrado!")
@@ -449,10 +465,6 @@ func _build_combinations():
 
 func _get_next_combination() -> Dictionary:
 
-	# =====================================================
-	# AVANÇA
-	# =====================================================
-
 	current_combination_index += 1
 
 
@@ -461,10 +473,6 @@ func _get_next_combination() -> Dictionary:
 	# =====================================================
 
 	if current_combination_index >= stroop_combinations.size():
-
-		# ==============================================
-		# NOVO EMBARALHAMENTO
-		# ==============================================
 
 		stroop_combinations.shuffle()
 
@@ -477,6 +485,7 @@ func _get_next_combination() -> Dictionary:
 
 		var first_combination: Dictionary = stroop_combinations[0]
 
+
 		if (
 			first_combination["word"] == last_word
 			and first_combination["color"] == last_color
@@ -488,6 +497,7 @@ func _get_next_combination() -> Dictionary:
 					1,
 					stroop_combinations.size() - 1
 				)
+
 
 				var temp = stroop_combinations[0]
 
@@ -512,42 +522,53 @@ func _style_button(
 	color: Color
 ):
 
-	button.custom_minimum_size = Vector2(190, 70)
+	button.custom_minimum_size = Vector2(
+		190,
+		70
+	)
+
 
 	button.add_theme_font_size_override(
 		"font_size",
 		20
 	)
 
+
 	button.add_theme_color_override(
 		"font_color",
 		Color.WHITE
 	)
+
 
 	button.add_theme_color_override(
 		"font_hover_color",
 		Color.WHITE
 	)
 
+
 	button.add_theme_color_override(
 		"font_pressed_color",
 		Color.WHITE
 	)
+
 
 	button.add_theme_color_override(
 		"font_focus_color",
 		Color.WHITE
 	)
 
+
 	button.add_theme_color_override(
 		"font_disabled_color",
 		Color.WHITE
 	)
 
+
 	button.add_theme_color_override(
 		"font_outline_color",
 		Color.BLACK
 	)
+
 
 	button.add_theme_constant_override(
 		"outline_size",
@@ -563,12 +584,17 @@ func _style_button(
 
 	normal.bg_color = color
 
+
 	normal.border_width_left = 3
 	normal.border_width_top = 3
 	normal.border_width_right = 3
 	normal.border_width_bottom = 3
 
-	normal.border_color = color.darkened(0.35)
+
+	normal.border_color = color.darkened(
+		0.35
+	)
+
 
 	normal.corner_radius_top_left = 10
 	normal.corner_radius_top_right = 10
@@ -582,7 +608,9 @@ func _style_button(
 
 	var hover := normal.duplicate()
 
-	hover.bg_color = color.lightened(0.15)
+	hover.bg_color = color.lightened(
+		0.15
+	)
 
 
 	# =====================================================
@@ -591,7 +619,9 @@ func _style_button(
 
 	var pressed := normal.duplicate()
 
-	pressed.bg_color = color.darkened(0.15)
+	pressed.bg_color = color.darkened(
+		0.15
+	)
 
 
 	# =====================================================
@@ -642,15 +672,17 @@ func start_challenge():
 
 	can_answer = false
 
+
 	progress_label.text = "0 / %d" % TOTAL_ACERTOS
 
 	result_label.text = ""
+
 
 	_enable_buttons(true)
 
 
 	# =====================================================
-	# NOVO CICLO DE COMBINAÇÕES
+	# NOVO CICLO
 	# =====================================================
 
 	_build_combinations()
@@ -670,6 +702,7 @@ func start_challenge():
 func _new_round():
 
 	if not challenge_active:
+
 		return
 
 
@@ -677,10 +710,11 @@ func _new_round():
 
 
 	# =====================================================
-	# PEGA NOVA COMBINAÇÃO
+	# PEGA COMBINAÇÃO
 	# =====================================================
 
 	var combination := _get_next_combination()
+
 
 	current_word = combination["word"]
 
@@ -688,7 +722,7 @@ func _new_round():
 
 
 	# =====================================================
-	# GUARDA ÚLTIMA COMBINAÇÃO
+	# GUARDA ÚLTIMA
 	# =====================================================
 
 	last_word = current_word
@@ -704,7 +738,7 @@ func _new_round():
 
 
 	# =====================================================
-	# DEFINE A COR
+	# DEFINE COR
 	# =====================================================
 
 	word_label.add_theme_color_override(
@@ -714,7 +748,7 @@ func _new_round():
 
 
 	# =====================================================
-	# PERMITE RESPOSTA
+	# PEQUENO DELAY
 	# =====================================================
 
 	await get_tree().create_timer(
@@ -723,6 +757,7 @@ func _new_round():
 
 
 	if not challenge_active:
+
 		return
 
 
@@ -736,10 +771,12 @@ func _new_round():
 func _answer(selected_color: String):
 
 	if not challenge_active:
+
 		return
 
 
 	if not can_answer:
+
 		return
 
 
@@ -830,6 +867,7 @@ func _answer(selected_color: String):
 
 
 	if not challenge_active:
+
 		return
 
 
@@ -845,20 +883,26 @@ func _answer(selected_color: String):
 
 func _complete_challenge():
 
+	# =====================================================
+	# DESATIVA O DESAFIO
+	# =====================================================
+
 	challenge_active = false
 
 	can_answer = false
 
+
 	_enable_buttons(false)
 
 
+	# =====================================================
+	# MOSTRA RESULTADO
+	# =====================================================
+
 	progress_label.text = "10 / 10"
 
-	# =====================================================
-	# DESAFIO CONCLUÍDO EM ROXO
-	# =====================================================
-
 	result_label.text = "DESAFIO CONCLUÍDO!"
+
 
 	result_label.add_theme_color_override(
 		"font_color",
@@ -871,6 +915,17 @@ func _complete_challenge():
 	print("10 ACERTOS!")
 	print("FRAGMENTO DESBLOQUEADO!")
 	print("================================")
+
+
+	# =====================================================
+	# AVISA O STROOP TRIGGER
+	# =====================================================
+	# Esse é o ponto que estava faltando.
+	# O trigger recebe esse sinal, fecha a tela
+	# e libera o movimento do player.
+	# =====================================================
+
+	challenge_completed.emit()
 
 
 # =========================================================

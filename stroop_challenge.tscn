@@ -665,14 +665,6 @@ offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_8r4bf")
 
-[node name="level" type="TileMap" parent="." unique_id=1161693319]
-position = Vector2(-1, 0)
-tile_set = SubResource("TileSet_vu8ra")
-format = 2
-layer_0/name = "ground"
-layer_0/tile_data = PackedInt32Array(2490423, 983050, 14, 2490424, 1114122, 14, 2490425, 1114122, 14, 2490426, 1114122, 14, 2490427, 1114122, 14, 2490428, 1114122, 14, 2490429, 1114122, 14, 2490430, 1114122, 14, 2490431, 1114122, 14, 2490432, 1114122, 14, 2490433, 1114122, 14, 2490434, 1114122, 14, 2490435, 1114122, 14, 2490436, 1114122, 14, 2490437, 1114122, 14, 2490438, 1114122, 14, 2490439, 1245194, 14)
-layer_1/name = "trees"
-
 [node name="BG" type="ParallaxBackground" parent="." unique_id=348594884]
 
 [node name="05" type="ParallaxLayer" parent="BG" unique_id=735705115]
@@ -695,6 +687,14 @@ position = Vector2(76, 171)
 scale = Vector2(2.128472, 1.3076922)
 texture = ExtResource("5_k604q")
 centered = false
+
+[node name="level" type="TileMap" parent="." unique_id=1161693319]
+position = Vector2(-1, 0)
+tile_set = SubResource("TileSet_vu8ra")
+format = 2
+layer_0/name = "ground"
+layer_0/tile_data = PackedInt32Array(2490423, 983050, 14, 2490424, 1114122, 14, 2490425, 1114122, 14, 2490426, 1114122, 14, 2490427, 1114122, 14, 2490428, 1114122, 14, 2490429, 1114122, 14, 2490430, 1114122, 14, 2490431, 1114122, 14, 2490432, 1114122, 14, 2490433, 1114122, 14, 2490434, 1114122, 14, 2490435, 1114122, 14, 2490436, 1114122, 14, 2490437, 1114122, 14, 2490438, 1114122, 14, 2490439, 1245194, 14)
+layer_1/name = "trees"
 
 [node name="CenterContainer" type="CenterContainer" parent="." unique_id=1185692518]
 layout_mode = 1

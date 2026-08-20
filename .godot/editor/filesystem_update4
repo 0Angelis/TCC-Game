@@ -8,3 +8,5 @@ res://levels/world_01.tscn
 res://levels/world_02.tscn
 res://stroop_challenge.tscn
 res://scripts/stroop_challenge.gd
+res://scripts/stroop_trigger.gd
+res://scripts/transition.gd

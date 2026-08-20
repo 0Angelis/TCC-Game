@@ -35,8 +35,8 @@
 [ext_resource type="Texture2D" uid="uid://c3ci0i5r2t8h0" path="res://assets/Mini FX, Items & UI/Mini UI/Speech_Emotes (16 x 16).png" id="33_a1ngu"]
 [ext_resource type="Texture2D" uid="uid://daid336cyg8np" path="res://assets/Mini FX, Items & UI/placa e.png" id="34_lhg54"]
 [ext_resource type="Script" uid="uid://dhx83fqukj7ji" path="res://scripts/transition.gd" id="35_47gca"]
-[ext_resource type="PackedScene" uid="uid://b8oxoefpjsd4e" path="res://stroop_challenge.tscn" id="35_qe4fd"]
 [ext_resource type="Shader" uid="uid://cfqg8x3kad7tx" path="res://shaders/transition.gdshader" id="36_g3ry1"]
+[ext_resource type="Script" uid="uid://cofp3vhargpkf" path="res://scripts/stroop_trigger.gd" id="36_tfcbk"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="37_pfg8k"]
 [ext_resource type="PackedScene" uid="uid://cu31oefxt7lgm" path="res://prefabs/frag_raciocinio.tscn" id="38_w682u"]
 [ext_resource type="Texture2D" uid="uid://cpqtblxl8p0bl" path="res://assets/portal/Purple Portal Sprite Sheet.png" id="40_n1cxq"]
@@ -1382,15 +1382,15 @@ visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
-[node name="StroopChallenge" parent="." unique_id=642136524 instance=ExtResource("35_qe4fd")]
+[node name="StroopTrigger" type="Area2D" parent="." unique_id=1200168217]
+script = ExtResource("36_tfcbk")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StroopChallenge" unique_id=82667970]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StroopTrigger" unique_id=82667970]
 position = Vector2(2390, 264)
 scale = Vector2(0.9, 0.9)
 shape = SubResource("CircleShape2D_sob1t")
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
-visible = false
 script = ExtResource("35_47gca")
 
 [node name="color_rect" type="ColorRect" parent="transition" unique_id=1131400237]
