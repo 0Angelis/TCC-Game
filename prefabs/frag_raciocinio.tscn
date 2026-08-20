@@ -1,39 +1,13 @@
 [gd_scene format=3 uid="uid://cu31oefxt7lgm"]
 
 [ext_resource type="Script" uid="uid://p3i45mnkijlc" path="res://scripts/frag_raciocinio.gd" id="1_bx6xc"]
-[ext_resource type="Texture2D" uid="uid://dg5q05g3ksajj" path="res://assets/Fragmentos/Fragmento Raciocinio4.png" id="2_bx6xc"]
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ljsfk"]
-atlas = ExtResource("2_bx6xc")
-region = Rect2(0, 0, 543, 724)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_a6p5o"]
-atlas = ExtResource("2_bx6xc")
-region = Rect2(543, 0, 543, 724)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_rbri2"]
-atlas = ExtResource("2_bx6xc")
-region = Rect2(1086, 0, 543, 724)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_vhydf"]
-atlas = ExtResource("2_bx6xc")
-region = Rect2(1629, 0, 543, 724)
+[ext_resource type="SpriteFrames" uid="uid://dg468x5qbeydm" path="res://frag/frag_atencao.tres" id="2_a6p5o"]
+[ext_resource type="SpriteFrames" uid="uid://y6ordsct1q8k" path="res://frag/frag_memoria.tres" id="3_rbri2"]
+[ext_resource type="SpriteFrames" uid="uid://bvr0ysq3jptqn" path="res://frag/frag_raciocinio.tres" id="4_vhydf"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_sob1t"]
 animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ljsfk")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_a6p5o")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_rbri2")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_vhydf")
-}],
+"frames": [],
 "loop": 1,
 "name": &"idle",
 "speed": 4.0
@@ -45,14 +19,28 @@ radius = 9.0
 [node name="frag_raciocinio" type="Area2D" unique_id=1108284432]
 collision_layer = 9
 script = ExtResource("1_bx6xc")
+tipo_fragmento = "Atencao"
 
-[node name="anim" type="AnimatedSprite2D" parent="." unique_id=654223170]
+[node name="fragmentos" type="AnimatedSprite2D" parent="." unique_id=654223170]
 position = Vector2(4.7683716e-07, 1.0000005)
 scale = Vector2(0.033580106, 0.04050892)
 sprite_frames = SubResource("SpriteFrames_sob1t")
 animation = &"idle"
 autoplay = "idle"
 frame_progress = 0.054326233
+
+[node name="Frag_atencao" type="AnimatedSprite2D" parent="fragmentos" unique_id=461003530]
+sprite_frames = ExtResource("2_a6p5o")
+autoplay = "default"
+
+[node name="Frag_memoria" type="AnimatedSprite2D" parent="fragmentos" unique_id=320575569]
+sprite_frames = ExtResource("3_rbri2")
+autoplay = "default"
+
+[node name="Frag_raciocinio" type="AnimatedSprite2D" parent="fragmentos" unique_id=1325360805]
+scale = Vector2(1.0000001, 1.0000001)
+sprite_frames = ExtResource("4_vhydf")
+autoplay = "default"
 
 [node name="collision" type="CollisionShape2D" parent="." unique_id=1351668820]
 shape = SubResource("CapsuleShape2D_5t4lp")

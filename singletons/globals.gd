@@ -10,3 +10,5 @@ var level_score := 0
 
 # Fragmentos de raciocínio
 var raciocinio_fragments := 0
+var atencao_fragments := 0
+var memoria_fragments := 0

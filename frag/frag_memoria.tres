@@ -1,0 +1,39 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://y6ordsct1q8k"]
+
+[ext_resource type="Texture2D" uid="uid://r4dkexifhi6w" path="res://assets/Fragmentos/Fragmento memoria4.png" id="1_we84f"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_73cvn"]
+atlas = ExtResource("1_we84f")
+region = Rect2(0, 0, 443, 887)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bfbvx"]
+atlas = ExtResource("1_we84f")
+region = Rect2(443, 0, 443, 887)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wkfhu"]
+atlas = ExtResource("1_we84f")
+region = Rect2(886, 0, 443, 887)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mj3jh"]
+atlas = ExtResource("1_we84f")
+region = Rect2(1329, 0, 443, 887)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_73cvn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bfbvx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wkfhu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mj3jh")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]

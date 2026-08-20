@@ -4,3 +4,7 @@ res://prefabs/frag_raciocinio.tscn
 res://tema/new_theme.tres
 res://shaders/transition.gdshader
 res://levels/world_02.tscn
+res://scripts/frag_raciocinio.gd
+res://levels/world_03.tscn
+res://singletons/globals.gd
+res://levels/world_01.tscn

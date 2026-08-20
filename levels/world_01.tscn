@@ -1631,15 +1631,20 @@ position = Vector2(754, 655)
 
 [node name="frag_raciocinio" parent="Fragmentos" unique_id=1108284432 instance=ExtResource("40_0aqq2")]
 position = Vector2(-555, -934)
+tipo_fragmento = "Raciocinio"
 
 [node name="frag_raciocinio2" parent="Fragmentos" unique_id=1768033476 instance=ExtResource("40_0aqq2")]
 position = Vector2(351, -438)
+tipo_fragmento = "Raciocinio"
 
 [node name="frag_raciocinio3" parent="Fragmentos" unique_id=1072736906 instance=ExtResource("40_0aqq2")]
 position = Vector2(851, -279)
+tipo_fragmento = "Raciocinio"
 
 [node name="frag_raciocinio4" parent="Fragmentos" unique_id=1163845356 instance=ExtResource("40_0aqq2")]
 position = Vector2(2145, 137)
+tipo_fragmento = "Raciocinio"
 
 [node name="frag_raciocinio5" parent="Fragmentos" unique_id=1284541050 instance=ExtResource("40_0aqq2")]
 position = Vector2(3130, -40)
+tipo_fragmento = "Raciocinio"

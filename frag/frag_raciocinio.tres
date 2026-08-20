@@ -1,0 +1,39 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://bvr0ysq3jptqn"]
+
+[ext_resource type="Texture2D" uid="uid://dg5q05g3ksajj" path="res://assets/Fragmentos/Fragmento Raciocinio4.png" id="1_2sf45"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cy77g"]
+atlas = ExtResource("1_2sf45")
+region = Rect2(0, 0, 543, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1ul5q"]
+atlas = ExtResource("1_2sf45")
+region = Rect2(543, 0, 543, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nluoh"]
+atlas = ExtResource("1_2sf45")
+region = Rect2(1086, 0, 543, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k2qxk"]
+atlas = ExtResource("1_2sf45")
+region = Rect2(1629, 0, 543, 724)
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cy77g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1ul5q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nluoh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k2qxk")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]

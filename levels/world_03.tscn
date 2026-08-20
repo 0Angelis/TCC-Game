@@ -719,6 +719,7 @@ texture = ExtResource("14_4e1o6")
 position = Vector2(18, 470)
 
 [node name="BG" type="ParallaxBackground" parent="." unique_id=271765439]
+visible = false
 
 [node name="05" type="ParallaxLayer" parent="BG" unique_id=398846043]
 motion_mirroring = Vector2(1280, 0)
@@ -948,6 +949,25 @@ position = Vector2(-18, 420)
 
 [node name="moving_platform-horizontal2" parent="platforms" unique_id=1919973187 instance=ExtResource("23_kngwo")]
 position = Vector2(-16, 347)
+
+[node name="Fragmentos2" type="Node2D" parent="." unique_id=595265891]
+position = Vector2(754, 655)
+
+[node name="frag_raciocinio" parent="Fragmentos2" unique_id=1108284432 instance=ExtResource("39_ooim6")]
+position = Vector2(-696, -192)
+tipo_fragmento = "Memoria"
+
+[node name="frag_raciocinio2" parent="Fragmentos2" unique_id=1572187999 instance=ExtResource("39_ooim6")]
+position = Vector2(-671, -191)
+
+[node name="frag_raciocinio3" parent="Fragmentos2" unique_id=1318221784 instance=ExtResource("39_ooim6")]
+position = Vector2(-646, -192)
+
+[node name="frag_raciocinio4" parent="Fragmentos2" unique_id=369199563 instance=ExtResource("39_ooim6")]
+position = Vector2(-626, -194)
+
+[node name="frag_raciocinio5" parent="Fragmentos2" unique_id=1018774101 instance=ExtResource("39_ooim6")]
+position = Vector2(-603, -194)
 
 [node name="goal" parent="." unique_id=1383269650 instance=ExtResource("24_rja6n")]
 visible = false
@@ -1513,22 +1533,3 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("38_n66ed")
-
-[node name="Fragmentos" type="Node2D" parent="." unique_id=887429600]
-visible = false
-position = Vector2(754, 655)
-
-[node name="frag_raciocinio" parent="Fragmentos" unique_id=1108284432 instance=ExtResource("39_ooim6")]
-position = Vector2(-555, -934)
-
-[node name="frag_raciocinio2" parent="Fragmentos" unique_id=1768033476 instance=ExtResource("39_ooim6")]
-position = Vector2(351, -438)
-
-[node name="frag_raciocinio3" parent="Fragmentos" unique_id=1072736906 instance=ExtResource("39_ooim6")]
-position = Vector2(851, -279)
-
-[node name="frag_raciocinio4" parent="Fragmentos" unique_id=1163845356 instance=ExtResource("39_ooim6")]
-position = Vector2(2145, 137)
-
-[node name="frag_raciocinio5" parent="Fragmentos" unique_id=1284541050 instance=ExtResource("39_ooim6")]
-position = Vector2(3130, -40)
