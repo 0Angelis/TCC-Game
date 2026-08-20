@@ -8,3 +8,5 @@ res://scripts/frag_raciocinio.gd
 res://levels/world_03.tscn
 res://singletons/globals.gd
 res://levels/world_01.tscn
+res://scripts/goal.gd
+res://scripts/hud_manager.gd

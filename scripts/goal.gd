@@ -5,7 +5,7 @@ extends Area2D
 
 
 # ==========================================
-# CONFIGURAÇÕES
+# PRÓXIMA FASE
 # ==========================================
 
 @export_file("*.tscn") var next_level: String = ""
@@ -27,45 +27,139 @@ func is_tutorial() -> bool:
 	var current_scene := get_tree().current_scene
 
 	if current_scene == null:
+
 		return false
 
-	return current_scene.scene_file_path.ends_with("world_00.tscn")
+	return current_scene.scene_file_path.ends_with(
+		"world_00.tscn"
+	)
 
 
 # ==========================================
-# PLAYER ENTROU NO GOAL
+# PEGA O TIPO DE FRAGMENTO DA FASE
+# ==========================================
+
+func get_fragment_count() -> int:
+
+	var current_scene := get_tree().current_scene
+
+	if current_scene == null:
+
+		return 0
+
+
+	var scene_path := current_scene.scene_file_path
+
+
+	# ==========================================
+	# MUNDO 1 → RACIOCÍNIO
+	# ==========================================
+
+	if scene_path.ends_with("world_01.tscn"):
+
+		return Globals.raciocinio_fragments
+
+
+	# ==========================================
+	# MUNDO 2 → ATENÇÃO
+	# ==========================================
+
+	if scene_path.ends_with("world_02.tscn"):
+
+		return Globals.atencao_fragments
+
+
+	# ==========================================
+	# MUNDO 3 → MEMÓRIA
+	# ==========================================
+
+	if scene_path.ends_with("world_03.tscn"):
+
+		return Globals.memoria_fragments
+
+
+	return 0
+
+
+# ==========================================
+# NOME DO TIPO
+# ==========================================
+
+func get_fragment_name() -> String:
+
+	var current_scene := get_tree().current_scene
+
+	if current_scene == null:
+
+		return "Fragmentos"
+
+
+	var scene_path := current_scene.scene_file_path
+
+
+	if scene_path.ends_with("world_01.tscn"):
+
+		return "Raciocínio"
+
+
+	if scene_path.ends_with("world_02.tscn"):
+
+		return "Atenção"
+
+
+	if scene_path.ends_with("world_03.tscn"):
+
+		return "Memória"
+
+
+	return "Fragmentos"
+
+
+# ==========================================
+# PLAYER ENTROU NO PORTAL
 # ==========================================
 
 func _on_body_entered(body: Node2D) -> void:
 
 	if not body.is_in_group("player"):
+
 		return
 
 
 	if not can_change_scene:
+
 		return
 
 
 	# ==========================================
-	# VERIFICA SE É O TUTORIAL
+	# TUTORIAL
 	# ==========================================
 
 	var tutorial := is_tutorial()
 
 
 	# ==========================================
-	# FASES NORMAIS EXIGEM 5 FRAGMENTOS
+	# PEGA QUANTIDADE
+	# ==========================================
+
+	var fragments := get_fragment_count()
+
+
+	# ==========================================
+	# FASES NORMAIS EXIGEM 5
 	# ==========================================
 
 	if not tutorial:
 
-		if Globals.raciocinio_fragments < 5:
+		if fragments < 5:
 
 			print("==============================")
 			print("FASE BLOQUEADA!")
 			print(
-				"FRAGMENTOS: ",
-				Globals.raciocinio_fragments,
+				"FRAGMENTOS DE ",
+				get_fragment_name(),
+				": ",
+				fragments,
 				"/5"
 			)
 			print("Pegue todos os fragmentos!")
@@ -100,13 +194,18 @@ func _on_body_entered(body: Node2D) -> void:
 
 	print("==============================")
 
+
 	if tutorial:
 
 		print("TUTORIAL CONCLUÍDO!")
 
 	else:
 
-		print("TODOS OS 5 FRAGMENTOS COLETADOS!")
+		print(
+			"TODOS OS 5 FRAGMENTOS DE ",
+			get_fragment_name(),
+			" COLETADOS!"
+		)
 
 
 	print("PASSANDO DE FASE!")
@@ -116,7 +215,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# RESET SCORE E MOEDAS
+	# RESET SCORE / MOEDAS
 	# ==========================================
 
 	Globals.score = 0
@@ -131,13 +230,23 @@ func _on_body_entered(body: Node2D) -> void:
 	# ==========================================
 
 	Globals.raciocinio_fragments = 0
+	Globals.atencao_fragments = 0
+	Globals.memoria_fragments = 0
 
 
-	print("SCORE RESETADO: ", Globals.score)
-	print("MOEDAS RESETADAS: ", Globals.coins)
 	print(
-		"FRAGMENTOS RESETADOS: ",
+		"RACIOCÍNIO RESETADO: ",
 		Globals.raciocinio_fragments
+	)
+
+	print(
+		"ATENÇÃO RESETADA: ",
+		Globals.atencao_fragments
+	)
+
+	print(
+		"MEMÓRIA RESETADA: ",
+		Globals.memoria_fragments
 	)
 
 

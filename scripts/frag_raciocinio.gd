@@ -10,7 +10,7 @@ var tipo_fragmento := "Raciocinio"
 
 
 # ==========================================
-# FRAGMENTOS
+# FRAGMENTOS VISUAIS
 # ==========================================
 
 @onready var frag_atencao = $fragmentos/Frag_atencao
@@ -34,7 +34,7 @@ func _ready() -> void:
 
 
 	# ==========================================
-	# MOSTRA O CORRETO
+	# MOSTRA O FRAGMENTO CORRETO
 	# ==========================================
 
 	match tipo_fragmento:
@@ -50,7 +50,7 @@ func _ready() -> void:
 
 
 	# ==========================================
-	# ATIVA COLISÃO
+	# ATIVA MONITORAMENTO
 	# ==========================================
 
 	monitoring = true
@@ -73,7 +73,7 @@ func _process(_delta: float) -> void:
 func _on_body_entered(body: Node2D) -> void:
 
 	# ==========================================
-	# VERIFICA PLAYER
+	# VERIFICA SE É O PLAYER
 	# ==========================================
 
 	if not body.is_in_group("player"):
@@ -82,7 +82,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# EVITA DUPLA COLETA
+	# EVITA PEGAR DUAS VEZES
 	# ==========================================
 
 	if not monitoring:
@@ -145,7 +145,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# TOCA ANIMAÇÃO DE COLETA
+	# ANIMAÇÃO DE COLETA
 	# ==========================================
 
 	match tipo_fragmento:
@@ -179,7 +179,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# REMOVE FRAGMENTO
+	# REMOVE
 	# ==========================================
 
 	queue_free()

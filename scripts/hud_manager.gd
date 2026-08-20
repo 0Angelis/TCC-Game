@@ -14,7 +14,7 @@ extends Control
 @onready var life_counter = $container/life_container/life_counter as Label
 
 
-@onready var raciocinio_counter = get_node_or_null(
+@onready var fragment_counter = get_node_or_null(
 	"container/raciocinio_container/raciocinio_counter"
 ) as Label
 
@@ -23,19 +23,66 @@ extends Control
 # TIMER
 # ==========================================
 
-# 10 minutos
 var time_left := 600.0
 
 var game_over := false
 
 
-func _ready():
+# ==========================================
+# PEGA QUANTIDADE DE FRAGMENTOS
+# ==========================================
 
+func get_current_fragment_count() -> int:
+
+	var current_scene := get_tree().current_scene
+
+	if current_scene == null:
+
+		return 0
+
+
+	var scene_path := current_scene.scene_file_path
+
+
+	# ==========================================
+	# WORLD 01
+	# ==========================================
+
+	if scene_path.ends_with("world_01.tscn"):
+
+		return Globals.raciocinio_fragments
+
+
+	# ==========================================
+	# WORLD 02
+	# ==========================================
+
+	if scene_path.ends_with("world_02.tscn"):
+
+		return Globals.atencao_fragments
+
+
+	# ==========================================
+	# WORLD 03
+	# ==========================================
+
+	if scene_path.ends_with("world_03.tscn"):
+
+		return Globals.memoria_fragments
+
+
+	return 0
+
+
+# ==========================================
+# READY
+# ==========================================
+
+func _ready():
 
 	# ==========================================
 	# MOEDAS
 	# ==========================================
-
 
 	coins_counter.text = "%03d" % Globals.coins
 
@@ -58,42 +105,45 @@ func _ready():
 	# FRAGMENTOS
 	# ==========================================
 
-	if raciocinio_counter != null:
+	if fragment_counter != null:
 
-		raciocinio_counter.text = "%d/5" % Globals.raciocinio_fragments
+		fragment_counter.text = "%d/5" % get_current_fragment_count()
 
+
+# ==========================================
+# PROCESS
+# ==========================================
 
 func _process(delta):
 
-
 	# ==========================================
-	# ATUALIZA MOEDAS
+	# MOEDAS
 	# ==========================================
 
 	coins_counter.text = "%03d" % Globals.coins
 
 
 	# ==========================================
-	# ATUALIZA SCORE
+	# SCORE
 	# ==========================================
 
 	score_counter.text = "%06d" % Globals.score
 
 
 	# ==========================================
-	# ATUALIZA VIDAS
+	# VIDAS
 	# ==========================================
 
 	life_counter.text = "%02d" % Globals.player_life
 
 
 	# ==========================================
-	# ATUALIZA FRAGMENTOS
+	# FRAGMENTOS
 	# ==========================================
 
-	if raciocinio_counter != null:
+	if fragment_counter != null:
 
-		raciocinio_counter.text = "      %d/5" % Globals.raciocinio_fragments
+		fragment_counter.text = "%d/5" % get_current_fragment_count()
 
 
 	# ==========================================
