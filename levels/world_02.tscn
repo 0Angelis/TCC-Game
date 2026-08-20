@@ -886,6 +886,8 @@ frame_3/duration = 1.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_sob1t"]
 size = Vector2(38.5, 17)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_sob1t"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5t4lp"]
 shader = ExtResource("36_g3ry1")
 shader_parameter/lines = 10.0
@@ -927,7 +929,7 @@ sprite_frames = SubResource("SpriteFrames_tfcbk")
 autoplay = "default"
 
 [node name="atention2" type="AnimatedSprite2D" parent="atention" unique_id=769538751]
-position = Vector2(2391.9998, 263.99997)
+position = Vector2(2390.9998, 264)
 scale = Vector2(0.016, 0.016)
 sprite_frames = SubResource("SpriteFrames_tfcbk")
 autoplay = "default"
@@ -1080,13 +1082,12 @@ theme_override_font_sizes/font_size = 16
 text = "     0/5"
 
 [node name="BG" type="ParallaxBackground" parent="." unique_id=271765439]
-visible = false
 
 [node name="05" type="ParallaxLayer" parent="BG" unique_id=398846043]
 motion_mirroring = Vector2(1280, 0)
 
 [node name="texture" type="Sprite2D" parent="BG/05" unique_id=1017075724]
-position = Vector2(0, -108.99999)
+position = Vector2(0, -69)
 scale = Vector2(3.3454857, 4.351282)
 texture = ExtResource("15_p8eye")
 centered = false
@@ -1104,7 +1105,7 @@ centered = false
 motion_mirroring = Vector2(1280, 0)
 
 [node name="clouds" type="Sprite2D" parent="BG/03" unique_id=1165320395]
-position = Vector2(76, 171)
+position = Vector2(82.00001, 219.00002)
 scale = Vector2(2.128472, 1.3076922)
 texture = ExtResource("18_25ukr")
 centered = false
@@ -1382,7 +1383,11 @@ position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="StroopChallenge" parent="." unique_id=642136524 instance=ExtResource("35_qe4fd")]
-visible = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StroopChallenge" unique_id=82667970]
+position = Vector2(2390, 264)
+scale = Vector2(0.9, 0.9)
+shape = SubResource("CircleShape2D_sob1t")
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
 visible = false
