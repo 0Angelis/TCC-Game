@@ -15,13 +15,13 @@
 [ext_resource type="Texture2D" uid="uid://cyoo8yqgfd6n2" path="res://Sunny-land-files/Assets/environment/Background/props.png" id="13_33rg8"]
 [ext_resource type="Texture2D" uid="uid://c8lf8vdqratxm" path="res://assets/Telas/chegada.png" id="14_4e1o6"]
 [ext_resource type="PackedScene" uid="uid://bbn2y2xyd8qva" path="res://actors/player.tscn" id="15_oonbl"]
-[ext_resource type="Texture2D" uid="uid://b6gh7p3ydemrw" path="res://Sunny-land-files/Assets/environment/Background/back.png" id="16_t4jqd"]
-[ext_resource type="Texture2D" uid="uid://5xmqp0661hwg" path="res://Sunny-land-files/Assets/environment/Background/middle.png" id="17_rhj15"]
-[ext_resource type="Texture2D" uid="uid://djg15a13ev1fm" path="res://Sunny-land-files/Assets/preview.png" id="18_uji5i"]
 [ext_resource type="Texture2D" uid="uid://dyixm1inxu0cr" path="res://assets/Seasonal Tilesets/1 - Grassland/Background parts/3 - Cloud_cover_1.png" id="19_6phi3"]
+[ext_resource type="Texture2D" uid="uid://b2n1d5icao2jf" path="res://assets/stringstar fields/background_0.png" id="20_3nr0m"]
 [ext_resource type="PackedScene" uid="uid://ct4nxdqyghxxn" path="res://prefabs/coin.tscn" id="20_bwtjd"]
 [ext_resource type="PackedScene" uid="uid://vloijhvrq35x" path="res://actors/enemy.tscn" id="21_36tbm"]
+[ext_resource type="Texture2D" uid="uid://djotnxryng31s" path="res://assets/stringstar fields/background_1.png" id="21_85nfd"]
 [ext_resource type="PackedScene" uid="uid://c0djf04oijatf" path="res://actors/eneme_2.tscn" id="22_yjlik"]
+[ext_resource type="Texture2D" uid="uid://c2pm4jtys3crs" path="res://assets/stringstar fields/background_2.png" id="23_85nfd"]
 [ext_resource type="PackedScene" uid="uid://8keuqw3et5uj" path="res://prefabs/moving_platform.tscn" id="23_kngwo"]
 [ext_resource type="PackedScene" uid="uid://c05me6gpn8c70" path="res://prefabs/goal.tscn" id="24_rja6n"]
 [ext_resource type="Script" uid="uid://crto63u7ixodo" path="res://scripts/hud_manager.gd" id="25_eew2y"]
@@ -718,46 +718,6 @@ texture = ExtResource("14_4e1o6")
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("15_oonbl")]
 position = Vector2(18, 470)
 
-[node name="BG" type="ParallaxBackground" parent="." unique_id=271765439]
-visible = false
-
-[node name="05" type="ParallaxLayer" parent="BG" unique_id=398846043]
-motion_mirroring = Vector2(1280, 0)
-
-[node name="texture" type="Sprite2D" parent="BG/05" unique_id=1017075724]
-position = Vector2(0, -108.99999)
-scale = Vector2(3.3454857, 4.351282)
-texture = ExtResource("16_t4jqd")
-centered = false
-
-[node name="04" type="ParallaxLayer" parent="BG" unique_id=1648917593]
-motion_mirroring = Vector2(1280, 0)
-
-[node name="back-cloud" type="Sprite2D" parent="BG/04" unique_id=1083376961]
-position = Vector2(-1, 348.00003)
-scale = Vector2(2.0113635, 1.320652)
-texture = ExtResource("17_rhj15")
-centered = false
-
-[node name="back-cloud2" type="Sprite2D" parent="BG/04" unique_id=825737194]
-position = Vector2(481.0001, 343.99997)
-scale = Vector2(1.994198, 1.3233695)
-texture = ExtResource("17_rhj15")
-centered = false
-
-[node name="Preview" type="Sprite2D" parent="BG/04" unique_id=1451067216]
-position = Vector2(622, 1583)
-texture = ExtResource("18_uji5i")
-
-[node name="03" type="ParallaxLayer" parent="BG" unique_id=649834629]
-motion_mirroring = Vector2(1280, 0)
-
-[node name="clouds" type="Sprite2D" parent="BG/03" unique_id=1165320395]
-position = Vector2(76, 171)
-scale = Vector2(2.128472, 1.3076922)
-texture = ExtResource("19_6phi3")
-centered = false
-
 [node name="coins" type="TileMap" parent="." unique_id=624749532]
 visible = false
 position = Vector2(-1, 0)
@@ -949,6 +909,48 @@ position = Vector2(-18, 420)
 
 [node name="moving_platform-horizontal2" parent="platforms" unique_id=1919973187 instance=ExtResource("23_kngwo")]
 position = Vector2(-16, 347)
+
+[node name="BG" type="ParallaxBackground" parent="." unique_id=1039345656]
+
+[node name="05" type="ParallaxLayer" parent="BG" unique_id=1161891705]
+motion_mirroring = Vector2(1280, 0)
+
+[node name="texture" type="Sprite2D" parent="BG/05" unique_id=848355491]
+position = Vector2(6, -571)
+scale = Vector2(4.4548607, 6.259615)
+texture = ExtResource("20_3nr0m")
+centered = false
+
+[node name="04" type="ParallaxLayer" parent="BG" unique_id=308807869]
+motion_mirroring = Vector2(1280, 0)
+
+[node name="back-cloud" type="Sprite2D" parent="BG/04" unique_id=362771515]
+scale = Vector2(4.4652777, 3.485577)
+texture = ExtResource("21_85nfd")
+centered = false
+
+[node name="03" type="ParallaxLayer" parent="BG" unique_id=1438164992]
+motion_mirroring = Vector2(1280, 0)
+
+[node name="clouds" type="Sprite2D" parent="BG/03" unique_id=359501604]
+scale = Vector2(4.4652777, 2.5721154)
+texture = ExtResource("19_6phi3")
+centered = false
+
+[node name="02" type="ParallaxLayer" parent="BG" unique_id=1458866663]
+motion_mirroring = Vector2(1280, 0)
+
+[node name="texture" type="Sprite2D" parent="BG/02" unique_id=359895745]
+scale = Vector2(4.444444, 3.485577)
+texture = ExtResource("23_85nfd")
+centered = false
+
+[node name="01" type="ParallaxLayer" parent="BG" unique_id=2136732757]
+motion_mirroring = Vector2(1280, 0)
+
+[node name="texture" type="Sprite2D" parent="BG/01" unique_id=107875011]
+scale = Vector2(4.4444447, 3.4903846)
+centered = false
 
 [node name="Fragmentos2" type="Node2D" parent="." unique_id=595265891]
 position = Vector2(754, 655)

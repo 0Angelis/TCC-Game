@@ -1,10 +1,11 @@
+res://scripts/
+res://
 res://frag/
 res://assets/Fragmentos/
 /Users/felipeangelis/Documents/GitHub/TCC-Game/
 res://assets/Comandos/
 /Users/felipeangelis/Documents/GitHub/TCC-Game/singletons/
 res://actors/
-res://scripts/
 res://assets/Sprite Pack 2/3 - Octi/
 res://assets/Telas/
 /Users/felipeangelis/Documents/GitHub/TCC-Game/scripts/
@@ -12,7 +13,6 @@ res://assets/Telas/
 res://assets/Sprite Pack 6/1 - Penguin/
 res://assets/Sprite Pack 6/3 - Skeleton/
 res://scenes/
-res://
 res://prefabs/
 res://tema/
 res://shaders/
