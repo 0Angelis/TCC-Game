@@ -10,3 +10,4 @@ res://stroop_challenge.tscn
 res://scripts/pause_menu.gd
 res://levels/world_01.tscn
 res://scripts/player.gd
+res://scripts/stroop_challenge.gd

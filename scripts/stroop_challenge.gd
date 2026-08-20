@@ -2,15 +2,6 @@ extends Control
 
 
 # =========================================================
-# SINAL
-# =========================================================
-# Avisará o StroopTrigger quando o desafio terminar.
-# =========================================================
-
-signal challenge_completed
-
-
-# =========================================================
 # REFERÊNCIAS
 # =========================================================
 
@@ -75,6 +66,7 @@ signal challenge_completed
 
 const TOTAL_ACERTOS := 10
 
+# Roxo usado no seu jogo.
 const PURPLE_COLOR := Color("#7046A3")
 
 
@@ -184,37 +176,51 @@ func _ready():
 	# =====================================================
 
 	if instruction_label == null:
+
 		print("ERRO: InstructionLabel não encontrado!")
+
 		return
 
 
 	if word_label == null:
+
 		print("ERRO: WordLabel não encontrado!")
+
 		return
 
 
 	if red_button == null:
+
 		print("ERRO: RedButton não encontrado!")
+
 		return
 
 
 	if blue_button == null:
+
 		print("ERRO: BlueButton não encontrado!")
+
 		return
 
 
 	if green_button == null:
+
 		print("ERRO: GreenButton não encontrado!")
+
 		return
 
 
 	if progress_label == null:
+
 		print("ERRO: ProgressLabel não encontrado!")
+
 		return
 
 
 	if result_label == null:
+
 		print("ERRO: ResultLabel não encontrado!")
+
 		return
 
 
@@ -244,7 +250,7 @@ func _ready():
 
 
 	# =====================================================
-	# CORES DOS TEXTOS
+	# CORES DO TEXTO DE INSTRUÇÃO
 	# =====================================================
 
 	instruction_label.add_theme_color_override(
@@ -272,7 +278,9 @@ func _ready():
 		28
 	)
 
-	instruction_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	instruction_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
 
 
 	# =====================================================
@@ -299,7 +307,9 @@ func _ready():
 		72
 	)
 
-	word_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	word_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
 
 
 	# =====================================================
@@ -326,7 +336,9 @@ func _ready():
 		28
 	)
 
-	progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	progress_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
 
 
 	# =====================================================
@@ -353,33 +365,35 @@ func _ready():
 		24
 	)
 
-	result_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	result_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
 
 
 	# =====================================================
 	# BOTÕES
 	# =====================================================
 
-	red_button.text = "VERMELHO"
+	red_button.text = "[ 1 ]  VERMELHO"
 
-	blue_button.text = "AZUL"
+	blue_button.text = "[ 2 ]  AZUL"
 
-	green_button.text = "VERDE"
+	green_button.text = "[ 3 ]  VERDE"
 
 
 	_style_button(
 		red_button,
-		Color("#D94242")
+		colors["vermelho"]
 	)
 
 	_style_button(
 		blue_button,
-		Color("#397FD1")
+		colors["azul"]
 	)
 
 	_style_button(
 		green_button,
-		Color("#3FA85B")
+		colors["verde"]
 	)
 
 
@@ -418,6 +432,65 @@ func _ready():
 
 
 # =========================================================
+# INPUT DO TECLADO
+# =========================================================
+
+func _unhandled_input(event):
+
+	# Só aceita teclas quando o desafio está ativo.
+	if not challenge_active:
+
+		return
+
+
+	# Não aceita resposta enquanto está esperando.
+	if not can_answer:
+
+		return
+
+
+	# Só aceita tecla pressionada.
+	if not event.is_pressed():
+
+		return
+
+
+	# Impede repetir ao segurar a tecla.
+	if event.is_echo():
+
+		return
+
+
+	# =====================================================
+	# TECLAS 1 / 2 / 3
+	# =====================================================
+
+	if event is InputEventKey:
+
+		match event.keycode:
+
+			KEY_1:
+
+				_answer("vermelho")
+
+				get_viewport().set_input_as_handled()
+
+
+			KEY_2:
+
+				_answer("azul")
+
+				get_viewport().set_input_as_handled()
+
+
+			KEY_3:
+
+				_answer("verde")
+
+				get_viewport().set_input_as_handled()
+
+
+# =========================================================
 # MONTA TODAS AS COMBINAÇÕES POSSÍVEIS
 # =========================================================
 
@@ -430,11 +503,9 @@ func _build_combinations():
 
 		for color in color_names:
 
-			# =============================================
-			# PALAVRA E COR NÃO PODEM SER IGUAIS
-			# =============================================
-
+			# Palavra e cor não podem ser iguais.
 			if word == color:
+
 				continue
 
 
@@ -465,6 +536,10 @@ func _build_combinations():
 
 func _get_next_combination() -> Dictionary:
 
+	# =====================================================
+	# AVANÇA
+	# =====================================================
+
 	current_combination_index += 1
 
 
@@ -483,7 +558,9 @@ func _get_next_combination() -> Dictionary:
 		# EVITA REPETIR A ÚLTIMA COMBINAÇÃO
 		# ==============================================
 
-		var first_combination: Dictionary = stroop_combinations[0]
+		var first_combination: Dictionary = (
+			stroop_combinations[0]
+		)
 
 
 		if (
@@ -501,7 +578,9 @@ func _get_next_combination() -> Dictionary:
 
 				var temp = stroop_combinations[0]
 
-				stroop_combinations[0] = stroop_combinations[swap_index]
+				stroop_combinations[0] = (
+					stroop_combinations[swap_index]
+				)
 
 				stroop_combinations[swap_index] = temp
 
@@ -510,7 +589,9 @@ func _get_next_combination() -> Dictionary:
 	# RETORNA
 	# =====================================================
 
-	return stroop_combinations[current_combination_index]
+	return stroop_combinations[
+		current_combination_index
+	]
 
 
 # =========================================================
@@ -522,11 +603,19 @@ func _style_button(
 	color: Color
 ):
 
+	# =====================================================
+	# TAMANHO
+	# =====================================================
+
 	button.custom_minimum_size = Vector2(
-		190,
-		70
+		220,
+		72
 	)
 
+
+	# =====================================================
+	# FONTE
+	# =====================================================
 
 	button.add_theme_font_size_override(
 		"font_size",
@@ -534,41 +623,44 @@ func _style_button(
 	)
 
 
+	# =====================================================
+	# CORES DO TEXTO
+	# =====================================================
+
 	button.add_theme_color_override(
 		"font_color",
 		Color.WHITE
 	)
-
 
 	button.add_theme_color_override(
 		"font_hover_color",
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_pressed_color",
 		Color.WHITE
 	)
-
 
 	button.add_theme_color_override(
 		"font_focus_color",
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_disabled_color",
-		Color.WHITE
+		Color("#777777")
 	)
 
+
+	# =====================================================
+	# CONTORNO DO TEXTO
+	# =====================================================
 
 	button.add_theme_color_override(
 		"font_outline_color",
-		Color.BLACK
+		Color("#17131F")
 	)
-
 
 	button.add_theme_constant_override(
 		"outline_size",
@@ -582,24 +674,42 @@ func _style_button(
 
 	var normal := StyleBoxFlat.new()
 
-	normal.bg_color = color
+	normal.bg_color = color.darkened(0.12)
 
 
-	normal.border_width_left = 3
-	normal.border_width_top = 3
-	normal.border_width_right = 3
-	normal.border_width_bottom = 3
+	# Borda fina
+	normal.border_width_left = 2
+	normal.border_width_top = 2
+	normal.border_width_right = 2
+	normal.border_width_bottom = 2
+
+	normal.border_color = Color("#30283A")
 
 
-	normal.border_color = color.darkened(
-		0.35
+	# Cantos
+	normal.corner_radius_top_left = 8
+	normal.corner_radius_top_right = 8
+	normal.corner_radius_bottom_left = 8
+	normal.corner_radius_bottom_right = 8
+
+
+	# =====================================================
+	# SOMBRA LEVE
+	# =====================================================
+
+	normal.shadow_color = Color(
+		0,
+		0,
+		0,
+		0.28
 	)
 
+	normal.shadow_size = 3
 
-	normal.corner_radius_top_left = 10
-	normal.corner_radius_top_right = 10
-	normal.corner_radius_bottom_left = 10
-	normal.corner_radius_bottom_right = 10
+	normal.shadow_offset = Vector2(
+		0,
+		3
+	)
 
 
 	# =====================================================
@@ -608,8 +718,18 @@ func _style_button(
 
 	var hover := normal.duplicate()
 
-	hover.bg_color = color.lightened(
-		0.15
+	hover.bg_color = color.lightened(0.10)
+
+	hover.border_color = PURPLE_COLOR
+
+	hover.shadow_color = PURPLE_COLOR
+	hover.shadow_color.a = 0.35
+
+	hover.shadow_size = 5
+
+	hover.shadow_offset = Vector2(
+		0,
+		2
 	)
 
 
@@ -619,20 +739,57 @@ func _style_button(
 
 	var pressed := normal.duplicate()
 
-	pressed.bg_color = color.darkened(
-		0.15
+	pressed.bg_color = color.darkened(0.28)
+
+	pressed.border_color = Color("#241E2C")
+
+	pressed.shadow_size = 1
+
+	pressed.shadow_offset = Vector2(
+		0,
+		1
 	)
 
 
 	# =====================================================
-	# DISABLED
+	# FOCUS
+	# =====================================================
+
+	var focus := normal.duplicate()
+
+	focus.bg_color = color.lightened(0.06)
+
+	focus.border_color = Color("#A477D6")
+
+	focus.shadow_color = PURPLE_COLOR
+	focus.shadow_color.a = 0.45
+
+	focus.shadow_size = 5
+
+	focus.shadow_offset = Vector2(
+		0,
+		2
+	)
+
+
+	# =====================================================
+	# DESABILITADO
 	# =====================================================
 
 	var disabled := normal.duplicate()
 
-	disabled.bg_color = Color("#444444")
+	disabled.bg_color = Color("#38343F")
 
-	disabled.border_color = Color("#222222")
+	disabled.border_color = Color("#26222C")
+
+	disabled.shadow_color = Color(
+		0,
+		0,
+		0,
+		0.15
+	)
+
+	disabled.shadow_size = 2
 
 
 	# =====================================================
@@ -655,8 +812,22 @@ func _style_button(
 	)
 
 	button.add_theme_stylebox_override(
+		"focus",
+		focus
+	)
+
+	button.add_theme_stylebox_override(
 		"disabled",
 		disabled
+	)
+
+
+	# =====================================================
+	# CURSOR
+	# =====================================================
+
+	button.mouse_default_cursor_shape = (
+		Control.CURSOR_POINTING_HAND
 	)
 
 
@@ -673,7 +844,10 @@ func start_challenge():
 	can_answer = false
 
 
-	progress_label.text = "0 / %d" % TOTAL_ACERTOS
+	progress_label.text = (
+		"0 / %d"
+		% TOTAL_ACERTOS
+	)
 
 	result_label.text = ""
 
@@ -710,7 +884,7 @@ func _new_round():
 
 
 	# =====================================================
-	# PEGA COMBINAÇÃO
+	# PEGA NOVA COMBINAÇÃO
 	# =====================================================
 
 	var combination := _get_next_combination()
@@ -738,7 +912,7 @@ func _new_round():
 
 
 	# =====================================================
-	# DEFINE COR
+	# DEFINE A COR
 	# =====================================================
 
 	word_label.add_theme_color_override(
@@ -748,7 +922,7 @@ func _new_round():
 
 
 	# =====================================================
-	# PEQUENO DELAY
+	# TEMPO ANTES DE RESPONDER
 	# =====================================================
 
 	await get_tree().create_timer(
@@ -839,10 +1013,15 @@ func _answer(selected_color: String):
 		correct_answers = 0
 
 
-		progress_label.text = "0 / %d" % TOTAL_ACERTOS
+		progress_label.text = (
+			"0 / %d"
+			% TOTAL_ACERTOS
+		)
 
 
-		result_label.text = "ERRO! ATENÇÃO!"
+		result_label.text = (
+			"ERRO! ATENÇÃO!"
+		)
 
 
 		result_label.add_theme_color_override(
@@ -873,7 +1052,6 @@ func _answer(selected_color: String):
 
 	result_label.text = ""
 
-
 	_new_round()
 
 
@@ -883,10 +1061,6 @@ func _answer(selected_color: String):
 
 func _complete_challenge():
 
-	# =====================================================
-	# DESATIVA O DESAFIO
-	# =====================================================
-
 	challenge_active = false
 
 	can_answer = false
@@ -895,13 +1069,16 @@ func _complete_challenge():
 	_enable_buttons(false)
 
 
-	# =====================================================
-	# MOSTRA RESULTADO
-	# =====================================================
-
 	progress_label.text = "10 / 10"
 
-	result_label.text = "DESAFIO CONCLUÍDO!"
+
+	# =====================================================
+	# DESAFIO CONCLUÍDO EM ROXO
+	# =====================================================
+
+	result_label.text = (
+		"DESAFIO CONCLUÍDO!"
+	)
 
 
 	result_label.add_theme_color_override(
@@ -910,22 +1087,25 @@ func _complete_challenge():
 	)
 
 
-	print("================================")
-	print("STROOP CONCLUÍDO!")
-	print("10 ACERTOS!")
-	print("FRAGMENTO DESBLOQUEADO!")
-	print("================================")
+	print(
+		"================================"
+	)
 
+	print(
+		"STROOP CONCLUÍDO!"
+	)
 
-	# =====================================================
-	# AVISA O STROOP TRIGGER
-	# =====================================================
-	# Esse é o ponto que estava faltando.
-	# O trigger recebe esse sinal, fecha a tela
-	# e libera o movimento do player.
-	# =====================================================
+	print(
+		"10 ACERTOS!"
+	)
 
-	challenge_completed.emit()
+	print(
+		"FRAGMENTO DESBLOQUEADO!"
+	)
+
+	print(
+		"================================"
+	)
 
 
 # =========================================================
