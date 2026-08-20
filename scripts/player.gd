@@ -32,7 +32,7 @@ var is_dead := false
 # Warning da placa
 var showing_warning := false
 
-# Vitória ao pegar fragmento
+# Vitória / dança
 var celebrating := false
 
 
@@ -77,11 +77,36 @@ func _unhandled_input(event):
 	if is_dead:
 		return
 
-	# Se estiver dançando, uma NOVA tecla
-	# de movimento cancela a dança.
+
+	# ==========================================
+	# TECLA B = DANÇA
+	# ==========================================
+
+	if (
+		event is InputEventKey
+		and event.pressed
+		and not event.echo
+		and event.keycode == KEY_B
+	):
+
+		play_dance()
+
+		get_viewport().set_input_as_handled()
+
+		return
+
+
+	# ==========================================
+	# CANCELAR DANÇA COM MOVIMENTO
+	# ==========================================
+
 	if celebrating:
 
-		if event is InputEventKey and event.pressed and not event.echo:
+		if (
+			event is InputEventKey
+			and event.pressed
+			and not event.echo
+		):
 
 			if (
 				event.keycode == KEY_A
@@ -95,7 +120,12 @@ func _unhandled_input(event):
 				or event.keycode == KEY_SPACE
 			):
 
+				# Cancela dança
 				celebrating = false
+
+				# IMPORTANTE:
+				# devolve o movimento
+				can_move = true
 
 				print("DANÇA CANCELADA")
 
@@ -228,7 +258,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ------------------------------------------
-	# 2. VITÓRIA
+	# 2. VITÓRIA / DANÇA
 	# ------------------------------------------
 
 	elif celebrating:
@@ -392,17 +422,17 @@ func check_damage_tile() -> void:
 
 
 	var positions = [
-
 		feet_position,
 		feet_position + Vector2(-8, 0),
 		feet_position + Vector2(8, 0),
 		feet_position + Vector2(0, 8),
 		feet_position + Vector2(0, 16)
-
 	]
 
 
-	for layer_index in range(level.get_layers_count()):
+	for layer_index in range(
+		level.get_layers_count()
+	):
 
 		for world_position in positions:
 
@@ -546,7 +576,9 @@ func take_damage(
 	# PEQUENO STUN
 	# ==========================================
 
-	await get_tree().create_timer(0.08).timeout
+	await get_tree().create_timer(
+		0.08
+	).timeout
 
 	if is_dead:
 		return
@@ -558,7 +590,9 @@ func take_damage(
 	# INVENCIBILIDADE
 	# ==========================================
 
-	await get_tree().create_timer(0.4).timeout
+	await get_tree().create_timer(
+		0.4
+	).timeout
 
 	if is_dead:
 		return
@@ -594,11 +628,14 @@ func play_warning():
 	if celebrating:
 		return
 
+
 	showing_warning = true
 
 	animation.play("warning")
 
-	print("WARNING DO PLAYER!")
+	print(
+		"WARNING DO PLAYER!"
+	)
 
 
 # ==========================================
@@ -615,6 +652,7 @@ func stop_warning():
 
 	if celebrating:
 		return
+
 
 	showing_warning = false
 
@@ -636,18 +674,48 @@ func play_victory():
 
 	celebrating = true
 
-	# NÃO trava o player
-	can_move = true
+	# Para movimento enquanto comemora.
+	can_move = false
 
-	# NÃO zera velocity
-	# Assim ele continua caindo normalmente.
+	velocity.x = 0
 
 	animation.stop()
 	animation.play("vitoria")
 
+
 	print("================================")
-	print("FRAGMENTO PEGADO!")
 	print("ANIMAÇÃO DE VITÓRIA!")
+	print("================================")
+
+
+# ==========================================
+# DANÇA MANUAL - TECLA B
+# ==========================================
+
+func play_dance():
+
+	if is_dead:
+		return
+
+	if taking_damage:
+		return
+
+
+	showing_warning = false
+
+	celebrating = true
+
+	# Para o personagem enquanto dança.
+	can_move = false
+
+	velocity.x = 0
+
+	animation.stop()
+	animation.play("vitoria")
+
+
+	print("================================")
+	print("DANÇA ATIVADA PELA TECLA B!")
 	print("================================")
 
 
@@ -714,8 +782,14 @@ func die():
 
 	print("==============================")
 	print("JOGADOR MORREU")
-	print("MOEDAS RESETADAS: ", Globals.coins)
-	print("SCORE RESETADO: ", Globals.score)
+	print(
+		"MOEDAS RESETADAS: ",
+		Globals.coins
+	)
+	print(
+		"SCORE RESETADO: ",
+		Globals.score
+	)
 	print(
 		"FRAGMENTOS RESETADOS: ",
 		Globals.raciocinio_fragments

@@ -1072,13 +1072,13 @@ texture = ExtResource("32_qe4fd")
 [node name="raciocinio_counter" type="Label" parent="HUD/control/container/raciocinio_container" unique_id=125452430]
 layout_mode = 2
 offset_transform_enabled = true
-offset_transform_position = Vector2(-300, -3600)
-offset_transform_scale = Vector2(30, 30)
+offset_transform_position = Vector2(200, -3600)
+offset_transform_scale = Vector2(10, 10)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 4
+theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("29_2hl3w")
-theme_override_font_sizes/font_size = 16
-text = "     0/5"
+theme_override_font_sizes/font_size = 40
+text = "0/5"
 
 [node name="BG" type="ParallaxBackground" parent="." unique_id=271765439]
 
@@ -1310,6 +1310,12 @@ position_smoothing_enabled = true
 [node name="warning" type="Node2D" parent="." unique_id=1954291522]
 position = Vector2(487, 346)
 
+[node name="alert_sign2" type="Sprite2D" parent="warning" unique_id=82781878]
+position = Vector2(1903, -92.499985)
+scale = Vector2(0.028708138, 0.02791062)
+texture = ExtResource("34_lhg54")
+region_rect = Rect2(0, 0, 16, 16)
+
 [node name="warning_sign" type="Node2D" parent="warning" unique_id=1771737388]
 position = Vector2(-289, 126)
 script = ExtResource("32_h8mkt")
@@ -1333,8 +1339,9 @@ visible = false
 position = Vector2(-2, 3)
 collision_layer = 2
 
-[node name="colission" type="CollisionShape2D" parent="warning/warning_sign/area_sign" unique_id=1468885801]
-position = Vector2(2, -2)
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sign/area_sign" unique_id=1061039120]
+visible = false
+position = Vector2(1.5, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="warning_sing2" type="Node2D" parent="warning" unique_id=707685460]

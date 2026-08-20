@@ -2,6 +2,13 @@ extends CanvasLayer
 
 
 # ==========================================
+# CAMADA DO PAUSE
+# ==========================================
+
+const PAUSE_LAYER := 1000
+
+
+# ==========================================
 # BOTÕES
 # ==========================================
 
@@ -17,7 +24,23 @@ extends CanvasLayer
 
 func _ready():
 
+	# ==========================================
+	# CONTINUA FUNCIONANDO DURANTE O PAUSE
+	# ==========================================
+
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+	# ==========================================
+	# CAMADA ACIMA DO STROOP
+	# ==========================================
+
+	layer = PAUSE_LAYER
+
+
+	# ==========================================
+	# COMEÇA ESCONDIDO
+	# ==========================================
 
 	visible = false
 
@@ -83,6 +106,10 @@ func _ready():
 
 func _unhandled_input(event):
 
+	# ==========================================
+	# ESC
+	# ==========================================
+
 	if event.is_action_pressed("ui_cancel"):
 
 		if get_tree().paused:
@@ -93,8 +120,14 @@ func _unhandled_input(event):
 
 			pause_game()
 
+		get_viewport().set_input_as_handled()
+
 		return
 
+
+	# ==========================================
+	# CONTROLES DO MENU
+	# ==========================================
 
 	if get_tree().paused and event is InputEventKey and event.pressed:
 
@@ -178,9 +211,43 @@ func _unhandled_input(event):
 
 func pause_game():
 
+	print(
+		"=============================="
+	)
+
+	print(
+		"JOGO PAUSADO"
+	)
+
+	print(
+		"=============================="
+	)
+
+
+	# ==========================================
+	# PRIMEIRO MOSTRA O MENU
+	# ==========================================
+
 	visible = true
 
+
+	# ==========================================
+	# GARANTE QUE ESTÁ NA FRENTE DO STROOP
+	# ==========================================
+
+	layer = PAUSE_LAYER
+
+
+	# ==========================================
+	# DEPOIS PAUSA O JOGO
+	# ==========================================
+
 	get_tree().paused = true
+
+
+	# ==========================================
+	# FOCO
+	# ==========================================
 
 	resume_btn.grab_focus()
 
@@ -191,7 +258,29 @@ func pause_game():
 
 func resume_game():
 
+	print(
+		"=============================="
+	)
+
+	print(
+		"JOGO CONTINUOU"
+	)
+
+	print(
+		"=============================="
+	)
+
+
+	# ==========================================
+	# DESPAUSA
+	# ==========================================
+
 	get_tree().paused = false
+
+
+	# ==========================================
+	# ESCONDE MENU
+	# ==========================================
 
 	visible = false
 
@@ -204,7 +293,9 @@ func close_dialog():
 
 	if DialogManager.is_message_active:
 
-		print("FECHANDO DIÁLOGO ANTES DO RESTART")
+		print(
+			"FECHANDO DIÁLOGO ANTES DO RESTART"
+		)
 
 		DialogManager.close_message()
 
@@ -215,9 +306,17 @@ func close_dialog():
 
 func restart_game():
 
-	print("==============================")
-	print("RESTART PELO PAUSE")
-	print("==============================")
+	print(
+		"=============================="
+	)
+
+	print(
+		"RESTART PELO PAUSE"
+	)
+
+	print(
+		"=============================="
+	)
 
 
 	# ==========================================
@@ -249,8 +348,16 @@ func restart_game():
 	Globals.raciocinio_fragments = 0
 
 
-	print("MOEDAS: ", Globals.coins)
-	print("SCORE: ", Globals.score)
+	print(
+		"MOEDAS: ",
+		Globals.coins
+	)
+
+	print(
+		"SCORE: ",
+		Globals.score
+	)
+
 	print(
 		"FRAGMENTOS: ",
 		Globals.raciocinio_fragments
@@ -265,7 +372,7 @@ func restart_game():
 
 
 	# ==========================================
-	# RECARREGA A CENA ATUAL
+	# RECARREGA CENA
 	# ==========================================
 
 	get_tree().reload_current_scene()
@@ -277,9 +384,17 @@ func restart_game():
 
 func quit_game():
 
-	print("==============================")
-	print("VOLTANDO PARA O MENU")
-	print("==============================")
+	print(
+		"=============================="
+	)
+
+	print(
+		"VOLTANDO PARA O MENU"
+	)
+
+	print(
+		"=============================="
+	)
 
 
 	# ==========================================
