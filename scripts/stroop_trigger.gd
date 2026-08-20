@@ -11,6 +11,19 @@ const STROOP_SCENE = preload(
 
 
 # =========================================================
+# CONFIGURAÇÃO
+# =========================================================
+
+# Pequena pausa antes de o Stroop aparecer.
+const STROOP_APPEAR_DELAY := 0.5
+
+
+# Tempo que a tela permanece totalmente fechada
+# antes de o mapa voltar a aparecer.
+const MAP_REVEAL_DELAY := 0.8
+
+
+# =========================================================
 # CONTROLE
 # =========================================================
 
@@ -60,7 +73,7 @@ func _ready():
 
 
 	# =====================================================
-	# PROCURA AUTOMATICAMENTE A TRANSIÇÃO
+	# PROCURA A TRANSIÇÃO
 	# =====================================================
 
 	var current_scene = get_tree().current_scene
@@ -77,7 +90,7 @@ func _ready():
 	if transition == null:
 
 		print(
-			"ERRO: nó 'transition' não encontrado no mundo 2!"
+			"ERRO: nó 'transition' não encontrado!"
 		)
 
 	else:
@@ -95,7 +108,7 @@ func _ready():
 
 
 	# =====================================================
-	# SINAIS DA ÁREA
+	# CONECTA ÁREA
 	# =====================================================
 
 	if not body_entered.is_connected(
@@ -117,7 +130,7 @@ func _ready():
 
 
 # =========================================================
-# CRIA AVISO "E - INTERAGIR"
+# CRIA "E - INTERAGIR"
 # =========================================================
 
 func _create_interaction_label():
@@ -172,7 +185,6 @@ func _on_body_entered(body: Node2D):
 
 
 	player_inside = true
-
 	player = body
 
 
@@ -194,7 +206,6 @@ func _on_body_exited(body: Node2D):
 
 	player_inside = false
 
-	# Mantém referência
 	player = body
 
 	interaction_label.hide()
@@ -239,7 +250,7 @@ func _unhandled_input(event):
 
 
 	# =====================================================
-	# PLAYER
+	# PEGA PLAYER
 	# =====================================================
 
 	if player == null:
@@ -298,7 +309,7 @@ func _stop_player():
 
 
 # =========================================================
-# ABRE STROOP COM TRANSIÇÃO
+# ABRE STROOP
 # =========================================================
 
 func _open_stroop_with_transition():
@@ -309,7 +320,6 @@ func _open_stroop_with_transition():
 
 
 	challenge_open = true
-
 	transition_busy = true
 
 
@@ -320,16 +330,19 @@ func _open_stroop_with_transition():
 	if transition != null:
 
 		print(
-			"INICIANDO TRANSIÇÃO DE ENTRADA..."
+			"TRANSIÇÃO DE ENTRADA..."
 		)
 
-		await transition.cover_screen()
+		await _cover_screen()
 
-	else:
 
-		print(
-			"AVISO: sem transition, abrindo Stroop normalmente."
-		)
+	# =====================================================
+	# PEQUENA PAUSA
+	# =====================================================
+
+	await get_tree().create_timer(
+		STROOP_APPEAR_DELAY
+	).timeout
 
 
 	# =====================================================
@@ -346,7 +359,7 @@ func _open_stroop_with_transition():
 
 
 	# =====================================================
-	# CRIA STROOP
+	# INSTANCIA STROOP
 	# =====================================================
 
 	stroop_instance = STROOP_SCENE.instantiate()
@@ -354,17 +367,13 @@ func _open_stroop_with_transition():
 	stroop_instance.process_mode = Node.PROCESS_MODE_ALWAYS
 
 
-	# =====================================================
-	# ADICIONA
-	# =====================================================
-
 	challenge_canvas.add_child(
 		stroop_instance
 	)
 
 
 	# =====================================================
-	# OCUPA A TELA INTEIRA
+	# TELA INTEIRA
 	# =====================================================
 
 	stroop_instance.set_anchors_and_offsets_preset(
@@ -411,7 +420,7 @@ func _open_stroop_with_transition():
 			"REVELANDO STROOP..."
 		)
 
-		await transition.reveal_screen()
+		await _reveal_screen()
 
 
 	transition_busy = false
@@ -420,6 +429,50 @@ func _open_stroop_with_transition():
 	print(
 		"STROOP ABERTO!"
 	)
+
+
+# =========================================================
+# COBRIR TELA
+# =========================================================
+
+func _cover_screen():
+
+	var tween = transition.create_tween()
+
+	tween.tween_property(
+		transition.color_rect,
+		"threshold",
+		1.0,
+		0.5
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_IN_OUT
+	)
+
+	await tween.finished
+
+
+# =========================================================
+# REVELAR TELA
+# =========================================================
+
+func _reveal_screen():
+
+	var tween = transition.create_tween()
+
+	tween.tween_property(
+		transition.color_rect,
+		"threshold",
+		0.0,
+		0.5
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_IN_OUT
+	)
+
+	await tween.finished
 
 
 # =========================================================
@@ -442,16 +495,16 @@ func _on_stroop_completed():
 
 
 	# =====================================================
-	# COBRE A TELA
+	# COBRE TELA
 	# =====================================================
 
 	if transition != null:
 
 		print(
-			"INICIANDO TRANSIÇÃO DE SAÍDA..."
+			"TRANSIÇÃO DE SAÍDA..."
 		)
 
-		await transition.cover_screen()
+		await _cover_screen()
 
 
 	# =====================================================
@@ -469,16 +522,15 @@ func _on_stroop_completed():
 
 
 	# =====================================================
-	# ESTADO
+	# ATUALIZA ESTADO
 	# =====================================================
 
 	challenge_open = false
-
 	challenge_completed = true
 
 
 	# =====================================================
-	# DEVOLVE CONTROLE AO PLAYER
+	# DEVOLVE MOVIMENTO
 	# =====================================================
 
 	if player == null:
@@ -502,7 +554,20 @@ func _on_stroop_completed():
 
 
 	# =====================================================
-	# REVELA O MAPA
+	# ESPERA ANTES DE MOSTRAR O MAPA
+	# =====================================================
+
+	print(
+		"AGUARDANDO ANTES DE REVELAR O MAPA..."
+	)
+
+	await get_tree().create_timer(
+		MAP_REVEAL_DELAY
+	).timeout
+
+
+	# =====================================================
+	# REVELA MAPA
 	# =====================================================
 
 	if transition != null:
@@ -511,7 +576,7 @@ func _on_stroop_completed():
 			"REVELANDO MAPA..."
 		)
 
-		await transition.reveal_screen()
+		await _reveal_screen()
 
 
 	transition_busy = false
