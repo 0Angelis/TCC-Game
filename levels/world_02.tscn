@@ -39,6 +39,7 @@
 [ext_resource type="Shader" uid="uid://cfqg8x3kad7tx" path="res://shaders/transition.gdshader" id="36_g3ry1"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="37_pfg8k"]
 [ext_resource type="PackedScene" uid="uid://cu31oefxt7lgm" path="res://prefabs/frag_raciocinio.tscn" id="38_w682u"]
+[ext_resource type="Texture2D" uid="uid://cpqtblxl8p0bl" path="res://assets/portal/Purple Portal Sprite Sheet.png" id="40_n1cxq"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_j8rs1"]
 tile_data = PackedInt32Array(0, 65537, 1)
@@ -674,6 +675,126 @@ pattern_0 = SubResource("TileMapPattern_j8rs1")
 pattern_1 = SubResource("TileMapPattern_fwd2m")
 pattern_2 = SubResource("TileMapPattern_or7x1")
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_q67t2"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(0, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_io3b3"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(64, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_afhwl"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(128, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fytqr"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(192, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_st4sk"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(256, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a1cws"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(320, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ww8t5"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(384, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qyo4n"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(448, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7kvya"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(0, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6ki2q"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(64, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tjnik"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(128, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y5g74"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(192, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uwxm0"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(256, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ws8vu"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(320, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vlvaj"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(384, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xroku"]
+atlas = ExtResource("40_n1cxq")
+region = Rect2(448, 128, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sob1t"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q67t2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_io3b3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_afhwl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fytqr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_st4sk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a1cws")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ww8t5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qyo4n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7kvya")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6ki2q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tjnik")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y5g74")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uwxm0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ws8vu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vlvaj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xroku")
+}],
+"loop": 0,
+"name": &"default",
+"speed": 5.0
+}]
+
 [sub_resource type="AnimatedTexture" id="AnimatedTexture_qe4fd"]
 frames = 4
 speed_scale = 3.0
@@ -711,11 +832,15 @@ layer_0/tile_data = PackedInt32Array(1966080, 65546, 1, 1966101, 327690, 1, 1966
 layer_1/name = "trees"
 layer_1/tile_data = PackedInt32Array(1703939, 458761, 4, 1769475, 458761, 5, 1638404, 524297, 3, 1703940, 524297, 4, 1769476, 524297, 5, 1572869, 589833, 2, 1638405, 589833, 3, 1703941, 589833, 4, 1769477, 589833, 5, 1835013, 589833, 6, 1900549, 589833, 7, 1572870, 655369, 2, 1638406, 655369, 3, 1703942, 655369, 4, 1769478, 655369, 5, 1835014, 655369, 6, 1900550, 655369, 7, 1572871, 720905, 2, 1638407, 720905, 3, 1703943, 720905, 4, 1769479, 720905, 5, 1835015, 720905, 6, 1900551, 720905, 7, 1572872, 786441, 2, 1638408, 786441, 3, 1703944, 786441, 4, 1769480, 786441, 5, 1900552, 786441, 7, 1638409, 851977, 3, 1703945, 851977, 4, 1769481, 851977, 5)
 
+[node name="portal chegada" type="AnimatedSprite2D" parent="." unique_id=178516932]
+position = Vector2(12, 457)
+sprite_frames = SubResource("SpriteFrames_sob1t")
+autoplay = "default"
+
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("14_nknj2")]
-position = Vector2(18, 470)
+position = Vector2(30, 469)
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=1951959649]
-visible = false
 
 [node name="control" type="Control" parent="HUD" unique_id=367132830]
 layout_mode = 3
@@ -902,7 +1027,6 @@ texture = ExtResource("18_25ukr")
 centered = false
 
 [node name="coins" type="TileMap" parent="." unique_id=624749532]
-visible = false
 position = Vector2(-1, 0)
 format = 2
 
@@ -1071,7 +1195,6 @@ position = Vector2(-36, -426)
 collision_layer = 6
 
 [node name="platforms" type="Node2D" parent="." unique_id=1625934543]
-visible = false
 position = Vector2(1260, 51)
 
 [node name="moving_platform-vertical" parent="platforms" unique_id=1411596026 instance=ExtResource("22_4h6l4")]
@@ -1093,12 +1216,10 @@ position = Vector2(-18, 420)
 position = Vector2(-16, 347)
 
 [node name="goal" parent="." unique_id=1383269650 instance=ExtResource("23_pbxfe")]
-visible = false
 position = Vector2(180, 447)
 next_level = "uid://gxukbahnutqp"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
-visible = false
 zoom = Vector2(2.5, 2.5)
 limit_left = 0
 position_smoothing_enabled = true

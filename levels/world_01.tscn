@@ -23,6 +23,7 @@
 [ext_resource type="Texture2D" uid="uid://gtrw5tcogyhu" path="res://assets/Seasonal Tilesets/Spike.png" id="12_yftww"]
 [ext_resource type="PackedScene" uid="uid://cvence5b8xxpw" path="res://prefabs/pause_menu.tscn" id="15_0uwfl"]
 [ext_resource type="Texture2D" uid="uid://ciui18xao3bit" path="res://assets/Comandos/Red!Assets.png" id="15_brbtt"]
+[ext_resource type="Texture2D" uid="uid://cpqtblxl8p0bl" path="res://assets/portal/Purple Portal Sprite Sheet.png" id="16_4xcht"]
 [ext_resource type="PackedScene" uid="uid://vloijhvrq35x" path="res://actors/enemy.tscn" id="17_athp7"]
 [ext_resource type="PackedScene" uid="uid://c0djf04oijatf" path="res://actors/eneme_2.tscn" id="18_dl4q8"]
 [ext_resource type="PackedScene" uid="uid://bgbkrt740a0rj" path="res://actors/fantasma.tscn" id="18_ffp5f"]
@@ -749,6 +750,126 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_q67t2"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(0, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_io3b3"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(64, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_afhwl"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(128, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fytqr"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(192, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_st4sk"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(256, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a1cws"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(320, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ww8t5"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(384, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qyo4n"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(448, 64, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7kvya"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(0, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6ki2q"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(64, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tjnik"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(128, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y5g74"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(192, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uwxm0"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(256, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ws8vu"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(320, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vlvaj"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(384, 128, 64, 64)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xroku"]
+atlas = ExtResource("16_4xcht")
+region = Rect2(448, 128, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4xcht"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q67t2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_io3b3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_afhwl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fytqr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_st4sk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a1cws")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ww8t5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qyo4n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7kvya")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6ki2q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tjnik")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y5g74")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uwxm0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ws8vu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vlvaj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xroku")
+}],
+"loop": 0,
+"name": &"default",
+"speed": 5.0
+}]
+
 [sub_resource type="AnimatedTexture" id="AnimatedTexture_5t4lp"]
 frames = 4
 speed_scale = 3.0
@@ -795,8 +916,13 @@ scale = Vector2(0.016, 0.016)
 sprite_frames = SubResource("SpriteFrames_ffp5f")
 autoplay = "default"
 
+[node name="portal chegada" type="AnimatedSprite2D" parent="." unique_id=654761614]
+position = Vector2(23, 810)
+sprite_frames = SubResource("SpriteFrames_4xcht")
+autoplay = "default"
+
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("4_naeyk")]
-position = Vector2(32, 819)
+position = Vector2(40, 823)
 
 [node name="coins" type="TileMap" parent="." unique_id=624749532]
 position = Vector2(-1, 0)
