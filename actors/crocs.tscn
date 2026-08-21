@@ -67,7 +67,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5kqm5"]
-size = Vector2(29.367346, 13.087584)
+size = Vector2(33.000004, 13.087584)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_vjkwa"]
 size = Vector2(26, 4.875)
@@ -86,7 +86,7 @@ animation = &"walking"
 autoplay = "walking"
 
 [node name="collision" type="CollisionShape2D" parent="." unique_id=1692084971]
-position = Vector2(-1, 9)
+position = Vector2(-0.49999964, 9)
 scale = Vector2(0.99999994, 0.9179999)
 shape = SubResource("RectangleShape2D_5kqm5")
 

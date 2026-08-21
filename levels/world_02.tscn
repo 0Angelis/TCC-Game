@@ -916,7 +916,7 @@ sprite_frames = SubResource("SpriteFrames_sob1t")
 autoplay = "default"
 
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("14_nknj2")]
-position = Vector2(39, 470)
+position = Vector2(28, 469)
 
 [node name="atention" type="Node2D" parent="." unique_id=391080393]
 position = Vector2(-1, 0)
@@ -1192,62 +1192,50 @@ position = Vector2(-91, 449)
 
 [node name="crocs7" parent="enemys" unique_id=836021135 instance=ExtResource("29_qe4fd")]
 position = Vector2(1079, 16)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs8" parent="enemys" unique_id=994975986 instance=ExtResource("29_qe4fd")]
 position = Vector2(2119, 14)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs2" parent="enemys" unique_id=1234281613 instance=ExtResource("29_qe4fd")]
 position = Vector2(2820, 16)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs" parent="enemys" unique_id=308275306 instance=ExtResource("29_qe4fd")]
 position = Vector2(1620, 16)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs3" parent="enemys" unique_id=1396298911 instance=ExtResource("29_qe4fd")]
 position = Vector2(1888, 257)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs9" parent="enemys" unique_id=1109872902 instance=ExtResource("29_qe4fd")]
 position = Vector2(2339, 32)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs10" parent="enemys" unique_id=2146938751 instance=ExtResource("29_qe4fd")]
 position = Vector2(2733, 257)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs11" parent="enemys" unique_id=547801292 instance=ExtResource("29_qe4fd")]
 position = Vector2(675, 259)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs12" parent="enemys" unique_id=117792285 instance=ExtResource("29_qe4fd")]
 position = Vector2(1399, 416)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs4" parent="enemys" unique_id=1633380516 instance=ExtResource("29_qe4fd")]
 position = Vector2(674, 16)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs5" parent="enemys" unique_id=124706096 instance=ExtResource("29_qe4fd")]
 position = Vector2(1330, 17)
-collision_layer = 4
 collision_mask = 7
 
 [node name="crocs6" parent="enemys" unique_id=722181230 instance=ExtResource("29_qe4fd")]
 position = Vector2(2741, 16)
-collision_layer = 4
 collision_mask = 7
 
 [node name="platforms" type="Node2D" parent="." unique_id=1625934543]

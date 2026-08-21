@@ -29,10 +29,18 @@ var can_take_damage := true
 var can_move := true
 var is_dead := false
 
-# Warning da placa
+
+# ==========================================
+# WARNING DA PLACA
+# ==========================================
+
 var showing_warning := false
 
-# Vitória / dança
+
+# ==========================================
+# VITÓRIA / DANÇA
+# ==========================================
+
 var celebrating := false
 
 
@@ -53,7 +61,6 @@ func _ready():
 
 	add_to_group("player")
 
-	# 5 vidas
 	Globals.player_life = 5
 
 	is_dead = false
@@ -120,11 +127,7 @@ func _unhandled_input(event):
 				or event.keycode == KEY_SPACE
 			):
 
-				# Cancela dança
 				celebrating = false
-
-				# IMPORTANTE:
-				# devolve o movimento
 				can_move = true
 
 				print("DANÇA CANCELADA")
@@ -158,7 +161,6 @@ func _physics_process(delta: float) -> void:
 
 	# ==========================================
 	# AGACHAR
-	# S OU SETA PARA BAIXO
 	# ==========================================
 
 	var moving_down := (
@@ -168,7 +170,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# DIREÇÃO HORIZONTAL
+	# DIREÇÃO
 	# ==========================================
 
 	var direction := 0
@@ -185,7 +187,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# PULO
+	# PULO NORMAL
 	# ==========================================
 
 	if (
@@ -203,7 +205,6 @@ func _physics_process(delta: float) -> void:
 
 	if moving_down:
 
-		# ↓ ou S = não anda
 		velocity.x = 0
 
 	elif direction != 0 and can_move:
@@ -222,7 +223,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# CANCELA WARNING AO MOVIMENTAR
+	# CANCELA WARNING
 	# ==========================================
 
 	if showing_warning:
@@ -246,20 +247,11 @@ func _physics_process(delta: float) -> void:
 	# ANIMAÇÕES
 	# ==========================================
 
-	# ------------------------------------------
-	# 1. HURT
-	# ------------------------------------------
-
 	if taking_damage:
 
 		if animation.animation != "hurt":
 
 			animation.play("hurt")
-
-
-	# ------------------------------------------
-	# 2. VITÓRIA / DANÇA
-	# ------------------------------------------
 
 	elif celebrating:
 
@@ -267,21 +259,11 @@ func _physics_process(delta: float) -> void:
 
 			animation.play("vitoria")
 
-
-	# ------------------------------------------
-	# 3. WARNING
-	# ------------------------------------------
-
 	elif showing_warning:
 
 		if animation.animation != "warning":
 
 			animation.play("warning")
-
-
-	# ------------------------------------------
-	# 4. AGACHAR / ARRASTAR
-	# ------------------------------------------
 
 	elif moving_down and is_on_floor():
 
@@ -289,21 +271,11 @@ func _physics_process(delta: float) -> void:
 
 			animation.play("arrastar")
 
-
-	# ------------------------------------------
-	# 5. FALLING
-	# ------------------------------------------
-
 	elif not is_on_floor() and velocity.y > 0:
 
 		if animation.animation != "falling":
 
 			animation.play("falling")
-
-
-	# ------------------------------------------
-	# 6. JUMP
-	# ------------------------------------------
 
 	elif not is_on_floor():
 
@@ -311,21 +283,11 @@ func _physics_process(delta: float) -> void:
 
 			animation.play("jump")
 
-
-	# ------------------------------------------
-	# 7. RUN
-	# ------------------------------------------
-
 	elif direction != 0:
 
 		if animation.animation != "run":
 
 			animation.play("run")
-
-
-	# ------------------------------------------
-	# 8. IDLE
-	# ------------------------------------------
 
 	else:
 
@@ -369,7 +331,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# VERIFICA ESPINHOS
+	# ESPINHOS
 	# ==========================================
 
 	check_damage_tile()
@@ -383,6 +345,7 @@ func _on_hurtbox_body_entered(body: Node2D) -> void:
 
 	if is_dead:
 		return
+
 
 	if body.is_in_group("enemies"):
 
@@ -420,7 +383,6 @@ func check_damage_tile() -> void:
 
 	var feet_position = global_position + Vector2(0, 12)
 
-
 	var positions = [
 		feet_position,
 		feet_position + Vector2(-8, 0),
@@ -432,7 +394,7 @@ func check_damage_tile() -> void:
 
 	for layer_index in range(
 		level.get_layers_count()
-	):
+		):
 
 		for world_position in positions:
 
@@ -505,7 +467,7 @@ func take_damage(
 
 
 	# ==========================================
-	# PERDE UMA VIDA
+	# PERDE VIDA
 	# ==========================================
 
 	if Globals.player_life > 0:
@@ -543,7 +505,7 @@ func take_damage(
 
 
 	# ==========================================
-	# VERMELHO SUAVE
+	# VERMELHO
 	# ==========================================
 
 	animation.modulate = Color(
@@ -573,7 +535,7 @@ func take_damage(
 
 
 	# ==========================================
-	# PEQUENO STUN
+	# STUN
 	# ==========================================
 
 	await get_tree().create_timer(
@@ -674,7 +636,6 @@ func play_victory():
 
 	celebrating = true
 
-	# Para movimento enquanto comemora.
 	can_move = false
 
 	velocity.x = 0
@@ -689,7 +650,7 @@ func play_victory():
 
 
 # ==========================================
-# DANÇA MANUAL - TECLA B
+# DANÇA MANUAL - B
 # ==========================================
 
 func play_dance():
@@ -705,7 +666,6 @@ func play_dance():
 
 	celebrating = true
 
-	# Para o personagem enquanto dança.
 	can_move = false
 
 	velocity.x = 0
@@ -777,8 +737,9 @@ func die():
 	Globals.level_coins = 0
 	Globals.level_score = 0
 
+
 	# ==========================================
-	# RESET DOS 3 TIPOS DE FRAGMENTO
+	# RESET FRAGMENTOS
 	# ==========================================
 
 	Globals.raciocinio_fragments = 0

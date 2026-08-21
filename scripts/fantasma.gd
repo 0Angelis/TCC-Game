@@ -214,7 +214,7 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 	# REBOTE DO PLAYER
 	# ==========================================
 
-	body.velocity.y = -120.0
+	body.velocity.y = -220.0
 
 
 # ==========================================
