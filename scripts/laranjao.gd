@@ -9,6 +9,11 @@ var direction := -1
 
 const SPEED := 50.0
 
+# Tempo para evitar várias viradas seguidas
+const TURN_COOLDOWN := 0.20
+
+var turn_timer := 0.0
+
 
 # ==========================================
 # ESTADO
@@ -92,6 +97,15 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
+	# TIMER DA VIRADA
+	# ==========================================
+
+	if turn_timer > 0.0:
+
+		turn_timer -= delta
+
+
+	# ==========================================
 	# GRAVIDADE
 	# ==========================================
 
@@ -128,14 +142,37 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# DETECTA PAREDE
+	# COLISÕES
 	# ==========================================
 
 	for i in get_slide_collision_count():
 
 		var slide_collision := get_slide_collision(i)
 
+		var collider := slide_collision.get_collider()
+
 		var normal := slide_collision.get_normal()
+
+
+		# ==========================================
+		# COLISÃO COM OUTRO INIMIGO
+		# ==========================================
+
+		if collider != null:
+
+			if collider.is_in_group("enemies"):
+
+				if not is_dead:
+
+					virar()
+
+
+				break
+
+
+		# ==========================================
+		# COLISÃO COM PAREDE
+		# ==========================================
 
 		if abs(normal.x) > 0.5:
 
@@ -145,7 +182,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# ANIMAÇÃO DE ANDAR
+	# ANIMAÇÃO
 	# ==========================================
 
 	if not is_dead:
@@ -169,10 +206,6 @@ func _update_ray_cast() -> void:
 		return
 
 
-	# ==========================================
-	# DETECTOR DO CHÃO
-	# ==========================================
-
 	ray_cast.target_position = Vector2(
 		direction * 18.0,
 		24.0
@@ -192,7 +225,19 @@ func virar() -> void:
 
 
 	# ==========================================
-	# INVERTE DIREÇÃO
+	# EVITA VIRADAS INSTANTÂNEAS
+	# ==========================================
+
+	if turn_timer > 0.0:
+
+		return
+
+
+	turn_timer = TURN_COOLDOWN
+
+
+	# ==========================================
+	# MUDA DIREÇÃO
 	# ==========================================
 
 	direction *= -1
@@ -212,6 +257,13 @@ func virar() -> void:
 	_update_ray_cast()
 
 
+	# ==========================================
+	# PEQUENO IMPULSO PARA A NOVA DIREÇÃO
+	# ==========================================
+
+	velocity.x = direction * SPEED
+
+
 # ==========================================
 # HITBOX
 # ==========================================
@@ -227,6 +279,7 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 	# ==========================================
 
 	if not body.is_in_group("player"):
+
 		return
 
 
@@ -253,10 +306,10 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# REBOTE REDUZIDO
+	# PULO DO PLAYER
 	# ==========================================
 
-	body.velocity.y = -120.0
+	body.velocity.y = -200.0
 
 
 # ==========================================
@@ -338,14 +391,14 @@ func matar_laranja() -> void:
 
 
 	# ==========================================
-	# GUARDA POSIÇÃO ORIGINAL
+	# POSIÇÃO ORIGINAL
 	# ==========================================
 
 	var original_position := animated_sprite.position
 
 
 	# ==========================================
-	# GARANTE ROTAÇÃO ZERO
+	# ROTAÇÃO ZERO
 	# ==========================================
 
 	animated_sprite.rotation_degrees = 0.0
@@ -358,7 +411,6 @@ func matar_laranja() -> void:
 	var jump_tween := create_tween()
 
 	jump_tween.set_parallel(true)
-
 
 	jump_tween.tween_property(
 		animated_sprite,
@@ -395,7 +447,7 @@ func matar_laranja() -> void:
 
 
 	# ==========================================
-	# PEQUENA PAUSA
+	# PAUSA
 	# ==========================================
 
 	await get_tree().create_timer(
@@ -411,7 +463,6 @@ func matar_laranja() -> void:
 
 	fall_tween.set_parallel(true)
 
-
 	fall_tween.tween_property(
 		animated_sprite,
 		"position",
@@ -425,7 +476,6 @@ func matar_laranja() -> void:
 	).set_ease(
 		Tween.EASE_IN
 	)
-
 
 	fall_tween.tween_property(
 		animated_sprite,
@@ -446,7 +496,6 @@ func matar_laranja() -> void:
 
 	fade_tween.set_parallel(true)
 
-
 	fade_tween.tween_property(
 		animated_sprite,
 		"position",
@@ -460,7 +509,6 @@ func matar_laranja() -> void:
 	).set_ease(
 		Tween.EASE_IN
 	)
-
 
 	fade_tween.tween_property(
 		animated_sprite,

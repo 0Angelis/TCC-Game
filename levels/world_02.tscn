@@ -916,7 +916,7 @@ sprite_frames = SubResource("SpriteFrames_sob1t")
 autoplay = "default"
 
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("14_nknj2")]
-position = Vector2(28, 469)
+position = Vector2(36, 470)
 
 [node name="atention" type="Node2D" parent="." unique_id=391080393]
 position = Vector2(-1, 0)

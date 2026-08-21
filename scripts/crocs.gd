@@ -24,6 +24,11 @@ const SCORE_REWARD := 100
 var is_dead := false
 var is_hurt := false
 
+# Evita ficar virando várias vezes seguidas
+var turn_cooldown := 0.0
+
+const TURN_COOLDOWN := 0.20
+
 
 # ==========================================
 # NÓS
@@ -111,6 +116,15 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
+	# COOLDOWN DA VIRADA
+	# ==========================================
+
+	if turn_cooldown > 0.0:
+
+		turn_cooldown -= delta
+
+
+	# ==========================================
 	# GRAVIDADE
 	# ==========================================
 
@@ -167,8 +181,29 @@ func _physics_process(delta: float) -> void:
 
 		var slide_collision := get_slide_collision(i)
 
+		var collider := slide_collision.get_collider()
+
 		var normal := slide_collision.get_normal()
 
+
+		# ==========================================
+		# COLISÃO COM OUTRO INIMIGO
+		# ==========================================
+
+		if collider != null:
+
+			if collider.is_in_group("enemies"):
+
+				virar()
+
+				# Sai imediatamente para não processar
+				# a mesma colisão novamente.
+				break
+
+
+		# ==========================================
+		# COLISÃO COM PAREDE
+		# ==========================================
 
 		if abs(normal.x) > 0.5:
 
@@ -219,17 +254,53 @@ func _update_ray_cast() -> void:
 func virar() -> void:
 
 	if is_dead:
+
 		return
+
 
 	if is_hurt:
+
 		return
 
+
+	# ==========================================
+	# EVITA VIRAR VÁRIAS VEZES
+	# ==========================================
+
+	if turn_cooldown > 0.0:
+
+		return
+
+
+	turn_cooldown = TURN_COOLDOWN
+
+
+	# ==========================================
+	# MUDA DIREÇÃO
+	# ==========================================
 
 	direction *= -1
 
+
+	# ==========================================
+	# VIRA SPRITE
+	# ==========================================
+
 	animated_sprite.flip_h = direction > 0
 
+
+	# ==========================================
+	# ATUALIZA RAYCAST
+	# ==========================================
+
 	_update_ray_cast()
+
+
+	# ==========================================
+	# GARANTE MOVIMENTO
+	# ==========================================
+
+	velocity.x = direction * SPEED
 
 
 # ==========================================
@@ -289,10 +360,12 @@ func hurt() -> void:
 func take_damage() -> void:
 
 	if is_dead:
+
 		return
 
 
 	if is_hurt:
+
 		return
 
 
@@ -350,6 +423,7 @@ func take_damage() -> void:
 		1
 	)
 
+
 	is_hurt = false
 
 
@@ -365,6 +439,7 @@ func take_damage() -> void:
 func matar_crocs() -> void:
 
 	if is_dead:
+
 		return
 
 
