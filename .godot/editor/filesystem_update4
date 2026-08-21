@@ -8,3 +8,4 @@ res://actors/laranjao.tscn
 res://scripts/laranjao.gd
 res://levels/world_02.tscn
 res://scripts/crocs.gd
+res://export_presets.cfg
