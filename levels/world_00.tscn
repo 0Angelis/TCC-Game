@@ -1104,7 +1104,7 @@ scale = Vector2(0.14856458, 0.13)
 texture = ExtResource("32_bu4vl")
 
 [node name="Comandos2" type="Sprite2D" parent="." unique_id=143338269]
-position = Vector2(665.00006, 731.00006)
+position = Vector2(663, 730.00006)
 scale = Vector2(0.134, 0.12)
 texture = ExtResource("34_bi2pd")
 
