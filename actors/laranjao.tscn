@@ -1,0 +1,72 @@
+[gd_scene format=3 uid="uid://blwrqd263j0p1"]
+
+[ext_resource type="Script" uid="uid://cgspje3v7iucv" path="res://scripts/laranjao.gd" id="1_q8i47"]
+[ext_resource type="Texture2D" uid="uid://bdjf0lkot1qa0" path="res://assets/Sprite Pack 2/4 - Robo Pumpkin/Hurt (16 x 16).png" id="2_wmfop"]
+[ext_resource type="Texture2D" uid="uid://d2qomtirnl0kb" path="res://assets/Sprite Pack 2/4 - Robo Pumpkin/Walking (16 x 16).png" id="3_38rj3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uvxbl"]
+atlas = ExtResource("2_wmfop")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rrjft"]
+atlas = ExtResource("3_38rj3")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bn04t"]
+atlas = ExtResource("3_38rj3")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kwvv2"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uvxbl")
+}],
+"loop": 1,
+"name": &"hurt",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rrjft")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bn04t")
+}],
+"loop": 1,
+"name": &"walkin",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q8i47"]
+size = Vector2(18, 13)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wmfop"]
+size = Vector2(13, 3.75)
+
+[node name="laranjao" type="CharacterBody2D" unique_id=142356406]
+collision_layer = 4
+collision_mask = 38
+script = ExtResource("1_q8i47")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1380688352]
+position = Vector2(0, -2)
+scale = Vector2(1.25, 1.1875)
+sprite_frames = SubResource("SpriteFrames_kwvv2")
+animation = &"hurt"
+autoplay = "walkin"
+
+[node name="collision" type="CollisionShape2D" parent="." unique_id=192618243]
+position = Vector2(0, 0.5)
+shape = SubResource("RectangleShape2D_q8i47")
+
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=428493282]
+target_position = Vector2(-18, 0)
+collision_mask = 3
+
+[node name="Area2D" type="Area2D" parent="." unique_id=229960950]
+
+[node name="hitbox" type="CollisionShape2D" parent="Area2D" unique_id=730833460]
+position = Vector2(0.5, -8)
+shape = SubResource("RectangleShape2D_wmfop")
+debug_color = Color(0.97, 0.048500013, 0.46317485, 0.21960784)

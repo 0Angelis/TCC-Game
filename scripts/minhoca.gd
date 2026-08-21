@@ -11,7 +11,7 @@ const SPEED := 30.0
 
 
 # ==========================================
-# ESTADOS
+# ESTADO
 # ==========================================
 
 var is_dead := false
@@ -25,6 +25,7 @@ var is_dead := false
 @onready var collision: CollisionShape2D = $collision
 @onready var ray_cast: RayCast2D = $RayCast2D
 @onready var hitbox: Area2D = $Area2D
+@onready var hitbox_collision: CollisionShape2D = $Area2D/hitbox
 
 
 # ==========================================
@@ -43,6 +44,12 @@ func _ready() -> void:
 
 	_update_ray_cast()
 
+	if animated_sprite.sprite_frames != null:
+
+		if animated_sprite.sprite_frames.has_animation("walkin"):
+
+			animated_sprite.play("walkin")
+
 	hitbox.monitoring = true
 	hitbox.monitorable = true
 
@@ -54,12 +61,6 @@ func _ready() -> void:
 			_on_hitbox_body_entered
 		)
 
-	if animated_sprite.sprite_frames != null:
-
-		if animated_sprite.sprite_frames.has_animation("idle"):
-
-			animated_sprite.play("idle")
-
 
 # ==========================================
 # FÍSICA
@@ -70,26 +71,11 @@ func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 
-
-	# ==========================================
-	# GRAVIDADE
-	# ==========================================
-
 	if not is_on_floor():
 
 		velocity += get_gravity() * delta
 
-
-	# ==========================================
-	# ATUALIZA RAYCAST
-	# ==========================================
-
 	_update_ray_cast()
-
-
-	# ==========================================
-	# FIM DA PLATAFORMA
-	# ==========================================
 
 	if is_on_floor():
 
@@ -97,19 +83,9 @@ func _physics_process(delta: float) -> void:
 
 			virar()
 
-
-	# ==========================================
-	# MOVIMENTO
-	# ==========================================
-
 	velocity.x = direction * SPEED
 
 	move_and_slide()
-
-
-	# ==========================================
-	# COLISÃO COM PAREDE
-	# ==========================================
 
 	for i in get_slide_collision_count():
 
@@ -123,31 +99,25 @@ func _physics_process(delta: float) -> void:
 
 			break
 
-
-	# ==========================================
-	# ANIMAÇÃO
-	# ==========================================
-
 	if not is_dead:
 
 		if animated_sprite.sprite_frames != null:
 
-			if animated_sprite.sprite_frames.has_animation("idle"):
+			if animated_sprite.sprite_frames.has_animation("walkin"):
 
-				if animated_sprite.animation != "idle":
+				if animated_sprite.animation != "walkin":
 
-					animated_sprite.play("idle")
+					animated_sprite.play("walkin")
 
 
 # ==========================================
-# ATUALIZA RAYCAST
+# RAYCAST
 # ==========================================
 
 func _update_ray_cast() -> void:
 
 	if ray_cast == null:
 		return
-
 
 	ray_cast.target_position = Vector2(
 		direction * 18.0,
@@ -166,7 +136,6 @@ func virar() -> void:
 	if is_dead:
 		return
 
-
 	direction *= -1
 
 	animated_sprite.flip_h = direction > 0
@@ -175,7 +144,7 @@ func virar() -> void:
 
 
 # ==========================================
-# HITBOX DA CABEÇA
+# HITBOX
 # ==========================================
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
@@ -183,36 +152,13 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 	if is_dead:
 		return
 
-
 	if not body.is_in_group("player"):
 		return
 
-
-	# ==========================================
-	# PLAYER PRECISA ESTAR ACIMA
-	# ==========================================
-
 	if body.global_position.y >= global_position.y:
-
 		return
 
-
-	# ==========================================
-	# MORTE
-	# ==========================================
-
-	print("==============================")
-	print("PLAYER PISOU NO FANTASMA!")
-	print("FANTASMA DERROTADO!")
-	print("==============================")
-
-
-	matar_fantasma()
-
-
-	# ==========================================
-	# REBOTE DO PLAYER
-	# ==========================================
+	matar_minhoca()
 
 	body.velocity.y = -120.0
 
@@ -221,126 +167,136 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 # MORTE
 # ==========================================
 
-func matar_fantasma() -> void:
+func matar_minhoca() -> void:
 
 	if is_dead:
 		return
-
 
 	is_dead = true
 
 
 	# ==========================================
-	# SCORE
+	# +50 SCORE
 	# ==========================================
 
 	Globals.score += 50
 
 
-	# ==========================================
-	# PARA TUDO
-	# ==========================================
+	print("MINHOCA DERROTADA!")
+	print("+50 SCORE")
+	print("SCORE ATUAL: ", Globals.score)
+
 
 	velocity = Vector2.ZERO
 
 	set_physics_process(false)
-
-
-	# ==========================================
-	# DESATIVA COLISÃO
-	# ==========================================
 
 	collision.set_deferred(
 		"disabled",
 		true
 	)
 
-
-	# ==========================================
-	# DESATIVA HITBOX
-	# ==========================================
-
 	hitbox.set_deferred(
 		"monitoring",
 		false
 	)
 
-
-	# ==========================================
-	# DESATIVA RAYCAST
-	# ==========================================
+	hitbox_collision.set_deferred(
+		"disabled",
+		true
+	)
 
 	ray_cast.enabled = false
 
-
-	# ==========================================
-	# MANTÉM SPRITE VISÍVEL
-	# ==========================================
-
 	animated_sprite.visible = true
 
+	animated_sprite.play("hurt")
 
-	# ==========================================
-	# ANIMAÇÃO DE MORTE
-	# ==========================================
+	var original_position := animated_sprite.position
 
-	var tween := create_tween()
+	animated_sprite.rotation_degrees = 0.0
 
-	tween.set_parallel(true)
+	var jump_tween := create_tween()
 
+	jump_tween.set_parallel(true)
 
-	# Gira
-
-	tween.tween_property(
+	jump_tween.tween_property(
 		animated_sprite,
-		"rotation_degrees",
-		360.0,
-		0.9
+		"position",
+		original_position + Vector2(0, -5),
+		0.18
 	).set_trans(
 		Tween.TRANS_QUAD
 	).set_ease(
-		Tween.EASE_IN_OUT
+		Tween.EASE_OUT
 	)
 
-
-	# Cai um pouco
-
-	tween.tween_property(
+	jump_tween.tween_property(
 		animated_sprite,
-		"position:y",
-		animated_sprite.position.y + 28.0,
-		0.9
+		"rotation_degrees",
+		180.0,
+		0.18
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+	await jump_tween.finished
+
+	await get_tree().create_timer(0.04).timeout
+
+	var fall_tween := create_tween()
+
+	fall_tween.set_parallel(true)
+
+	fall_tween.tween_property(
+		animated_sprite,
+		"position",
+		original_position + Vector2(0, 14),
+		0.20
 	).set_trans(
 		Tween.TRANS_QUAD
 	).set_ease(
 		Tween.EASE_IN
 	)
 
+	fall_tween.tween_property(
+		animated_sprite,
+		"rotation_degrees",
+		180.0,
+		0.20
+	)
 
-	# Fica transparente
+	await fall_tween.finished
 
-	tween.tween_property(
+	var fade_tween := create_tween()
+
+	fade_tween.set_parallel(true)
+
+	fade_tween.tween_property(
+		animated_sprite,
+		"position",
+		original_position + Vector2(0, 18),
+		0.12
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_IN
+	)
+
+	fade_tween.tween_property(
 		animated_sprite,
 		"modulate:a",
 		0.0,
-		0.9
+		0.12
 	).set_trans(
 		Tween.TRANS_QUAD
 	).set_ease(
 		Tween.EASE_IN
 	)
 
-
-	# ==========================================
-	# ESPERA
-	# ==========================================
-
-	await tween.finished
-
-
-	# ==========================================
-	# REMOVE
-	# ==========================================
+	await fade_tween.finished
 
 	queue_free()
 
@@ -351,4 +307,4 @@ func matar_fantasma() -> void:
 
 func die() -> void:
 
-	matar_fantasma()
+	matar_minhoca()

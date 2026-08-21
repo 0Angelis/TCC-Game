@@ -26,10 +26,10 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_scsv4"]
-size = Vector2(12, 10)
+size = Vector2(15, 10)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uxckq"]
-size = Vector2(12, 3.75)
+size = Vector2(10, 3.75)
 
 [node name="fantasma" type="CharacterBody2D" unique_id=725779105]
 collision_layer = 4
@@ -37,12 +37,14 @@ collision_mask = 38
 script = ExtResource("1_ub2c7")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1811955416]
+position = Vector2(0, -2)
+scale = Vector2(1.25, 1.1875)
 sprite_frames = SubResource("SpriteFrames_sob1t")
 animation = &"idle"
 autoplay = "idle"
 
 [node name="collision" type="CollisionShape2D" parent="." unique_id=568610063]
-position = Vector2(0, 2)
+position = Vector2(-0.5, 2)
 shape = SubResource("RectangleShape2D_scsv4")
 
 [node name="RayCast2D" type="RayCast2D" parent="." unique_id=1259169729]
@@ -52,6 +54,6 @@ collision_mask = 3
 [node name="Area2D" type="Area2D" parent="." unique_id=448673243]
 
 [node name="hitbox" type="CollisionShape2D" parent="Area2D" unique_id=199698192]
-position = Vector2(0, -4.125)
+position = Vector2(0, -5)
 shape = SubResource("RectangleShape2D_uxckq")
 debug_color = Color(0.97, 0.048500013, 0.46317485, 0.21960784)

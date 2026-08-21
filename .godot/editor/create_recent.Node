@@ -1,6 +1,6 @@
-Area2D
-AnimatedSprite2D
 CharacterBody2D
+AnimatedSprite2D
+Area2D
 CenterContainer
 HBoxContainer
 Button

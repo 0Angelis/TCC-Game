@@ -9,3 +9,14 @@ res://scripts/player.gd
 res://scripts/stroop_challenge.gd
 res://actors/crocs.tscn
 res://scripts/crocs.gd
+res://scripts/eneme_2.gd
+res://scripts/enemy.gd
+res://levels/world_01.tscn
+res://actors/enemy.tscn
+res://actors/eneme_2.tscn
+res://scripts/fantasma.gd
+res://actors/fantasma.tscn
+res://actors/minhoca.tscn
+res://scripts/laranjao.gd
+res://scripts/minhoca.gd
+res://actors/laranjao.tscn

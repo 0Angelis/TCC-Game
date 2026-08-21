@@ -7,11 +7,11 @@ extends CharacterBody2D
 
 var direction := -1
 
-const SPEED := 30.0
+const SPEED := 50.0
 
 
 # ==========================================
-# ESTADOS
+# ESTADO
 # ==========================================
 
 var is_dead := false
@@ -25,6 +25,7 @@ var is_dead := false
 @onready var collision: CollisionShape2D = $collision
 @onready var ray_cast: RayCast2D = $RayCast2D
 @onready var hitbox: Area2D = $Area2D
+@onready var hitbox_collision: CollisionShape2D = $Area2D/hitbox
 
 
 # ==========================================
@@ -35,13 +36,38 @@ func _ready() -> void:
 
 	add_to_group("enemies")
 
+	# ==========================================
+	# DIREÇÃO INICIAL
+	# ==========================================
+
 	direction = -1
 
 	animated_sprite.flip_h = false
 
+
+	# ==========================================
+	# RAYCAST
+	# ==========================================
+
 	ray_cast.enabled = true
 
 	_update_ray_cast()
+
+
+	# ==========================================
+	# ANIMAÇÃO
+	# ==========================================
+
+	if animated_sprite.sprite_frames != null:
+
+		if animated_sprite.sprite_frames.has_animation("walkin"):
+
+			animated_sprite.play("walkin")
+
+
+	# ==========================================
+	# HITBOX
+	# ==========================================
 
 	hitbox.monitoring = true
 	hitbox.monitorable = true
@@ -53,12 +79,6 @@ func _ready() -> void:
 		hitbox.body_entered.connect(
 			_on_hitbox_body_entered
 		)
-
-	if animated_sprite.sprite_frames != null:
-
-		if animated_sprite.sprite_frames.has_animation("idle"):
-
-			animated_sprite.play("idle")
 
 
 # ==========================================
@@ -88,7 +108,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# FIM DA PLATAFORMA
+	# DETECTA FIM DO PISO
 	# ==========================================
 
 	if is_on_floor():
@@ -108,7 +128,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# COLISÃO COM PAREDE
+	# DETECTA PAREDE
 	# ==========================================
 
 	for i in get_slide_collision_count():
@@ -125,18 +145,18 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# ANIMAÇÃO
+	# ANIMAÇÃO DE ANDAR
 	# ==========================================
 
 	if not is_dead:
 
 		if animated_sprite.sprite_frames != null:
 
-			if animated_sprite.sprite_frames.has_animation("idle"):
+			if animated_sprite.sprite_frames.has_animation("walkin"):
 
-				if animated_sprite.animation != "idle":
+				if animated_sprite.animation != "walkin":
 
-					animated_sprite.play("idle")
+					animated_sprite.play("walkin")
 
 
 # ==========================================
@@ -148,6 +168,10 @@ func _update_ray_cast() -> void:
 	if ray_cast == null:
 		return
 
+
+	# ==========================================
+	# DETECTOR DO CHÃO
+	# ==========================================
 
 	ray_cast.target_position = Vector2(
 		direction * 18.0,
@@ -167,15 +191,29 @@ func virar() -> void:
 		return
 
 
+	# ==========================================
+	# INVERTE DIREÇÃO
+	# ==========================================
+
 	direction *= -1
 
+
+	# ==========================================
+	# VIRA SPRITE
+	# ==========================================
+
 	animated_sprite.flip_h = direction > 0
+
+
+	# ==========================================
+	# ATUALIZA RAYCAST
+	# ==========================================
 
 	_update_ray_cast()
 
 
 # ==========================================
-# HITBOX DA CABEÇA
+# HITBOX
 # ==========================================
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
@@ -183,6 +221,10 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 	if is_dead:
 		return
 
+
+	# ==========================================
+	# SÓ REAGE AO PLAYER
+	# ==========================================
 
 	if not body.is_in_group("player"):
 		return
@@ -198,20 +240,20 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# MORTE
+	# LARANJA DERROTADO
 	# ==========================================
 
 	print("==============================")
-	print("PLAYER PISOU NO FANTASMA!")
-	print("FANTASMA DERROTADO!")
+	print("PLAYER PISOU NO LARANJA!")
+	print("LARANJA DERROTADO!")
 	print("==============================")
 
 
-	matar_fantasma()
+	matar_laranja()
 
 
 	# ==========================================
-	# REBOTE DO PLAYER
+	# REBOTE REDUZIDO
 	# ==========================================
 
 	body.velocity.y = -120.0
@@ -221,7 +263,7 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 # MORTE
 # ==========================================
 
-func matar_fantasma() -> void:
+func matar_laranja() -> void:
 
 	if is_dead:
 		return
@@ -231,10 +273,20 @@ func matar_fantasma() -> void:
 
 
 	# ==========================================
-	# SCORE
+	# +100 SCORE
 	# ==========================================
 
-	Globals.score += 50
+	Globals.score += 100
+
+
+	print("==============================")
+	print("LARANJA DERROTADO!")
+	print("+100 SCORE")
+	print(
+		"SCORE ATUAL: ",
+		Globals.score
+	)
+	print("==============================")
 
 
 	# ==========================================
@@ -265,6 +317,11 @@ func matar_fantasma() -> void:
 		false
 	)
 
+	hitbox_collision.set_deferred(
+		"disabled",
+		true
+	)
+
 
 	# ==========================================
 	# DESATIVA RAYCAST
@@ -274,42 +331,95 @@ func matar_fantasma() -> void:
 
 
 	# ==========================================
-	# MANTÉM SPRITE VISÍVEL
-	# ==========================================
-
-	animated_sprite.visible = true
-
-
-	# ==========================================
 	# ANIMAÇÃO DE MORTE
 	# ==========================================
 
-	var tween := create_tween()
-
-	tween.set_parallel(true)
+	animated_sprite.play("hurt")
 
 
-	# Gira
+	# ==========================================
+	# GUARDA POSIÇÃO ORIGINAL
+	# ==========================================
 
-	tween.tween_property(
+	var original_position := animated_sprite.position
+
+
+	# ==========================================
+	# GARANTE ROTAÇÃO ZERO
+	# ==========================================
+
+	animated_sprite.rotation_degrees = 0.0
+
+
+	# ==========================================
+	# SOBE UM POUCO
+	# ==========================================
+
+	var jump_tween := create_tween()
+
+	jump_tween.set_parallel(true)
+
+
+	jump_tween.tween_property(
 		animated_sprite,
-		"rotation_degrees",
-		360.0,
-		0.9
+		"position",
+		original_position + Vector2(
+			0,
+			-5
+		),
+		0.18
 	).set_trans(
 		Tween.TRANS_QUAD
 	).set_ease(
-		Tween.EASE_IN_OUT
+		Tween.EASE_OUT
 	)
 
 
-	# Cai um pouco
+	# ==========================================
+	# VIRA DE CABEÇA PARA BAIXO
+	# ==========================================
 
-	tween.tween_property(
+	jump_tween.tween_property(
 		animated_sprite,
-		"position:y",
-		animated_sprite.position.y + 28.0,
-		0.9
+		"rotation_degrees",
+		180.0,
+		0.18
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+
+	await jump_tween.finished
+
+
+	# ==========================================
+	# PEQUENA PAUSA
+	# ==========================================
+
+	await get_tree().create_timer(
+		0.04
+	).timeout
+
+
+	# ==========================================
+	# CAI
+	# ==========================================
+
+	var fall_tween := create_tween()
+
+	fall_tween.set_parallel(true)
+
+
+	fall_tween.tween_property(
+		animated_sprite,
+		"position",
+		original_position + Vector2(
+			0,
+			14
+		),
+		0.20
 	).set_trans(
 		Tween.TRANS_QUAD
 	).set_ease(
@@ -317,13 +427,46 @@ func matar_fantasma() -> void:
 	)
 
 
-	# Fica transparente
+	fall_tween.tween_property(
+		animated_sprite,
+		"rotation_degrees",
+		180.0,
+		0.20
+	)
 
-	tween.tween_property(
+
+	await fall_tween.finished
+
+
+	# ==========================================
+	# DESAPARECE
+	# ==========================================
+
+	var fade_tween := create_tween()
+
+	fade_tween.set_parallel(true)
+
+
+	fade_tween.tween_property(
+		animated_sprite,
+		"position",
+		original_position + Vector2(
+			0,
+			18
+		),
+		0.12
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_IN
+	)
+
+
+	fade_tween.tween_property(
 		animated_sprite,
 		"modulate:a",
 		0.0,
-		0.9
+		0.12
 	).set_trans(
 		Tween.TRANS_QUAD
 	).set_ease(
@@ -331,11 +474,7 @@ func matar_fantasma() -> void:
 	)
 
 
-	# ==========================================
-	# ESPERA
-	# ==========================================
-
-	await tween.finished
+	await fade_tween.finished
 
 
 	# ==========================================
@@ -351,4 +490,4 @@ func matar_fantasma() -> void:
 
 func die() -> void:
 
-	matar_fantasma()
+	matar_laranja()
