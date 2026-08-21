@@ -777,7 +777,13 @@ func die():
 	Globals.level_coins = 0
 	Globals.level_score = 0
 
+	# ==========================================
+	# RESET DOS 3 TIPOS DE FRAGMENTO
+	# ==========================================
+
 	Globals.raciocinio_fragments = 0
+	Globals.atencao_fragments = 0
+	Globals.memoria_fragments = 0
 
 
 	print("==============================")
@@ -791,8 +797,16 @@ func die():
 		Globals.score
 	)
 	print(
-		"FRAGMENTOS RESETADOS: ",
+		"FRAGMENTOS DE RACIOCÍNIO: ",
 		Globals.raciocinio_fragments
+	)
+	print(
+		"FRAGMENTOS DE ATENÇÃO: ",
+		Globals.atencao_fragments
+	)
+	print(
+		"FRAGMENTOS DE MEMÓRIA: ",
+		Globals.memoria_fragments
 	)
 	print("==============================")
 

@@ -1,14 +1,14 @@
+Area2D
+AnimatedSprite2D
+CharacterBody2D
 CenterContainer
 HBoxContainer
 Button
 TextureRect
 Control
-Area2D
 CollisionShape2D
 Node2D
-AnimatedSprite2D
 Label
 VBoxContainer
 ColorRect
 RayCast2D
-CharacterBody2D

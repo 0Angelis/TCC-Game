@@ -1,0 +1,102 @@
+[gd_scene format=3 uid="uid://bnmdsw7v24nnn"]
+
+[ext_resource type="Script" uid="uid://2wkvxfp3d0hc" path="res://scripts/crocs.gd" id="1_b6je6"]
+[ext_resource type="Texture2D" uid="uid://cou60md85v8fl" path="res://assets/Sprite Pack 5/6 - Mr. Chomps/Hurt_(32 x 32).png" id="2_t04wj"]
+[ext_resource type="Texture2D" uid="uid://cc14fx6xmo5dc" path="res://assets/Sprite Pack 5/6 - Mr. Chomps/Crawling_(32 x 32).png" id="3_7pg74"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sd8hs"]
+atlas = ExtResource("2_t04wj")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n6tg3"]
+atlas = ExtResource("3_7pg74")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y314h"]
+atlas = ExtResource("3_7pg74")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kldef"]
+atlas = ExtResource("3_7pg74")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2hl5i"]
+atlas = ExtResource("3_7pg74")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2pas5"]
+atlas = ExtResource("3_7pg74")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rwdo0"]
+atlas = ExtResource("3_7pg74")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sob1t"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sd8hs")
+}],
+"loop": 1,
+"name": &"hurt",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n6tg3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y314h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kldef")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2hl5i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2pas5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rwdo0")
+}],
+"loop": 1,
+"name": &"walking",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5kqm5"]
+size = Vector2(29.367346, 13.087584)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vjkwa"]
+size = Vector2(26, 4.875)
+
+[node name="crocs" type="CharacterBody2D" unique_id=836021135]
+light_mask = 4
+visibility_layer = 38
+script = ExtResource("1_b6je6")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2105101646]
+scale = Vector2(1, 0.918)
+sprite_frames = SubResource("SpriteFrames_sob1t")
+animation = &"walking"
+autoplay = "walking"
+
+[node name="collision" type="CollisionShape2D" parent="." unique_id=1692084971]
+position = Vector2(-1, 9)
+scale = Vector2(0.99999994, 0.9179999)
+shape = SubResource("RectangleShape2D_5kqm5")
+
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=1806203309]
+position = Vector2(-0.32653087, 6.130201)
+scale = Vector2(1, 0.918)
+target_position = Vector2(-21.22449, 0.43333197)
+collision_mask = 3
+
+[node name="Area2D" type="Area2D" parent="." unique_id=934650501]
+
+[node name="hitbox" type="CollisionShape2D" parent="Area2D" unique_id=1274684900]
+position = Vector2(-1, 2.4375)
+shape = SubResource("RectangleShape2D_vjkwa")
+debug_color = Color(0.97, 0.048500013, 0.46317485, 0.21960784)
