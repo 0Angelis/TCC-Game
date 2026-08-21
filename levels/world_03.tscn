@@ -18,9 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://dyixm1inxu0cr" path="res://assets/Seasonal Tilesets/1 - Grassland/Background parts/3 - Cloud_cover_1.png" id="19_6phi3"]
 [ext_resource type="Texture2D" uid="uid://b2n1d5icao2jf" path="res://assets/stringstar fields/background_0.png" id="20_3nr0m"]
 [ext_resource type="PackedScene" uid="uid://ct4nxdqyghxxn" path="res://prefabs/coin.tscn" id="20_bwtjd"]
-[ext_resource type="PackedScene" uid="uid://vloijhvrq35x" path="res://actors/enemy.tscn" id="21_36tbm"]
 [ext_resource type="Texture2D" uid="uid://djotnxryng31s" path="res://assets/stringstar fields/background_1.png" id="21_85nfd"]
-[ext_resource type="PackedScene" uid="uid://c0djf04oijatf" path="res://actors/eneme_2.tscn" id="22_yjlik"]
 [ext_resource type="Texture2D" uid="uid://c2pm4jtys3crs" path="res://assets/stringstar fields/background_2.png" id="23_85nfd"]
 [ext_resource type="PackedScene" uid="uid://8keuqw3et5uj" path="res://prefabs/moving_platform.tscn" id="23_kngwo"]
 [ext_resource type="PackedScene" uid="uid://c05me6gpn8c70" path="res://prefabs/goal.tscn" id="24_rja6n"]
@@ -800,92 +798,6 @@ position = Vector2(1816, 710)
 
 [node name="coin23" parent="coins" unique_id=416405077 instance=ExtResource("20_bwtjd")]
 position = Vector2(3957, 545)
-
-[node name="enemys" type="Node2D" parent="." unique_id=571055843]
-position = Vector2(754, 655)
-
-[node name="enemy" parent="enemys" unique_id=310052193 instance=ExtResource("21_36tbm")]
-position = Vector2(51, -2)
-collision_layer = 6
-
-[node name="eneme2" parent="enemys" unique_id=1906887308 instance=ExtResource("22_yjlik")]
-position = Vector2(783, 4)
-collision_layer = 6
-collision_mask = 2
-
-[node name="eneme3" parent="enemys" unique_id=892555498 instance=ExtResource("22_yjlik")]
-position = Vector2(276, -349)
-collision_layer = 6
-collision_mask = 2
-
-[node name="enemy3" parent="enemys" unique_id=1872588236 instance=ExtResource("21_36tbm")]
-position = Vector2(2367, 142)
-collision_layer = 6
-
-[node name="enemy4" parent="enemys" unique_id=15830460 instance=ExtResource("21_36tbm")]
-position = Vector2(277, -246)
-collision_layer = 6
-
-[node name="eneme4" parent="enemys" unique_id=840832355 instance=ExtResource("22_yjlik")]
-position = Vector2(263, 5)
-collision_layer = 6
-collision_mask = 2
-
-[node name="eneme5" parent="enemys" unique_id=2122786752 instance=ExtResource("22_yjlik")]
-position = Vector2(1187, 0)
-collision_layer = 6
-collision_mask = 2
-
-[node name="enemy5" parent="enemys" unique_id=1602903798 instance=ExtResource("21_36tbm")]
-position = Vector2(941, -3)
-collision_layer = 6
-
-[node name="enemy6" parent="enemys" unique_id=587824184 instance=ExtResource("21_36tbm")]
-position = Vector2(101, -436)
-collision_layer = 6
-
-[node name="eneme6" parent="enemys" unique_id=666653096 instance=ExtResource("22_yjlik")]
-position = Vector2(-173, -208)
-collision_layer = 6
-collision_mask = 2
-
-[node name="eneme7" parent="enemys" unique_id=2143564980 instance=ExtResource("22_yjlik")]
-position = Vector2(-124, -208)
-collision_layer = 6
-collision_mask = 2
-
-[node name="eneme8" parent="enemys" unique_id=1515860791 instance=ExtResource("22_yjlik")]
-position = Vector2(327, -301)
-collision_layer = 6
-collision_mask = 2
-
-[node name="eneme9" parent="enemys" unique_id=217297880 instance=ExtResource("22_yjlik")]
-position = Vector2(2561, -73)
-collision_layer = 6
-collision_mask = 2
-
-[node name="eneme10" parent="enemys" unique_id=1427781189 instance=ExtResource("22_yjlik")]
-position = Vector2(2678, -75)
-collision_layer = 6
-collision_mask = 2
-
-[node name="eneme11" parent="enemys" unique_id=681805868 instance=ExtResource("22_yjlik")]
-position = Vector2(2805, -75)
-collision_layer = 6
-collision_mask = 2
-
-[node name="eneme12" parent="enemys" unique_id=637211108 instance=ExtResource("22_yjlik")]
-position = Vector2(2932, -74)
-collision_layer = 6
-collision_mask = 2
-
-[node name="enemy7" parent="enemys" unique_id=790747724 instance=ExtResource("21_36tbm")]
-position = Vector2(1709, 108)
-collision_layer = 6
-
-[node name="enemy8" parent="enemys" unique_id=504386501 instance=ExtResource("21_36tbm")]
-position = Vector2(1810, 174)
-collision_layer = 6
 
 [node name="platforms" type="Node2D" parent="." unique_id=1625934543]
 visible = false
