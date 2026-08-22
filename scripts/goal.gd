@@ -1,257 +1,600 @@
 extends Area2D
 
 
-@onready var transition = $"../transition"
+# =========================================================
+# TRANSIÇÃO
+# =========================================================
+
+var transition = null
 
 
-# ==========================================
+# =========================================================
 # PRÓXIMA FASE
-# ==========================================
+# =========================================================
 
-@export_file("*.tscn") var next_level: String = ""
+@export_file("*.tscn")
+var next_level: String = ""
 
 
-# ==========================================
+# =========================================================
+# LABEL DO CONTADOR
+# =========================================================
+
+var fragment_label: Label = null
+
+
+# =========================================================
 # CONTROLE
-# ==========================================
+# =========================================================
 
-var can_change_scene: bool = true
+var can_change_scene := true
 
 
-# ==========================================
-# VERIFICA SE É O TUTORIAL
-# ==========================================
+# =========================================================
+# READY
+# =========================================================
 
-func is_tutorial() -> bool:
+func _ready() -> void:
+
+	# =====================================================
+	# PROCURA TRANSIÇÃO
+	# =====================================================
+
+	var current_scene := get_tree().current_scene
+
+
+	if current_scene != null:
+
+		transition = current_scene.find_child(
+			"transition",
+			true,
+			false
+		)
+
+
+	# =====================================================
+	# PROCURA O LABEL
+	# =====================================================
+
+	fragment_label = find_child(
+		"Label",
+		true,
+		false
+	) as Label
+
+
+	# =====================================================
+	# CASO NÃO ACHE "Label",
+	# PROCURA QUALQUER LABEL DESCENDENTE
+	# =====================================================
+
+	if fragment_label == null:
+
+		fragment_label = _find_first_label(
+			self
+		)
+
+
+	# =====================================================
+	# MONITORAMENTO
+	# =====================================================
+
+	monitoring = true
+
+	monitorable = true
+
+
+	# =====================================================
+	# CONECTA PLAYER
+	# =====================================================
+
+	if not body_entered.is_connected(
+		_on_body_entered
+	):
+
+		body_entered.connect(
+			_on_body_entered
+		)
+
+
+	# =====================================================
+	# ATUALIZA TEXTO
+	# =====================================================
+
+	_update_fragment_label()
+
+
+# =========================================================
+# PROCURA PRIMEIRO LABEL
+# =========================================================
+
+func _find_first_label(
+	node: Node
+) -> Label:
+
+	for child in node.get_children():
+
+		if child is Label:
+
+			return child as Label
+
+
+		var found := _find_first_label(
+			child
+		)
+
+
+		if found != null:
+
+			return found
+
+
+	return null
+
+
+# =========================================================
+# PROCESS
+# =========================================================
+
+func _process(_delta: float) -> void:
+
+	_update_fragment_label()
+
+
+# =========================================================
+# IDENTIFICA MUNDO ATUAL
+# =========================================================
+
+func get_current_world() -> int:
 
 	var current_scene := get_tree().current_scene
 
-	if current_scene == null:
-
-		return false
-
-	return current_scene.scene_file_path.ends_with(
-		"world_00.tscn"
-	)
-
-
-# ==========================================
-# PEGA O TIPO DE FRAGMENTO DA FASE
-# ==========================================
-
-func get_fragment_count() -> int:
-
-	var current_scene := get_tree().current_scene
 
 	if current_scene == null:
 
 		return 0
 
 
-	var scene_path := current_scene.scene_file_path
+	var path := (
+		current_scene.scene_file_path
+	)
 
 
-	# ==========================================
-	# MUNDO 1 → RACIOCÍNIO
-	# ==========================================
+	# =====================================================
+	# WORLD 00
+	# =====================================================
 
-	if scene_path.ends_with("world_01.tscn"):
+	if path.to_lower().contains(
+		"world_00"
+	):
 
-		return Globals.raciocinio_fragments
-
-
-	# ==========================================
-	# MUNDO 2 → ATENÇÃO
-	# ==========================================
-
-	if scene_path.ends_with("world_02.tscn"):
-
-		return Globals.atencao_fragments
+		return 0
 
 
-	# ==========================================
-	# MUNDO 3 → MEMÓRIA
-	# ==========================================
+	# =====================================================
+	# WORLD 01
+	# =====================================================
 
-	if scene_path.ends_with("world_03.tscn"):
+	if path.to_lower().contains(
+		"world_01"
+	):
 
-		return Globals.memoria_fragments
+		return 1
+
+
+	# =====================================================
+	# WORLD 02
+	# =====================================================
+
+	if path.to_lower().contains(
+		"world_02"
+	):
+
+		return 2
+
+
+	# =====================================================
+	# WORLD 03
+	# =====================================================
+
+	if path.to_lower().contains(
+		"world_03"
+	):
+
+		return 3
+
+
+	# =====================================================
+	# SEGURANÇA
+	# =====================================================
+
+	return 0
+
+
+# =========================================================
+# QUANTIDADE NECESSÁRIA
+# =========================================================
+
+func get_required_fragments() -> int:
+
+	match get_current_world():
+
+		0:
+			return 0
+
+		1:
+			return 5
+
+		2:
+			return 3
+
+		3:
+			return 5
 
 
 	return 0
 
 
-# ==========================================
-# NOME DO TIPO
-# ==========================================
+# =========================================================
+# PEGA FRAGMENTOS DA FASE
+# =========================================================
+
+func get_fragment_count() -> int:
+
+	match get_current_world():
+
+		# =================================================
+		# WORLD 01
+		# RACIOCÍNIO
+		# =================================================
+
+		1:
+			return Globals.raciocinio_fragments
+
+
+		# =================================================
+		# WORLD 02
+		# ATENÇÃO
+		# =================================================
+
+		2:
+			return Globals.atencao_fragments
+
+
+		# =================================================
+		# WORLD 03
+		# MEMÓRIA
+		# =================================================
+
+		3:
+			return Globals.memoria_fragments
+
+
+	return 0
+
+
+# =========================================================
+# NOME DO FRAGMENTO
+# =========================================================
 
 func get_fragment_name() -> String:
 
-	var current_scene := get_tree().current_scene
+	match get_current_world():
 
-	if current_scene == null:
+		1:
+			return "RACIOCÍNIO"
 
-		return "Fragmentos"
+		2:
+			return "ATENÇÃO"
 
-
-	var scene_path := current_scene.scene_file_path
-
-
-	if scene_path.ends_with("world_01.tscn"):
-
-		return "Raciocínio"
+		3:
+			return "MEMÓRIA"
 
 
-	if scene_path.ends_with("world_02.tscn"):
-
-		return "Atenção"
+	return "FRAGMENTOS"
 
 
-	if scene_path.ends_with("world_03.tscn"):
+# =========================================================
+# ATUALIZA LABEL DO PORTAL
+# =========================================================
 
-		return "Memória"
+func _update_fragment_label() -> void:
 
-
-	return "Fragmentos"
-
-
-# ==========================================
-# PLAYER ENTROU NO PORTAL
-# ==========================================
-
-func _on_body_entered(body: Node2D) -> void:
-
-	if not body.is_in_group("player"):
+	if fragment_label == null:
 
 		return
 
+
+	# =====================================================
+	# QUANTIDADE NECESSÁRIA
+	# =====================================================
+
+	var required := (
+		get_required_fragments()
+	)
+
+
+	# =====================================================
+	# WORLD 00
+	# =====================================================
+	# Não precisa mostrar contador.
+
+	if required <= 0:
+
+		fragment_label.text = ""
+
+		return
+
+
+	# =====================================================
+	# QUANTIDADE ATUAL
+	# =====================================================
+
+	var current := (
+		get_fragment_count()
+	)
+
+
+	# =====================================================
+	# LIMITA
+	# =====================================================
+
+	current = clamp(
+		current,
+		0,
+		required
+	)
+
+
+	# =====================================================
+	# MOSTRA
+	# =====================================================
+
+	fragment_label.text = (
+		str(current)
+		+ "/"
+		+ str(required)
+	)
+
+
+	# =====================================================
+	# VISUAL
+	# =====================================================
+
+	fragment_label.visible = true
+
+	fragment_label.modulate = Color.WHITE
+
+	fragment_label.self_modulate = Color.WHITE
+
+
+	fragment_label.add_theme_color_override(
+		"font_color",
+		Color.WHITE
+	)
+
+
+	fragment_label.add_theme_color_override(
+		"font_outline_color",
+		Color.BLACK
+	)
+
+
+	fragment_label.add_theme_constant_override(
+		"outline_size",
+		3
+	)
+
+
+# =========================================================
+# PLAYER ENTROU
+# =========================================================
+
+func _on_body_entered(
+	body: Node2D
+) -> void:
+
+	# =====================================================
+	# SOMENTE PLAYER
+	# =====================================================
+
+	if not body.is_in_group(
+		"player"
+	):
+
+		return
+
+
+	# =====================================================
+	# EVITA DUPLICAÇÃO
+	# =====================================================
 
 	if not can_change_scene:
 
 		return
 
 
-	# ==========================================
-	# TUTORIAL
-	# ==========================================
+	# =====================================================
+	# MUNDO ATUAL
+	# =====================================================
 
-	var tutorial := is_tutorial()
-
-
-	# ==========================================
-	# PEGA QUANTIDADE
-	# ==========================================
-
-	var fragments := get_fragment_count()
+	var world := get_current_world()
 
 
-	# ==========================================
-	# FASES NORMAIS EXIGEM 5
-	# ==========================================
+	# =====================================================
+	# NECESSÁRIOS
+	# =====================================================
 
-	if not tutorial:
+	var required := (
+		get_required_fragments()
+	)
 
-		if fragments < 5:
 
-			print("==============================")
-			print("FASE BLOQUEADA!")
+	# =====================================================
+	# ATUAIS
+	# =====================================================
+
+	var current := (
+		get_fragment_count()
+	)
+
+
+	# =====================================================
+	# MUNDO 00
+	# =====================================================
+
+	if world == 0:
+
+		print(
+			"=============================="
+		)
+
+		print(
+			"MUNDO 00 CONCLUÍDO!"
+		)
+
+		print(
+			"PORTAL LIBERADO!"
+		)
+
+		print(
+			"=============================="
+
+		)
+
+
+	# =====================================================
+	# OUTROS MUNDOS
+	# =====================================================
+
+	else:
+
+		# =================================================
+		# BLOQUEADO
+		# =================================================
+
+		if current < required:
+
 			print(
-				"FRAGMENTOS DE ",
+				"=============================="
+			)
+
+			print(
+				"PORTAL BLOQUEADO!"
+			)
+
+			print(
 				get_fragment_name(),
 				": ",
-				fragments,
-				"/5"
+				current,
+				"/",
+				required
 			)
-			print("Pegue todos os fragmentos!")
-			print("==============================")
+
+			print(
+				"FALTAM: ",
+				required - current
+			)
+
+			print(
+				"=============================="
+			)
+
+			_update_fragment_label()
 
 			return
 
 
-	# ==========================================
+		# =================================================
+		# LIBERADO
+		# =================================================
+
+		print(
+			"=============================="
+		)
+
+		print(
+			"PORTAL LIBERADO!"
+		)
+
+		print(
+			get_fragment_name(),
+			": ",
+			current,
+			"/",
+			required
+		)
+
+		print(
+			"=============================="
+		)
+
+
+	# =====================================================
 	# VERIFICA PRÓXIMA FASE
-	# ==========================================
+	# =====================================================
 
 	if next_level == "":
 
-		print("==============================")
-		print("ERRO: PRÓXIMA FASE NÃO DEFINIDA!")
-		print("==============================")
+		print(
+			"ERRO: PRÓXIMA FASE NÃO DEFINIDA!"
+		)
 
 		return
 
 
-	# ==========================================
-	# IMPEDE DUPLA ATIVAÇÃO
-	# ==========================================
+	# =====================================================
+	# BLOQUEIA NOVAS ENTRADAS
+	# =====================================================
 
 	can_change_scene = false
 
 
-	# ==========================================
-	# MENSAGEM
-	# ==========================================
-
-	print("==============================")
-
-
-	if tutorial:
-
-		print("TUTORIAL CONCLUÍDO!")
-
-	else:
-
-		print(
-			"TODOS OS 5 FRAGMENTOS DE ",
-			get_fragment_name(),
-			" COLETADOS!"
-		)
-
-
-	print("PASSANDO DE FASE!")
-	print("PRÓXIMA FASE: ", next_level)
-
-	print("==============================")
-
-
-	# ==========================================
-	# RESET SCORE / MOEDAS
-	# ==========================================
+	# =====================================================
+	# RESET SCORE E MOEDAS
+	# =====================================================
 
 	Globals.score = 0
+
 	Globals.coins = 0
 
 	Globals.level_score = 0
+
 	Globals.level_coins = 0
 
 
-	# ==========================================
-	# RESET DOS FRAGMENTOS
-	# ==========================================
+	# =====================================================
+	# RESET FRAGMENTOS
+	# =====================================================
 
 	Globals.raciocinio_fragments = 0
+
 	Globals.atencao_fragments = 0
+
 	Globals.memoria_fragments = 0
 
 
-	print(
-		"RACIOCÍNIO RESETADO: ",
-		Globals.raciocinio_fragments
+	# =====================================================
+	# TROCA DE FASE
+	# =====================================================
+
+	if transition != null:
+
+		if transition.has_method(
+			"change_scene"
+		):
+
+			transition.change_scene(
+				next_level
+			)
+
+			return
+
+
+	# =====================================================
+	# FALLBACK
+	# =====================================================
+
+	get_tree().change_scene_to_file(
+		next_level
 	)
-
-	print(
-		"ATENÇÃO RESETADA: ",
-		Globals.atencao_fragments
-	)
-
-	print(
-		"MEMÓRIA RESETADA: ",
-		Globals.memoria_fragments
-	)
-
-
-	# ==========================================
-	# MUDA DE FASE
-	# ==========================================
-
-	transition.change_scene(next_level)

@@ -1077,7 +1077,7 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("29_2hl3w")
 theme_override_font_sizes/font_size = 40
-text = "0/5"
+text = "0/3"
 
 [node name="BG" type="ParallaxBackground" parent="." unique_id=271765439]
 
@@ -1441,13 +1441,13 @@ shape = SubResource("CircleShape2D_sob1t")
 position = Vector2(757, 859)
 
 [node name="frag_raciocinio" parent="Fragmentos" unique_id=1108284432 instance=ExtResource("38_w682u")]
-position = Vector2(-211, -395)
+position = Vector2(-802, -364)
 
 [node name="frag_raciocinio2" parent="Fragmentos" unique_id=1768033476 instance=ExtResource("38_w682u")]
-position = Vector2(537, 5)
+position = Vector2(-823, -365)
 
 [node name="frag_raciocinio3" parent="Fragmentos" unique_id=1072736906 instance=ExtResource("38_w682u")]
-position = Vector2(865, -683)
+position = Vector2(-803, -332)
 
 [node name="frag_raciocinio4" parent="Fragmentos" unique_id=1163845356 instance=ExtResource("38_w682u")]
-position = Vector2(1129, -395)
+position = Vector2(-823, -332)
