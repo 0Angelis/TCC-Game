@@ -159,6 +159,26 @@ var color_names := [
 ) as ColorRect
 
 
+# =========================================================
+# FUNDOS DO STROOP
+# =========================================================
+# BG = fundo normal
+# BG2 = fundo escuro usado somente no desafio 2
+
+@onready var normal_background: CanvasItem = find_child(
+	"BG",
+	true,
+	false
+) as CanvasItem
+
+
+@onready var dark_background: CanvasItem = find_child(
+	"BG2",
+	true,
+	false
+) as CanvasItem
+
+
 @onready var main_container: Control = find_child(
 	"MainContainer",
 	true,
@@ -278,6 +298,36 @@ var enter_label: Label = null
 
 
 # =========================================================
+# TELA DE PREPARAÇÃO - DESAFIOS 2 E 3
+# =========================================================
+
+var pre_start_active := false
+
+var pre_start_overlay: ColorRect = null
+
+var pre_start_panel: Panel = null
+
+var pre_start_title_label: Label = null
+
+var pre_start_subtitle_label: Label = null
+
+var pre_start_hint_label: Label = null
+
+var pre_start_button: Button = null
+
+var pre_start_tween: Tween = null
+
+
+# =========================================================
+# TRANSIÇÃO DE ENTRADA DA FASE
+# =========================================================
+
+var scene_fade: ColorRect = null
+
+var scene_fade_tween: Tween = null
+
+
+# =========================================================
 # TELA FINAL
 # =========================================================
 
@@ -321,6 +371,8 @@ func _ready() -> void:
 	can_answer = false
 
 	tutorial_active = false
+
+	pre_start_active = false
 
 	result_screen_active = false
 
@@ -457,6 +509,26 @@ func _ready() -> void:
 		background.modulate = Color.WHITE
 
 		background.self_modulate = Color.WHITE
+
+
+	# =====================================================
+	# FUNDO DO DESAFIO
+	# =====================================================
+	# Desafio 2 usa BG2.
+	# Desafios 1 e 3 usam BG normal.
+
+	if normal_background != null:
+
+		normal_background.visible = (
+			difficulty != 2
+		)
+
+
+	if dark_background != null:
+
+		dark_background.visible = (
+			difficulty == 2
+		)
 
 
 	# =====================================================
@@ -642,6 +714,13 @@ func _ready() -> void:
 
 
 	# =====================================================
+	# TRANSIÇÃO DE ENTRADA
+	# =====================================================
+
+	_setup_scene_fade_in()
+
+
+	# =====================================================
 	# TUTORIAL
 	# =====================================================
 	# SOMENTE DESAFIO 1.
@@ -682,7 +761,7 @@ func _ready() -> void:
 
 			enter_label = null
 
-		start_challenge()
+		_setup_pre_start_screen()
 
 
 	# =====================================================
@@ -1145,10 +1224,6 @@ func _time_finished() -> void:
 		return
 
 
-	# =====================================================
-	# PARA
-	# =====================================================
-
 	challenge_active = false
 
 	can_answer = false
@@ -1162,10 +1237,6 @@ func _time_finished() -> void:
 
 	_stop_timer_pulse()
 
-
-	# =====================================================
-	# ESCONDE DESAFIO
-	# =====================================================
 
 	instruction_label.hide()
 
@@ -1189,10 +1260,6 @@ func _time_finished() -> void:
 
 		timer_panel.hide()
 
-
-	# =====================================================
-	# MOSTRA RESULTADO
-	# =====================================================
 
 	_show_final_screen(
 		false
@@ -1308,63 +1375,51 @@ func _create_enter_label() -> void:
 
 	enter_label = Label.new()
 
-
 	enter_label.text = "(ENTER)"
-
 
 	enter_label.mouse_filter = (
 		Control.MOUSE_FILTER_IGNORE
 	)
-
 
 	enter_label.add_theme_font_size_override(
 		"font_size",
 		9
 	)
 
-
 	enter_label.add_theme_color_override(
 		"font_color",
 		Color("#E6D8F5")
 	)
-
 
 	enter_label.add_theme_color_override(
 		"font_outline_color",
 		Color.BLACK
 	)
 
-
 	enter_label.add_theme_constant_override(
 		"outline_size",
 		2
 	)
 
-
 	enter_label.horizontal_alignment = (
 		HORIZONTAL_ALIGNMENT_CENTER
 	)
 
-
 	enter_label.vertical_alignment = (
 		VERTICAL_ALIGNMENT_CENTER
 	)
-
 
 	enter_label.size = Vector2(
 		180,
 		14
 	)
 
-
 	enter_label.position = Vector2(
 		40,
 		40
 	)
 
-
 	enter_label.z_index = 10
-
 
 	tutorial_button.add_child(
 		enter_label
@@ -1386,7 +1441,6 @@ func _on_tutorial_button_pressed() -> void:
 		"stroop_tutorial_seen",
 		true
 	)
-
 
 	tutorial_active = false
 
@@ -1413,6 +1467,29 @@ func _on_tutorial_button_pressed() -> void:
 func _unhandled_input(
 	event: InputEvent
 ) -> void:
+
+	# =====================================================
+	# TELA DE PREPARAÇÃO
+	# =====================================================
+
+	if pre_start_active:
+
+		if event.is_action_pressed(
+			"ui_accept"
+		):
+
+			if pre_start_button != null:
+
+				pre_start_button.grab_focus()
+
+				pre_start_button.pressed.emit()
+
+
+			get_viewport().set_input_as_handled()
+
+
+		return
+
 
 	# =====================================================
 	# TUTORIAL
@@ -1574,10 +1651,6 @@ func _answer(
 	can_answer = false
 
 
-	# =====================================================
-	# ACERTO
-	# =====================================================
-
 	if selected_color == current_color:
 
 		correct_answers += 1
@@ -1613,10 +1686,6 @@ func _answer(
 		result_label.visible = true
 
 
-		# =================================================
-		# COMPLETOU
-		# =================================================
-
 		if correct_answers >= TOTAL_ACERTOS:
 
 			_complete_challenge()
@@ -1624,29 +1693,13 @@ func _answer(
 			return
 
 
-	# =====================================================
-	# ERRO
-	# =====================================================
-
 	else:
 
 		error_count += 1
 
 
-		# =================================================
-		# IMPORTANTE:
-		#
-		# NÃO ZERA correct_answers.
-		#
-		# O jogador mantém o progresso.
-		# =================================================
-
 		remove_time()
 
-
-		# =================================================
-		# TEMPO ACABOU
-		# =================================================
 
 		if time_left <= 0.0:
 
@@ -1654,10 +1707,6 @@ func _answer(
 
 			return
 
-
-		# =================================================
-		# MANTÉM O PROGRESSO
-		# =================================================
 
 		progress_label.text = (
 			"%d / %d"
@@ -1685,10 +1734,6 @@ func _answer(
 
 		result_label.visible = true
 
-
-	# =====================================================
-	# ESPERA
-	# =====================================================
 
 	await get_tree().create_timer(
 		0.75
@@ -1722,12 +1767,7 @@ func _setup_color_buttons() -> void:
 	extra_buttons.clear()
 
 
-	# =====================================================
-	# VERMELHO
-	# =====================================================
-
 	color_buttons["vermelho"] = red_button
-
 
 	_setup_button(
 		red_button,
@@ -1736,12 +1776,7 @@ func _setup_color_buttons() -> void:
 	)
 
 
-	# =====================================================
-	# AZUL
-	# =====================================================
-
 	color_buttons["azul"] = blue_button
-
 
 	_setup_button(
 		blue_button,
@@ -1750,12 +1785,7 @@ func _setup_color_buttons() -> void:
 	)
 
 
-	# =====================================================
-	# VERDE
-	# =====================================================
-
 	color_buttons["verde"] = green_button
-
 
 	_setup_button(
 		green_button,
@@ -1763,10 +1793,6 @@ func _setup_color_buttons() -> void:
 		3
 	)
 
-
-	# =====================================================
-	# AMARELO
-	# =====================================================
 
 	if get_active_color_count() >= 4:
 
@@ -1776,10 +1802,6 @@ func _setup_color_buttons() -> void:
 		)
 
 
-	# =====================================================
-	# ROXO
-	# =====================================================
-
 	if get_active_color_count() >= 5:
 
 		_create_extra_button(
@@ -1787,10 +1809,6 @@ func _setup_color_buttons() -> void:
 			5
 		)
 
-
-	# =====================================================
-	# LARANJA
-	# =====================================================
 
 	if get_active_color_count() >= 6:
 
@@ -1872,11 +1890,9 @@ func _setup_button(
 		]
 	)
 
-
 	button.mouse_filter = (
 		Control.MOUSE_FILTER_STOP
 	)
-
 
 	button.focus_mode = (
 		Control.FOCUS_ALL
@@ -1894,7 +1910,6 @@ func _setup_button(
 		var callable: Callable = (
 			connection["callable"]
 		)
-
 
 		if callable.is_valid():
 
@@ -1927,12 +1942,10 @@ func _create_extra_button(
 
 	var button := Button.new()
 
-
 	button.name = (
 		color_name.capitalize()
 		+ "Button"
 	)
-
 
 	button.text = (
 		"[ %d ]  %s"
@@ -1942,11 +1955,9 @@ func _create_extra_button(
 		]
 	)
 
-
 	button.focus_mode = (
 		Control.FOCUS_ALL
 	)
-
 
 	button.mouse_filter = (
 		Control.MOUSE_FILTER_STOP
@@ -1986,7 +1997,6 @@ func _create_extra_button(
 
 	color_buttons[color_name] = button
 
-
 	extra_buttons.append(
 		button
 	)
@@ -2020,30 +2030,25 @@ func _force_white_text(
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_hover_color",
 		Color.WHITE
 	)
-
 
 	button.add_theme_color_override(
 		"font_pressed_color",
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_hover_pressed_color",
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_focus_color",
 		Color.WHITE
 	)
-
 
 	button.add_theme_color_override(
 		"font_disabled_color",
@@ -2059,10 +2064,6 @@ func start_challenge() -> void:
 
 	_clear_final_screen()
 
-
-	# =====================================================
-	# MOSTRA INTERFACE NORMAL
-	# =====================================================
 
 	instruction_label.show()
 
@@ -2105,10 +2106,6 @@ func start_challenge() -> void:
 			)
 
 
-	# =====================================================
-	# RESET
-	# =====================================================
-
 	correct_answers = 0
 
 	error_count = 0
@@ -2121,10 +2118,6 @@ func start_challenge() -> void:
 
 	time_up_message = false
 
-
-	# =====================================================
-	# TIMER
-	# =====================================================
 
 	time_left = INITIAL_TIME
 
@@ -2143,24 +2136,15 @@ func start_challenge() -> void:
 		)
 
 
-	# =====================================================
-	# PROGRESSO
-	# =====================================================
-
 	progress_label.text = (
 		"0 / %d"
 		% TOTAL_ACERTOS
 	)
 
-
 	result_label.text = ""
 
 	result_label.visible = true
 
-
-	# =====================================================
-	# REAPLICA CORES CORRETAS
-	# =====================================================
 
 	instruction_label.add_theme_color_override(
 		"font_color",
@@ -2196,19 +2180,9 @@ func start_challenge() -> void:
 	)
 
 
-	# =====================================================
-	# TIMER
-	# =====================================================
-
 	_update_timer_ui()
 
-
-	# =====================================================
-	# NOVAS COMBINAÇÕES
-	# =====================================================
-
 	_build_combinations()
-
 
 	_new_round()
 
@@ -2348,50 +2322,36 @@ func _new_round() -> void:
 	last_color = current_color
 
 
-	# =====================================================
-	# PALAVRA
-	# =====================================================
-
 	word_label.text = (
 		current_word.to_upper()
 	)
 
-
 	word_label.visible = true
-
 
 	word_label.modulate = Color.WHITE
 
 	word_label.self_modulate = Color.WHITE
 
 
-	# =====================================================
-	# FORÇA A COR DA PALAVRA
-	# =====================================================
-
 	word_label.add_theme_color_override(
 		"font_color",
 		colors[current_color]
 	)
-
 
 	word_label.add_theme_color_override(
 		"font_outline_color",
 		Color.BLACK
 	)
 
-
 	word_label.add_theme_constant_override(
 		"outline_size",
 		8
 	)
 
-
 	word_label.add_theme_font_size_override(
 		"font_size",
 		72
 	)
-
 
 	word_label.horizontal_alignment = (
 		HORIZONTAL_ALIGNMENT_CENTER
@@ -2448,23 +2408,19 @@ func _award_attention_fragment() -> void:
 		"================================"
 	)
 
-
 	print(
 		"FRAGMENTO DE ATENÇÃO +1"
 	)
-
 
 	print(
 		"DESAFIO: ",
 		difficulty
 	)
 
-
 	print(
 		"TOTAL: ",
 		Globals.atencao_fragments
 	)
-
 
 	print(
 		"================================"
@@ -2480,10 +2436,6 @@ func _complete_challenge() -> void:
 	_award_attention_fragment()
 
 
-	# =====================================================
-	# PARA
-	# =====================================================
-
 	challenge_active = false
 
 	can_answer = false
@@ -2497,10 +2449,6 @@ func _complete_challenge() -> void:
 
 	_stop_timer_pulse()
 
-
-	# =====================================================
-	# ESCONDE DESAFIO
-	# =====================================================
 
 	instruction_label.hide()
 
@@ -2525,10 +2473,6 @@ func _complete_challenge() -> void:
 		timer_panel.hide()
 
 
-	# =====================================================
-	# RESULTADO
-	# =====================================================
-
 	_show_final_screen(
 		true
 	)
@@ -2544,10 +2488,6 @@ func _show_final_screen(
 
 	_clear_final_screen()
 
-
-	# =====================================================
-	# TÍTULO
-	# =====================================================
 
 	final_title_label = Label.new()
 
@@ -2569,66 +2509,52 @@ func _show_final_screen(
 		Control.PRESET_CENTER_TOP
 	)
 
-
 	final_title_label.position = Vector2(
 		-500,
 		65
 	)
-
 
 	final_title_label.size = Vector2(
 		1000,
 		65
 	)
 
-
 	final_title_label.mouse_filter = (
 		Control.MOUSE_FILTER_IGNORE
 	)
-
 
 	final_title_label.horizontal_alignment = (
 		HORIZONTAL_ALIGNMENT_CENTER
 	)
 
-
 	final_title_label.vertical_alignment = (
 		VERTICAL_ALIGNMENT_CENTER
 	)
-
 
 	final_title_label.add_theme_font_size_override(
 		"font_size",
 		38
 	)
 
-
 	final_title_label.add_theme_color_override(
 		"font_color",
 		FINAL_WHITE
 	)
-
 
 	final_title_label.add_theme_color_override(
 		"font_outline_color",
 		Color("#101820")
 	)
 
-
 	final_title_label.add_theme_constant_override(
 		"outline_size",
 		7
 	)
 
-
 	add_child(
 		final_title_label
 	)
 
-
-	# =====================================================
-	# INFORMAÇÃO PRINCIPAL
-	# =====================================================
 
 	final_info_label = Label.new()
 
@@ -2655,152 +2581,112 @@ func _show_final_screen(
 		Control.PRESET_CENTER_TOP
 	)
 
-
 	final_info_label.position = Vector2(
 		-430,
 		150
 	)
-
 
 	final_info_label.size = Vector2(
 		860,
 		115
 	)
 
-
 	final_info_label.mouse_filter = (
 		Control.MOUSE_FILTER_IGNORE
 	)
-
 
 	final_info_label.horizontal_alignment = (
 		HORIZONTAL_ALIGNMENT_CENTER
 	)
 
-
 	final_info_label.vertical_alignment = (
 		VERTICAL_ALIGNMENT_CENTER
 	)
-
 
 	final_info_label.add_theme_font_size_override(
 		"font_size",
 		28
 	)
 
-
-	# =====================================================
-	# TUDO BRANCO
-	# =====================================================
-
 	final_info_label.add_theme_color_override(
 		"font_color",
 		Color.WHITE
 	)
 
-
 	final_info_label.add_theme_color_override(
 		"font_outline_color",
 		Color("#101820")
 	)
-
 
 	final_info_label.add_theme_constant_override(
 		"outline_size",
 		5
 	)
 
-
 	add_child(
 		final_info_label
 	)
 
 
-	# =====================================================
-	# ERROS
-	# =====================================================
-
 	final_error_label = Label.new()
-
 
 	final_error_label.text = (
 		"ERROS: "
 		+ str(error_count)
 	)
 
-
 	final_error_label.set_anchors_preset(
 		Control.PRESET_CENTER_TOP
 	)
-
 
 	final_error_label.position = Vector2(
 		-300,
 		285
 	)
 
-
 	final_error_label.size = Vector2(
 		600,
 		45
 	)
 
-
 	final_error_label.mouse_filter = (
 		Control.MOUSE_FILTER_IGNORE
 	)
-
 
 	final_error_label.horizontal_alignment = (
 		HORIZONTAL_ALIGNMENT_CENTER
 	)
 
-
 	final_error_label.vertical_alignment = (
 		VERTICAL_ALIGNMENT_CENTER
 	)
-
 
 	final_error_label.add_theme_font_size_override(
 		"font_size",
 		21
 	)
 
-
 	final_error_label.add_theme_color_override(
 		"font_color",
 		FINAL_TEXT
 	)
-
 
 	final_error_label.add_theme_color_override(
 		"font_outline_color",
 		Color("#101820")
 	)
 
-
 	final_error_label.add_theme_constant_override(
 		"outline_size",
 		4
 	)
-
 
 	add_child(
 		final_error_label
 	)
 
 
-	# =====================================================
-	# NÃO TEM LINHA
-	# =====================================================
-
-
-	# =====================================================
-	# BOTÃO FINAL
-	# =====================================================
-
 	final_enter_button = Button.new()
-
 
 	final_enter_button.name = (
 		"FinalEnterButton"
@@ -2824,70 +2710,58 @@ func _show_final_screen(
 		Control.PRESET_CENTER_BOTTOM
 	)
 
-
 	final_enter_button.position = Vector2(
 		-125,
 		-80
 	)
-
 
 	final_enter_button.size = Vector2(
 		250,
 		48
 	)
 
-
 	final_enter_button.custom_minimum_size = Vector2(
 		250,
 		48
 	)
 
-
 	final_enter_button.focus_mode = (
 		Control.FOCUS_ALL
 	)
 
-
 	final_enter_button.mouse_filter = (
 		Control.MOUSE_FILTER_STOP
 	)
-
 
 	final_enter_button.add_theme_font_size_override(
 		"font_size",
 		18
 	)
 
-
 	final_enter_button.add_theme_color_override(
 		"font_color",
 		Color.WHITE
 	)
-
 
 	final_enter_button.add_theme_color_override(
 		"font_hover_color",
 		Color.WHITE
 	)
 
-
 	final_enter_button.add_theme_color_override(
 		"font_pressed_color",
 		Color.WHITE
 	)
-
 
 	final_enter_button.add_theme_color_override(
 		"font_focus_color",
 		Color.WHITE
 	)
 
-
 	final_enter_button.add_theme_color_override(
 		"font_outline_color",
 		Color("#111820")
 	)
-
 
 	final_enter_button.add_theme_constant_override(
 		"outline_size",
@@ -2904,10 +2778,6 @@ func _show_final_screen(
 		Control.CURSOR_POINTING_HAND
 	)
 
-
-	# =====================================================
-	# AÇÃO DO BOTÃO
-	# =====================================================
 
 	if success:
 
@@ -2930,17 +2800,12 @@ func _show_final_screen(
 	final_enter_button.grab_focus()
 
 
-	# =====================================================
-	# ANIMAÇÃO
-	# =====================================================
-
 	final_title_label.modulate = Color(
 		1,
 		1,
 		1,
 		0
 	)
-
 
 	final_info_label.modulate = Color(
 		1,
@@ -2949,14 +2814,12 @@ func _show_final_screen(
 		0
 	)
 
-
 	final_error_label.modulate = Color(
 		1,
 		1,
 		1,
 		0
 	)
-
 
 	final_enter_button.modulate = Color(
 		1,
@@ -2978,14 +2841,12 @@ func _show_final_screen(
 		0.20
 	)
 
-
 	tween.tween_property(
 		final_info_label,
 		"modulate",
 		Color.WHITE,
 		0.25
 	)
-
 
 	tween.tween_property(
 		final_error_label,
@@ -2994,13 +2855,655 @@ func _show_final_screen(
 		0.30
 	)
 
-
 	tween.tween_property(
 		final_enter_button,
 		"modulate",
 		Color.WHITE,
 		0.40
 	)
+
+
+# =========================================================
+# ESCONDE TEXTOS ANTIGOS DE ENTER
+# =========================================================
+
+func _hide_old_enter_hints() -> void:
+
+	for node in find_children(
+		"*",
+		"Label",
+		true,
+		false
+	):
+
+		if not node is Label:
+
+			continue
+
+
+		var label := node as Label
+
+		var text := label.text.to_upper()
+
+
+		if text.contains("ENTER") and (
+			text.contains("COMEÇ")
+			or text.contains("COMEC")
+			or text.contains("INICI")
+			or text.contains("PARA COMEÇAR")
+			or text.contains("PARA INICIAR")
+		):
+
+			label.visible = false
+
+
+# =========================================================
+# TRANSIÇÃO DE ENTRADA DA FASE
+# =========================================================
+
+func _setup_scene_fade_in() -> void:
+
+	if scene_fade != null:
+
+		return
+
+
+	scene_fade = ColorRect.new()
+
+	scene_fade.name = "SceneFadeIn"
+
+	scene_fade.set_anchors_preset(
+		Control.PRESET_FULL_RECT
+	)
+
+	scene_fade.offset_left = 0
+	scene_fade.offset_top = 0
+	scene_fade.offset_right = 0
+	scene_fade.offset_bottom = 0
+
+	scene_fade.color = Color(
+		0,
+		0,
+		0,
+		1
+	)
+
+	scene_fade.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	scene_fade.z_index = 5000
+
+
+	add_child(
+		scene_fade
+	)
+
+	move_child(
+		scene_fade,
+		get_child_count() - 1
+	)
+
+
+	scene_fade_tween = create_tween()
+
+
+	scene_fade_tween.tween_property(
+		scene_fade,
+		"modulate:a",
+		0.0,
+		0.65
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+
+	scene_fade_tween.tween_callback(
+		func():
+			if is_instance_valid(
+				scene_fade
+			):
+
+				scene_fade.queue_free()
+
+
+			scene_fade = null
+
+			scene_fade_tween = null
+	)
+
+
+# =========================================================
+# TELA DE PREPARAÇÃO
+# =========================================================
+
+func _setup_pre_start_screen() -> void:
+
+	pre_start_active = true
+
+	_hide_old_enter_hints()
+
+
+	instruction_label.hide()
+
+	word_label.hide()
+
+	progress_label.hide()
+
+	result_label.hide()
+
+
+	for button in color_buttons.values():
+
+		if is_instance_valid(
+			button
+		):
+
+			button.hide()
+
+
+	if timer_panel != null:
+
+		timer_panel.hide()
+
+
+	# =====================================================
+	# FUNDO ESCURO
+	# =====================================================
+
+	pre_start_overlay = ColorRect.new()
+
+	pre_start_overlay.name = "PreStartOverlay"
+
+	pre_start_overlay.set_anchors_preset(
+		Control.PRESET_FULL_RECT
+	)
+
+	pre_start_overlay.color = Color(
+		0.02,
+		0.03,
+		0.07,
+		0.78
+	)
+
+	pre_start_overlay.mouse_filter = (
+		Control.MOUSE_FILTER_STOP
+	)
+
+	pre_start_overlay.z_index = 900
+
+	add_child(
+		pre_start_overlay
+	)
+
+
+	# =====================================================
+	# PAINEL PRINCIPAL
+	# =====================================================
+
+	pre_start_panel = Panel.new()
+
+	pre_start_panel.name = "PreStartPanel"
+
+	pre_start_panel.set_anchors_preset(
+		Control.PRESET_CENTER
+	)
+
+	pre_start_panel.position = Vector2(
+		-335,
+		-205
+	)
+
+	pre_start_panel.size = Vector2(
+		670,
+		410
+	)
+
+	pre_start_panel.mouse_filter = (
+		Control.MOUSE_FILTER_STOP
+	)
+
+	pre_start_panel.z_index = 901
+
+
+	var panel_style := StyleBoxFlat.new()
+
+	panel_style.bg_color = Color(
+		"#121827"
+	)
+
+	panel_style.border_width_left = 3
+	panel_style.border_width_top = 3
+	panel_style.border_width_right = 3
+	panel_style.border_width_bottom = 3
+
+	panel_style.border_color = Color(
+		"#8D52D8"
+	)
+
+	panel_style.corner_radius_top_left = 18
+	panel_style.corner_radius_top_right = 18
+	panel_style.corner_radius_bottom_left = 18
+	panel_style.corner_radius_bottom_right = 18
+
+	panel_style.shadow_color = Color(
+		0,
+		0,
+		0,
+		0.55
+	)
+
+	panel_style.shadow_size = 14
+
+	panel_style.shadow_offset = Vector2(
+		0,
+		7
+	)
+
+
+	pre_start_panel.add_theme_stylebox_override(
+		"panel",
+		panel_style
+	)
+
+	add_child(
+		pre_start_panel
+	)
+
+
+	# =====================================================
+	# LINHA SUPERIOR
+	# =====================================================
+
+	var accent := ColorRect.new()
+
+	accent.color = Color(
+		"#A477D6"
+	)
+
+	accent.position = Vector2(
+		45,
+		40
+	)
+
+	accent.size = Vector2(
+		580,
+		3
+	)
+
+	pre_start_panel.add_child(
+		accent
+	)
+
+
+	# =====================================================
+	# TÍTULO
+	# =====================================================
+
+	pre_start_title_label = Label.new()
+
+	pre_start_title_label.text = "PREPARE-SE!"
+
+	pre_start_title_label.position = Vector2(
+		45,
+		65
+	)
+
+	pre_start_title_label.size = Vector2(
+		580,
+		70
+	)
+
+	pre_start_title_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	pre_start_title_label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+	pre_start_title_label.add_theme_font_size_override(
+		"font_size",
+		42
+	)
+
+	pre_start_title_label.add_theme_color_override(
+		"font_color",
+		Color(
+			"#F4F7FA"
+		)
+	)
+
+	pre_start_title_label.add_theme_color_override(
+		"font_outline_color",
+		Color(
+			"#070B12"
+		)
+	)
+
+	pre_start_title_label.add_theme_constant_override(
+		"outline_size",
+		6
+	)
+
+	pre_start_title_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	pre_start_panel.add_child(
+		pre_start_title_label
+	)
+
+
+	# =====================================================
+	# SUBTÍTULO
+	# =====================================================
+
+	pre_start_subtitle_label = Label.new()
+
+	pre_start_subtitle_label.text = (
+		"DESAFIO DE NÍVEL "
+		+ str(difficulty)
+	)
+
+	pre_start_subtitle_label.position = Vector2(
+		70,
+		138
+	)
+
+	pre_start_subtitle_label.size = Vector2(
+		530,
+		40
+	)
+
+	pre_start_subtitle_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	pre_start_subtitle_label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+	pre_start_subtitle_label.add_theme_font_size_override(
+		"font_size",
+		24
+	)
+
+	pre_start_subtitle_label.add_theme_color_override(
+		"font_color",
+		Color(
+			"#A477D6"
+		)
+	)
+
+	pre_start_subtitle_label.add_theme_color_override(
+		"font_outline_color",
+		Color.BLACK
+	)
+
+	pre_start_subtitle_label.add_theme_constant_override(
+		"outline_size",
+		3
+	)
+
+	pre_start_subtitle_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	pre_start_panel.add_child(
+		pre_start_subtitle_label
+	)
+
+
+	# =====================================================
+	# FRASE
+	# =====================================================
+
+	var message_label := Label.new()
+
+	message_label.text = (
+		"Atenção redobrada. O próximo desafio"
+		+ " será ainda mais difícil."
+	)
+
+	message_label.position = Vector2(
+		70,
+		180
+	)
+
+	message_label.size = Vector2(
+		530,
+		48
+	)
+
+	message_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	message_label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+	message_label.add_theme_font_size_override(
+		"font_size",
+		16
+	)
+
+	message_label.add_theme_color_override(
+		"font_color",
+		Color(
+			"#DCE4E9"
+		)
+	)
+
+	message_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	pre_start_panel.add_child(
+		message_label
+	)
+
+
+	# =====================================================
+	# BOTÃO ENTER
+	# =====================================================
+
+	pre_start_button = Button.new()
+
+	pre_start_button.name = "PreStartButton"
+
+	pre_start_button.text = (
+		"↵ COMEÇAR"
+	)
+
+	pre_start_button.position = Vector2(
+		190,
+		250
+	)
+
+	pre_start_button.size = Vector2(
+		290,
+		58
+	)
+
+	pre_start_button.custom_minimum_size = Vector2(
+		290,
+		58
+	)
+
+	pre_start_button.focus_mode = (
+		Control.FOCUS_ALL
+	)
+
+	pre_start_button.mouse_filter = (
+		Control.MOUSE_FILTER_STOP
+	)
+
+	pre_start_button.add_theme_font_size_override(
+		"font_size",
+		20
+	)
+
+	pre_start_button.add_theme_color_override(
+		"font_color",
+		Color.WHITE
+	)
+
+	pre_start_button.add_theme_color_override(
+		"font_hover_color",
+		Color.WHITE
+	)
+
+	pre_start_button.add_theme_color_override(
+		"font_pressed_color",
+		Color.WHITE
+	)
+
+	pre_start_button.add_theme_color_override(
+		"font_focus_color",
+		Color.WHITE
+	)
+
+	pre_start_button.add_theme_color_override(
+		"font_outline_color",
+		Color(
+			"#111820"
+		)
+	)
+
+	pre_start_button.add_theme_constant_override(
+		"outline_size",
+		2
+	)
+
+
+	_style_final_button(
+		pre_start_button
+	)
+
+
+	pre_start_button.pressed.connect(
+		_start_pre_start_screen
+	)
+
+
+	pre_start_panel.add_child(
+		pre_start_button
+	)
+
+
+	# =====================================================
+	# FOCO
+	# =====================================================
+
+	pre_start_button.grab_focus()
+
+
+	# =====================================================
+	# PISCAR BOTÃO
+	# =====================================================
+
+	pre_start_tween = create_tween()
+
+	pre_start_tween.set_loops()
+
+
+	pre_start_tween.tween_property(
+		pre_start_button,
+		"modulate:a",
+		0.65,
+		0.55
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_IN_OUT
+	)
+
+
+	pre_start_tween.tween_property(
+		pre_start_button,
+		"modulate:a",
+		1.0,
+		0.55
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_IN_OUT
+	)
+
+
+# =========================================================
+# INICIA APÓS A TELA DE PREPARAÇÃO
+# =========================================================
+
+func _start_pre_start_screen() -> void:
+
+	if not pre_start_active:
+
+		return
+
+
+	pre_start_active = false
+
+
+	if pre_start_tween != null:
+
+		pre_start_tween.kill()
+
+		pre_start_tween = null
+
+
+	_clear_pre_start_screen()
+
+
+	start_challenge()
+
+
+# =========================================================
+# LIMPA TELA DE PREPARAÇÃO
+# =========================================================
+
+func _clear_pre_start_screen() -> void:
+
+	if pre_start_tween != null:
+
+		pre_start_tween.kill()
+
+		pre_start_tween = null
+
+
+	if pre_start_overlay != null:
+
+		if is_instance_valid(
+			pre_start_overlay
+		):
+
+			pre_start_overlay.queue_free()
+
+		pre_start_overlay = null
+
+
+	if pre_start_panel != null:
+
+		if is_instance_valid(
+			pre_start_panel
+		):
+
+			pre_start_panel.queue_free()
+
+		pre_start_panel = null
+
+
+	pre_start_title_label = null
+
+	pre_start_subtitle_label = null
+
+	pre_start_hint_label = null
+
+	pre_start_button = null
 
 
 # =========================================================
@@ -3013,26 +3516,21 @@ func _style_final_button(
 
 	var normal := StyleBoxFlat.new()
 
-
 	normal.bg_color = FINAL_BUTTON
-
 
 	normal.border_width_left = 2
 	normal.border_width_top = 2
 	normal.border_width_right = 2
 	normal.border_width_bottom = 2
 
-
 	normal.border_color = Color(
 		"#AEB8BE"
 	)
-
 
 	normal.corner_radius_top_left = 9
 	normal.corner_radius_top_right = 9
 	normal.corner_radius_bottom_left = 9
 	normal.corner_radius_bottom_right = 9
-
 
 	normal.shadow_color = Color(
 		0,
@@ -3041,9 +3539,7 @@ func _style_final_button(
 		0.38
 	)
 
-
 	normal.shadow_size = 4
-
 
 	normal.shadow_offset = Vector2(
 		0,
@@ -3051,20 +3547,13 @@ func _style_final_button(
 	)
 
 
-	# =====================================================
-	# HOVER
-	# =====================================================
-
 	var hover := normal.duplicate()
 
-
 	hover.bg_color = FINAL_BUTTON_HOVER
-
 
 	hover.border_color = Color(
 		"#E2E7EA"
 	)
-
 
 	hover.shadow_color = Color(
 		0,
@@ -3073,27 +3562,18 @@ func _style_final_button(
 		0.55
 	)
 
-
 	hover.shadow_size = 7
 
 
-	# =====================================================
-	# PRESSIONADO
-	# =====================================================
-
 	var pressed := normal.duplicate()
 
-
 	pressed.bg_color = FINAL_BUTTON_PRESSED
-
 
 	pressed.border_color = Color(
 		"#929DA4"
 	)
 
-
 	pressed.shadow_size = 2
-
 
 	pressed.shadow_offset = Vector2(
 		0,
@@ -3101,43 +3581,29 @@ func _style_final_button(
 	)
 
 
-	# =====================================================
-	# FOCO
-	# =====================================================
-
 	var focus := normal.duplicate()
-
 
 	focus.bg_color = FINAL_BUTTON_HOVER
 
-
 	focus.border_color = Color.WHITE
-
 
 	focus.shadow_size = 7
 
-
-	# =====================================================
-	# APLICA
-	# =====================================================
 
 	button.add_theme_stylebox_override(
 		"normal",
 		normal
 	)
 
-
 	button.add_theme_stylebox_override(
 		"hover",
 		hover
 	)
 
-
 	button.add_theme_stylebox_override(
 		"pressed",
 		pressed
 	)
-
 
 	button.add_theme_stylebox_override(
 		"focus",
@@ -3215,7 +3681,23 @@ func _close_result_screen() -> void:
 
 
 	# =====================================================
-	# AVISA AO MAPA
+	# ANIMAÇÃO DE VITÓRIA DO PLAYER
+	# =====================================================
+
+	var player := get_tree().get_first_node_in_group(
+		"player"
+	)
+
+
+	if player != null:
+
+		if player.has_method("play_victory"):
+
+			player.play_victory()
+
+
+	# =====================================================
+	# AVISA AO MAPA QUE O DESAFIO TERMINOU
 	# =====================================================
 
 	challenge_completed.emit()
@@ -3256,42 +3738,35 @@ func _style_tutorial_button(
 		62
 	)
 
-
 	button.add_theme_font_size_override(
 		"font_size",
 		22
 	)
-
 
 	button.add_theme_color_override(
 		"font_color",
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_hover_color",
 		Color.WHITE
 	)
-
 
 	button.add_theme_color_override(
 		"font_pressed_color",
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_focus_color",
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_outline_color",
 		Color.BLACK
 	)
-
 
 	button.add_theme_constant_override(
 		"outline_size",
@@ -3301,20 +3776,16 @@ func _style_tutorial_button(
 
 	var normal := StyleBoxFlat.new()
 
-
 	normal.bg_color = Color(
 		"#7B3FC6"
 	)
-
 
 	normal.border_width_left = 2
 	normal.border_width_top = 2
 	normal.border_width_right = 2
 	normal.border_width_bottom = 2
 
-
 	normal.border_color = Color.BLACK
-
 
 	normal.corner_radius_top_left = 8
 	normal.corner_radius_top_right = 8
@@ -3324,7 +3795,6 @@ func _style_tutorial_button(
 
 	var hover := normal.duplicate()
 
-
 	hover.bg_color = Color(
 		"#A75AEA"
 	)
@@ -3332,14 +3802,12 @@ func _style_tutorial_button(
 
 	var pressed := normal.duplicate()
 
-
 	pressed.bg_color = Color(
 		"#5E299A"
 	)
 
 
 	var focus := normal.duplicate()
-
 
 	focus.bg_color = Color(
 		"#8A48D8"
@@ -3351,24 +3819,20 @@ func _style_tutorial_button(
 		normal
 	)
 
-
 	button.add_theme_stylebox_override(
 		"hover",
 		hover
 	)
-
 
 	button.add_theme_stylebox_override(
 		"pressed",
 		pressed
 	)
 
-
 	button.add_theme_stylebox_override(
 		"focus",
 		focus
 	)
-
 
 	button.mouse_default_cursor_shape = (
 		Control.CURSOR_POINTING_HAND
@@ -3389,48 +3853,40 @@ func _style_button(
 		72
 	)
 
-
 	button.add_theme_font_size_override(
 		"font_size",
 		20
 	)
-
 
 	button.add_theme_color_override(
 		"font_color",
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_hover_color",
 		Color.WHITE
 	)
-
 
 	button.add_theme_color_override(
 		"font_pressed_color",
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_focus_color",
 		Color.WHITE
 	)
-
 
 	button.add_theme_color_override(
 		"font_disabled_color",
 		Color.WHITE
 	)
 
-
 	button.add_theme_color_override(
 		"font_outline_color",
 		Color("#17131F")
 	)
-
 
 	button.add_theme_constant_override(
 		"outline_size",
@@ -3440,28 +3896,23 @@ func _style_button(
 
 	var normal := StyleBoxFlat.new()
 
-
 	normal.bg_color = color.darkened(
 		0.12
 	)
-
 
 	normal.border_width_left = 2
 	normal.border_width_top = 2
 	normal.border_width_right = 2
 	normal.border_width_bottom = 2
 
-
 	normal.border_color = Color(
 		"#30283A"
 	)
-
 
 	normal.corner_radius_top_left = 8
 	normal.corner_radius_top_right = 8
 	normal.corner_radius_bottom_left = 8
 	normal.corner_radius_bottom_right = 8
-
 
 	normal.shadow_color = Color(
 		0,
@@ -3470,9 +3921,7 @@ func _style_button(
 		0.28
 	)
 
-
 	normal.shadow_size = 3
-
 
 	normal.shadow_offset = Vector2(
 		0,
@@ -3482,23 +3931,17 @@ func _style_button(
 
 	var hover := normal.duplicate()
 
-
 	hover.bg_color = color.lightened(
 		0.10
 	)
 
-
 	hover.border_color = PURPLE_COLOR
-
 
 	hover.shadow_color = PURPLE_COLOR
 
-
 	hover.shadow_color.a = 0.35
 
-
 	hover.shadow_size = 5
-
 
 	hover.shadow_offset = Vector2(
 		0,
@@ -3508,14 +3951,11 @@ func _style_button(
 
 	var pressed := normal.duplicate()
 
-
 	pressed.bg_color = color.darkened(
 		0.28
 	)
 
-
 	pressed.shadow_size = 1
-
 
 	pressed.shadow_offset = Vector2(
 		0,
@@ -3525,25 +3965,19 @@ func _style_button(
 
 	var focus := normal.duplicate()
 
-
 	focus.bg_color = color.lightened(
 		0.06
 	)
-
 
 	focus.border_color = Color(
 		"#A477D6"
 	)
 
-
 	focus.shadow_color = PURPLE_COLOR
-
 
 	focus.shadow_color.a = 0.45
 
-
 	focus.shadow_size = 5
-
 
 	focus.shadow_offset = Vector2(
 		0,
@@ -3556,24 +3990,20 @@ func _style_button(
 		normal
 	)
 
-
 	button.add_theme_stylebox_override(
 		"hover",
 		hover
 	)
-
 
 	button.add_theme_stylebox_override(
 		"pressed",
 		pressed
 	)
 
-
 	button.add_theme_stylebox_override(
 		"focus",
 		focus
 	)
-
 
 	button.mouse_default_cursor_shape = (
 		Control.CURSOR_POINTING_HAND
@@ -3615,3 +4045,4 @@ func _enable_buttons(
 			_force_white_text(
 				button
 			)
+			

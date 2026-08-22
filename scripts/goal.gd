@@ -24,10 +24,24 @@ var fragment_label: Label = null
 
 
 # =========================================================
+# LABEL DA MENSAGEM DO PORTAL
+# =========================================================
+
+var portal_message_label: Label = null
+
+
+# =========================================================
 # CONTROLE
 # =========================================================
 
 var can_change_scene := true
+
+
+# =========================================================
+# PLAYER PERTO DO PORTAL
+# =========================================================
+
+var player_near_portal := false
 
 
 # =========================================================
@@ -42,7 +56,6 @@ func _ready() -> void:
 
 	var current_scene := get_tree().current_scene
 
-
 	if current_scene != null:
 
 		transition = current_scene.find_child(
@@ -53,7 +66,7 @@ func _ready() -> void:
 
 
 	# =====================================================
-	# PROCURA O LABEL
+	# PROCURA LABEL DO CONTADOR
 	# =====================================================
 
 	fragment_label = find_child(
@@ -64,8 +77,8 @@ func _ready() -> void:
 
 
 	# =====================================================
-	# CASO NÃO ACHE "Label",
-	# PROCURA QUALQUER LABEL DESCENDENTE
+	# CASO NÃO ACHE "Label"
+	# PROCURA QUALQUER LABEL
 	# =====================================================
 
 	if fragment_label == null:
@@ -73,6 +86,156 @@ func _ready() -> void:
 		fragment_label = _find_first_label(
 			self
 		)
+
+
+	# =====================================================
+	# PROCURA LABEL DA MENSAGEM
+	# =====================================================
+
+	portal_message_label = find_child(
+		"PortalMessage",
+		true,
+		false
+	) as Label
+
+
+	# =====================================================
+	# CRIA LABEL AUTOMATICAMENTE
+	# =====================================================
+
+	if portal_message_label == null:
+
+		portal_message_label = Label.new()
+
+		portal_message_label.name = "PortalMessage"
+
+		add_child(
+			portal_message_label
+		)
+
+
+	# =====================================================
+	# POSIÇÃO DA MENSAGEM
+	# =====================================================
+
+	portal_message_label.position = Vector2(
+		-105,
+		-38
+	)
+
+	portal_message_label.size = Vector2(
+		210,
+		22
+	)
+
+
+	# =====================================================
+	# ALINHAMENTO
+	# =====================================================
+
+	portal_message_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	portal_message_label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+
+	# =====================================================
+	# FILTRO PIXEL ART
+	# =====================================================
+
+	portal_message_label.texture_filter = (
+		CanvasItem.TEXTURE_FILTER_NEAREST
+	)
+
+
+	# =====================================================
+	# TAMANHO DA FONTE
+	# =====================================================
+
+	portal_message_label.add_theme_font_size_override(
+		"font_size",
+		6
+	)
+
+
+	# =====================================================
+	# ANTIALIASING
+	# =====================================================
+
+	portal_message_label.add_theme_constant_override(
+		"font_antialiasing",
+		0
+	)
+
+
+	# =====================================================
+	# COR
+	# =====================================================
+
+	portal_message_label.add_theme_color_override(
+		"font_color",
+		Color(
+			1.0,
+			1.0,
+			1.0,
+			1.0
+		)
+	)
+
+
+	# =====================================================
+	# CONTORNO
+	# =====================================================
+
+	portal_message_label.add_theme_color_override(
+		"font_outline_color",
+		Color(
+			0.02,
+			0.03,
+			0.05,
+			1.0
+		)
+	)
+
+	portal_message_label.add_theme_constant_override(
+		"outline_size",
+		2
+	)
+
+
+	# =====================================================
+	# SOMBRA
+	# =====================================================
+
+	portal_message_label.add_theme_color_override(
+		"font_shadow_color",
+		Color(
+			0.0,
+			0.0,
+			0.0,
+			0.45
+		)
+	)
+
+	portal_message_label.add_theme_constant_override(
+		"shadow_offset_x",
+		1
+	)
+
+	portal_message_label.add_theme_constant_override(
+		"shadow_offset_y",
+		1
+	)
+
+
+	# =====================================================
+	# ESCONDE INICIALMENTE
+	# =====================================================
+
+	portal_message_label.visible = false
 
 
 	# =====================================================
@@ -85,7 +248,7 @@ func _ready() -> void:
 
 
 	# =====================================================
-	# CONECTA PLAYER
+	# CONECTA ENTRADA DO PLAYER
 	# =====================================================
 
 	if not body_entered.is_connected(
@@ -98,7 +261,20 @@ func _ready() -> void:
 
 
 	# =====================================================
-	# ATUALIZA TEXTO
+	# CONECTA SAÍDA DO PLAYER
+	# =====================================================
+
+	if not body_exited.is_connected(
+		_on_body_exited
+	):
+
+		body_exited.connect(
+			_on_body_exited
+		)
+
+
+	# =====================================================
+	# ATUALIZA CONTADOR
 	# =====================================================
 
 	_update_fragment_label()
@@ -155,9 +331,7 @@ func get_current_world() -> int:
 		return 0
 
 
-	var path := (
-		current_scene.scene_file_path
-	)
+	var path := current_scene.scene_file_path
 
 
 	# =====================================================
@@ -236,7 +410,7 @@ func get_required_fragments() -> int:
 
 
 # =========================================================
-# PEGA FRAGMENTOS DA FASE
+# PEGA FRAGMENTOS
 # =========================================================
 
 func get_fragment_count() -> int:
@@ -282,20 +456,20 @@ func get_fragment_name() -> String:
 	match get_current_world():
 
 		1:
-			return "RACIOCÍNIO"
+			return "Raciocínio"
 
 		2:
-			return "ATENÇÃO"
+			return "Atenção"
 
 		3:
-			return "MEMÓRIA"
+			return "Memória"
 
 
-	return "FRAGMENTOS"
+	return "Fragmentos"
 
 
 # =========================================================
-# ATUALIZA LABEL DO PORTAL
+# ATUALIZA CONTADOR
 # =========================================================
 
 func _update_fragment_label() -> void:
@@ -305,19 +479,12 @@ func _update_fragment_label() -> void:
 		return
 
 
-	# =====================================================
-	# QUANTIDADE NECESSÁRIA
-	# =====================================================
-
-	var required := (
-		get_required_fragments()
-	)
+	var required := get_required_fragments()
 
 
 	# =====================================================
 	# WORLD 00
 	# =====================================================
-	# Não precisa mostrar contador.
 
 	if required <= 0:
 
@@ -326,18 +493,8 @@ func _update_fragment_label() -> void:
 		return
 
 
-	# =====================================================
-	# QUANTIDADE ATUAL
-	# =====================================================
+	var current := get_fragment_count()
 
-	var current := (
-		get_fragment_count()
-	)
-
-
-	# =====================================================
-	# LIMITA
-	# =====================================================
 
 	current = clamp(
 		current,
@@ -347,7 +504,7 @@ func _update_fragment_label() -> void:
 
 
 	# =====================================================
-	# MOSTRA
+	# MOSTRA CONTADOR
 	# =====================================================
 
 	fragment_label.text = (
@@ -373,17 +530,49 @@ func _update_fragment_label() -> void:
 		Color.WHITE
 	)
 
-
 	fragment_label.add_theme_color_override(
 		"font_outline_color",
 		Color.BLACK
 	)
 
-
 	fragment_label.add_theme_constant_override(
 		"outline_size",
-		3
+		2
 	)
+
+
+# =========================================================
+# MOSTRA MENSAGEM
+# =========================================================
+
+func _show_portal_message(
+	text: String
+) -> void:
+
+	if portal_message_label == null:
+
+		return
+
+
+	portal_message_label.text = text
+
+	portal_message_label.visible = true
+
+
+# =========================================================
+# ESCONDE MENSAGEM
+# =========================================================
+
+func _hide_portal_message() -> void:
+
+	if portal_message_label == null:
+
+		return
+
+
+	portal_message_label.text = ""
+
+	portal_message_label.visible = false
 
 
 # =========================================================
@@ -406,6 +595,13 @@ func _on_body_entered(
 
 
 	# =====================================================
+	# MARCA PLAYER PERTO
+	# =====================================================
+
+	player_near_portal = true
+
+
+	# =====================================================
 	# EVITA DUPLICAÇÃO
 	# =====================================================
 
@@ -415,32 +611,18 @@ func _on_body_entered(
 
 
 	# =====================================================
-	# MUNDO ATUAL
+	# INFORMAÇÕES
 	# =====================================================
 
 	var world := get_current_world()
 
+	var required := get_required_fragments()
 
-	# =====================================================
-	# NECESSÁRIOS
-	# =====================================================
-
-	var required := (
-		get_required_fragments()
-	)
+	var current := get_fragment_count()
 
 
 	# =====================================================
-	# ATUAIS
-	# =====================================================
-
-	var current := (
-		get_fragment_count()
-	)
-
-
-	# =====================================================
-	# MUNDO 00
+	# WORLD 00
 	# =====================================================
 
 	if world == 0:
@@ -459,8 +641,9 @@ func _on_body_entered(
 
 		print(
 			"=============================="
-
 		)
+
+		_hide_portal_message()
 
 
 	# =====================================================
@@ -470,10 +653,13 @@ func _on_body_entered(
 	else:
 
 		# =================================================
-		# BLOQUEADO
+		# PORTAL BLOQUEADO
 		# =================================================
 
 		if current < required:
+
+			var missing := required - current
+
 
 			print(
 				"=============================="
@@ -493,12 +679,34 @@ func _on_body_entered(
 
 			print(
 				"FALTAM: ",
-				required - current
+				missing
 			)
 
 			print(
 				"=============================="
 			)
+
+
+			# =============================================
+			# MENSAGEM
+			# =============================================
+
+			if missing == 1:
+
+				_show_portal_message(
+					"Falta 1 fragmento de "
+					+ get_fragment_name()
+				)
+
+			else:
+
+				_show_portal_message(
+					"Faltam "
+					+ str(missing)
+					+ " fragmentos de "
+					+ get_fragment_name()
+				)
+
 
 			_update_fragment_label()
 
@@ -506,7 +714,7 @@ func _on_body_entered(
 
 
 		# =================================================
-		# LIBERADO
+		# PORTAL LIBERADO
 		# =================================================
 
 		print(
@@ -527,6 +735,11 @@ func _on_body_entered(
 
 		print(
 			"=============================="
+		)
+
+
+		_show_portal_message(
+			"Portal liberado!"
 		)
 
 
@@ -575,7 +788,7 @@ func _on_body_entered(
 
 
 	# =====================================================
-	# TROCA DE FASE
+	# TROCA DE FASE IMEDIATA
 	# =====================================================
 
 	if transition != null:
@@ -598,3 +811,36 @@ func _on_body_entered(
 	get_tree().change_scene_to_file(
 		next_level
 	)
+
+
+# =========================================================
+# PLAYER SAIU
+# =========================================================
+
+func _on_body_exited(
+	body: Node2D
+) -> void:
+
+	# =====================================================
+	# SOMENTE PLAYER
+	# =====================================================
+
+	if not body.is_in_group(
+		"player"
+	):
+
+		return
+
+
+	# =====================================================
+	# PLAYER NÃO ESTÁ MAIS PERTO
+	# =====================================================
+
+	player_near_portal = false
+
+
+	# =====================================================
+	# ESCONDE MENSAGEM
+	# =====================================================
+
+	_hide_portal_message()

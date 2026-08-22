@@ -281,7 +281,27 @@ func matar_fantasma() -> void:
 
 
 	# ==========================================
-	# ANIMAÇÃO DE MORTE
+	# MORTE
+	# ==========================================
+	# O fantasma vira de lado e cai,
+	# sem aquele giro de 360 graus.
+
+	var start_rotation := animated_sprite.rotation_degrees
+
+
+	# ==========================================
+	# ESCOLHE O LADO DA QUEDA
+	# ==========================================
+
+	var death_rotation := 90.0
+
+	if direction > 0:
+
+		death_rotation = -90.0
+
+
+	# ==========================================
+	# TWEEN
 	# ==========================================
 
 	var tween := create_tween()
@@ -289,27 +309,31 @@ func matar_fantasma() -> void:
 	tween.set_parallel(true)
 
 
-	# Gira
+	# ==========================================
+	# VIRA DE LADO
+	# ==========================================
 
 	tween.tween_property(
 		animated_sprite,
 		"rotation_degrees",
-		360.0,
-		0.9
+		start_rotation + death_rotation,
+		0.45
 	).set_trans(
 		Tween.TRANS_QUAD
 	).set_ease(
-		Tween.EASE_IN_OUT
+		Tween.EASE_OUT
 	)
 
 
-	# Cai um pouco
+	# ==========================================
+	# CAI
+	# ==========================================
 
 	tween.tween_property(
 		animated_sprite,
 		"position:y",
-		animated_sprite.position.y + 28.0,
-		0.9
+		animated_sprite.position.y + 18.0,
+		0.45
 	).set_trans(
 		Tween.TRANS_QUAD
 	).set_ease(
@@ -317,13 +341,34 @@ func matar_fantasma() -> void:
 	)
 
 
-	# Fica transparente
+	# ==========================================
+	# FICA LEVEMENTE MENOR
+	# ==========================================
+
+	tween.tween_property(
+		animated_sprite,
+		"scale",
+		Vector2(
+			0.92,
+			0.92
+		),
+		0.45
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_IN
+	)
+
+
+	# ==========================================
+	# DESAPARECE
+	# ==========================================
 
 	tween.tween_property(
 		animated_sprite,
 		"modulate:a",
 		0.0,
-		0.9
+		0.45
 	).set_trans(
 		Tween.TRANS_QUAD
 	).set_ease(

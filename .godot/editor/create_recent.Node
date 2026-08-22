@@ -1,10 +1,10 @@
+TextureRect
 CharacterBody2D
 AnimatedSprite2D
 Area2D
 CenterContainer
 HBoxContainer
 Button
-TextureRect
 Control
 CollisionShape2D
 Node2D
