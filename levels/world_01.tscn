@@ -1319,7 +1319,7 @@ texture = ExtResource("32_brbtt")
 [node name="raciocinio_counter" type="Label" parent="HUD/control/container/raciocinio_container" unique_id=916055118]
 layout_mode = 2
 offset_transform_enabled = true
-offset_transform_position = Vector2(0, -3600)
+offset_transform_position = Vector2(100, -3600)
 offset_transform_scale = Vector2(10, 10)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
