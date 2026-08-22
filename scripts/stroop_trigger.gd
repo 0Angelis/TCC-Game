@@ -11,41 +11,6 @@ const STROOP_SCENE = preload(
 
 
 # =========================================================
-# CONFIGURAÇÃO
-# =========================================================
-
-# Pequena pausa antes do Stroop aparecer.
-const STROOP_APPEAR_DELAY := 0.5
-
-# Tempo que a tela fica fechada antes do mapa voltar.
-const MAP_REVEAL_DELAY := 0.8
-
-# Tempo da revelação do Stroop.
-const STROOP_REVEAL_TIME := 0.75
-
-# Tempo da revelação do mapa.
-const MAP_REVEAL_TIME := 0.75
-
-# Pequena pausa durante as trocas.
-const TRANSITION_PAUSE := 0.15
-
-# Tempo para o pinguim olhar para trás.
-const WARNING_DELAY := 0.4
-
-# Quanto tempo o pinguim dança depois de voltar.
-const VICTORY_DANCE_TIME := 1.5
-
-
-# =========================================================
-# CAMADAS
-# =========================================================
-
-const STROOP_LAYER := 200
-const HUD_LAYER := 300
-const TRANSITION_LAYER := 1000
-
-
-# =========================================================
 # CONTROLE
 # =========================================================
 
@@ -53,9 +18,6 @@ var player_inside := false
 var challenge_open := false
 var challenge_completed := false
 var transition_busy := false
-
-# Impede ganhar o mesmo fragmento duas vezes.
-var fragment_awarded := false
 
 
 # =========================================================
@@ -73,7 +35,7 @@ var interaction_label: Label = null
 
 
 # =========================================================
-# CANVAS DO STROOP
+# CANVAS
 # =========================================================
 
 var challenge_canvas: CanvasLayer = null
@@ -85,39 +47,56 @@ var stroop_instance: Control = null
 # =========================================================
 
 var transition = null
-var original_transition_layer := 0
 
 
 # =========================================================
-# HUD
+# DIFICULDADE
 # =========================================================
 
-var hud = null
-var original_hud_layer := 0
-
-var hud_mouse_filters: Dictionary = {}
+var difficulty := 1
 
 
 # =========================================================
 # READY
 # =========================================================
 
-func _ready():
+func _ready() -> void:
+
+	# =====================================================
+	# DEFINE DIFICULDADE PELO NOME
+	# =====================================================
+
+	if name == "StroopTrigger":
+
+		difficulty = 1
+
+	elif name == "StroopTrigger2":
+
+		difficulty = 2
+
+	elif name == "StroopTrigger3":
+
+		difficulty = 3
+
+	else:
+
+		difficulty = 1
+
+
+	# =====================================================
+	# ÁREA
+	# =====================================================
 
 	monitoring = true
 	monitorable = true
 
 
 	# =====================================================
-	# CENA ATUAL
+	# PROCURA TRANSIÇÃO
 	# =====================================================
 
 	var current_scene = get_tree().current_scene
 
-
-	# =====================================================
-	# PROCURA TRANSIÇÃO
-	# =====================================================
 
 	if current_scene != null:
 
@@ -131,48 +110,22 @@ func _ready():
 	if transition == null:
 
 		print(
-			"ERRO: nó 'transition' não encontrado!"
+			"AVISO: nó 'transition' não encontrado!"
 		)
-
-	else:
-
-		print(
-			"TRANSIÇÃO ENCONTRADA!"
-		)
-
-		if transition is CanvasLayer:
-
-			original_transition_layer = transition.layer
 
 
 	# =====================================================
-	# PROCURA HUD
+	# INICIA PROGRESSÃO
 	# =====================================================
 
-	if current_scene != null:
+	if not current_scene.has_meta(
+		"stroop_progress"
+	):
 
-		hud = current_scene.find_child(
-			"HUD",
-			true,
-			false
+		current_scene.set_meta(
+			"stroop_progress",
+			1
 		)
-
-
-	if hud == null:
-
-		print(
-			"ERRO: HUD NÃO ENCONTRADA!"
-		)
-
-	else:
-
-		print(
-			"HUD ENCONTRADA!"
-		)
-
-		if hud is CanvasLayer:
-
-			original_hud_layer = hud.layer
 
 
 	# =====================================================
@@ -204,11 +157,79 @@ func _ready():
 		)
 
 
+	print(
+		"================================"
+	)
+
+	print(
+		"STROOP TRIGGER INICIADO"
+	)
+
+	print(
+		"NOME: ",
+		name
+	)
+
+	print(
+		"DIFICULDADE: ",
+		difficulty
+	)
+
+	print(
+		"PRÓXIMO LIBERADO: ",
+		_get_unlocked_level()
+	)
+
+	print(
+		"================================"
+	)
+
+
 # =========================================================
-# CRIA "E - INTERAGIR"
+# RETORNA QUAL STROOP ESTÁ LIBERADO
 # =========================================================
 
-func _create_interaction_label():
+func _get_unlocked_level() -> int:
+
+	var current_scene = get_tree().current_scene
+
+
+	if current_scene == null:
+
+		return 1
+
+
+	if not current_scene.has_meta(
+		"stroop_progress"
+	):
+
+		current_scene.set_meta(
+			"stroop_progress",
+			1
+		)
+
+
+	return int(
+		current_scene.get_meta(
+			"stroop_progress"
+		)
+	)
+
+
+# =========================================================
+# VERIFICA SE ESTE TRIGGER ESTÁ LIBERADO
+# =========================================================
+
+func _is_unlocked() -> bool:
+
+	return difficulty == _get_unlocked_level()
+
+
+# =========================================================
+# CRIA AVISO
+# =========================================================
+
+func _create_interaction_label() -> void:
 
 	interaction_label = Label.new()
 
@@ -239,7 +260,9 @@ func _create_interaction_label():
 		4
 	)
 
-	interaction_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	interaction_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
 
 	interaction_label.hide()
 
@@ -252,7 +275,7 @@ func _create_interaction_label():
 # PLAYER ENTROU
 # =========================================================
 
-func _on_body_entered(body: Node2D):
+func _on_body_entered(body: Node2D) -> void:
 
 	if not body.is_in_group("player"):
 
@@ -260,19 +283,43 @@ func _on_body_entered(body: Node2D):
 
 
 	player_inside = true
+
 	player = body
 
 
-	if not challenge_open and not challenge_completed:
+	# =====================================================
+	# SÓ MOSTRA SE FOR O DESAFIO DA VEZ
+	# =====================================================
 
-		interaction_label.show()
+	if _is_unlocked():
+
+		if not challenge_open:
+
+			if not challenge_completed:
+
+				interaction_label.show()
+
+	else:
+
+		interaction_label.hide()
+
+
+	print(
+		"PLAYER ENTROU EM: ",
+		name
+	)
+
+	print(
+		"LIBERADO: ",
+		_is_unlocked()
+	)
 
 
 # =========================================================
 # PLAYER SAIU
 # =========================================================
 
-func _on_body_exited(body: Node2D):
+func _on_body_exited(body: Node2D) -> void:
 
 	if not body.is_in_group("player"):
 
@@ -280,7 +327,8 @@ func _on_body_exited(body: Node2D):
 
 
 	player_inside = false
-	player = body
+
+	player = null
 
 	interaction_label.hide()
 
@@ -289,25 +337,45 @@ func _on_body_exited(body: Node2D):
 # INPUT
 # =========================================================
 
-func _unhandled_input(event):
+func _unhandled_input(event: InputEvent) -> void:
 
 	if not player_inside:
+
 		return
 
 
 	if challenge_open:
+
 		return
 
 
 	if challenge_completed:
+
 		return
 
 
 	if transition_busy:
+
 		return
 
 
-	if not event.is_action_pressed("interact"):
+	# =====================================================
+	# TRAVA DE ORDEM
+	# =====================================================
+
+	if not _is_unlocked():
+
+		return
+
+
+	# =====================================================
+	# USA E / INTERACT
+	# =====================================================
+
+	if not event.is_action_pressed(
+		"interact"
+	):
+
 		return
 
 
@@ -339,28 +407,6 @@ func _unhandled_input(event):
 
 
 	# =====================================================
-	# OLHA PARA TRÁS
-	# =====================================================
-
-	if player.has_method("play_warning"):
-
-		print(
-			"PLAYER OLHANDO PARA TRÁS..."
-		)
-
-		player.play_warning()
-
-
-	# =====================================================
-	# ESPERA
-	# =====================================================
-
-	await get_tree().create_timer(
-		WARNING_DELAY
-	).timeout
-
-
-	# =====================================================
 	# PARA PLAYER
 	# =====================================================
 
@@ -381,9 +427,10 @@ func _unhandled_input(event):
 # PARA PLAYER
 # =========================================================
 
-func _stop_player():
+func _stop_player() -> void:
 
 	if player == null:
+
 		return
 
 
@@ -399,174 +446,47 @@ func _stop_player():
 
 
 # =========================================================
-# COLOCA TRANSIÇÃO NA FRENTE
-# =========================================================
-
-func _put_transition_in_front():
-
-	if transition == null:
-		return
-
-
-	if transition is CanvasLayer:
-
-		transition.layer = TRANSITION_LAYER
-
-
-# =========================================================
-# RESTAURA TRANSIÇÃO
-# =========================================================
-
-func _restore_transition_layer():
-
-	if transition == null:
-		return
-
-
-	if transition is CanvasLayer:
-
-		transition.layer = original_transition_layer
-
-
-# =========================================================
-# COLOCA HUD NA FRENTE
-# =========================================================
-
-func _put_hud_in_front():
-
-	if hud == null:
-		return
-
-
-	if hud is CanvasLayer:
-
-		hud.layer = HUD_LAYER
-
-
-# =========================================================
-# RESTAURA HUD
-# =========================================================
-
-func _restore_hud_layer():
-
-	if hud == null:
-		return
-
-
-	if hud is CanvasLayer:
-
-		hud.layer = original_hud_layer
-
-
-# =========================================================
-# DESATIVA CLIQUES DA HUD
-# =========================================================
-
-func _disable_hud_mouse():
-
-	if hud == null:
-		return
-
-
-	hud_mouse_filters.clear()
-
-
-	var controls = _get_hud_controls(hud)
-
-
-	for control in controls:
-
-		if control == null:
-			continue
-
-
-		hud_mouse_filters[control] = control.mouse_filter
-
-		control.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-
-	print(
-		"CLIQUES DA HUD DESATIVADOS!"
-	)
-
-
-# =========================================================
-# RESTAURA CLIQUES DA HUD
-# =========================================================
-
-func _restore_hud_mouse():
-
-	if hud_mouse_filters.is_empty():
-		return
-
-
-	for control in hud_mouse_filters:
-
-		if is_instance_valid(control):
-
-			control.mouse_filter = hud_mouse_filters[control]
-
-
-	hud_mouse_filters.clear()
-
-
-	print(
-		"CLIQUES DA HUD RESTAURADOS!"
-	)
-
-
-# =========================================================
-# PEGA TODOS OS CONTROLS DA HUD
-# =========================================================
-
-func _get_hud_controls(node: Node) -> Array:
-
-	var result: Array = []
-
-
-	if node is Control:
-
-		result.append(node)
-
-
-	for child in node.get_children():
-
-		result.append_array(
-			_get_hud_controls(child)
-		)
-
-
-	return result
-
-
-# =========================================================
 # ABRE STROOP
 # =========================================================
 
-func _open_stroop_with_transition():
+func _open_stroop_with_transition() -> void:
 
 	if challenge_open:
+
+		return
+
+
+	# =====================================================
+	# SEGURANÇA DA ORDEM
+	# =====================================================
+
+	if not _is_unlocked():
+
 		return
 
 
 	challenge_open = true
+
 	transition_busy = true
 
 
-	# =====================================================
-	# HUD
-	# =====================================================
+	print(
+		"================================"
+	)
 
-	_put_hud_in_front()
+	print(
+		"ABRINDO ",
+		name
+	)
 
-	_disable_hud_mouse()
+	print(
+		"DIFICULDADE: ",
+		difficulty
+	)
 
-
-	# =====================================================
-	# TRANSIÇÃO
-	# =====================================================
-
-	_put_transition_in_front()
+	print(
+		"================================"
+	)
 
 
 	# =====================================================
@@ -574,10 +494,6 @@ func _open_stroop_with_transition():
 	# =====================================================
 
 	if transition != null:
-
-		print(
-			"TRANSIÇÃO DE ENTRADA..."
-		)
 
 		await _cover_screen()
 
@@ -587,16 +503,7 @@ func _open_stroop_with_transition():
 	# =====================================================
 
 	await get_tree().create_timer(
-		TRANSITION_PAUSE
-	).timeout
-
-
-	# =====================================================
-	# ESPERA ANTES DO STROOP
-	# =====================================================
-
-	await get_tree().create_timer(
-		STROOP_APPEAR_DELAY
+		0.25
 	).timeout
 
 
@@ -606,7 +513,7 @@ func _open_stroop_with_transition():
 
 	challenge_canvas = CanvasLayer.new()
 
-	challenge_canvas.layer = STROOP_LAYER
+	challenge_canvas.layer = 200
 
 	get_tree().root.add_child(
 		challenge_canvas
@@ -619,8 +526,37 @@ func _open_stroop_with_transition():
 
 	stroop_instance = STROOP_SCENE.instantiate()
 
-	stroop_instance.process_mode = Node.PROCESS_MODE_ALWAYS
 
+	# =====================================================
+	# PASSA DIFICULDADE
+	# =====================================================
+
+	stroop_instance.set(
+		"difficulty",
+		difficulty
+	)
+
+
+	print(
+		"DIFICULDADE NO STROOP: ",
+		stroop_instance.get(
+			"difficulty"
+		)
+	)
+
+
+	# =====================================================
+	# PROCESSAMENTO
+	# =====================================================
+
+	stroop_instance.process_mode = (
+		Node.PROCESS_MODE_ALWAYS
+	)
+
+
+	# =====================================================
+	# ADICIONA
+	# =====================================================
 
 	challenge_canvas.add_child(
 		stroop_instance
@@ -637,22 +573,17 @@ func _open_stroop_with_transition():
 
 	stroop_instance.position = Vector2.ZERO
 
-	stroop_instance.size = get_viewport().get_visible_rect().size
+	stroop_instance.size = (
+		get_viewport().get_visible_rect().size
+	)
 
-	stroop_instance.mouse_filter = Control.MOUSE_FILTER_STOP
-
-
-	# =====================================================
-	# HUD
-	# =====================================================
-
-	_put_hud_in_front()
-
-	_disable_hud_mouse()
+	stroop_instance.mouse_filter = (
+		Control.MOUSE_FILTER_STOP
+	)
 
 
 	# =====================================================
-	# SINAL
+	# CONECTA FINAL
 	# =====================================================
 
 	if stroop_instance.has_signal(
@@ -675,35 +606,12 @@ func _open_stroop_with_transition():
 
 
 	# =====================================================
-	# TRANSIÇÃO ACIMA DE TUDO
-	# =====================================================
-
-	_put_transition_in_front()
-
-
-	# =====================================================
-	# REVELA STROOP
+	# REVELA
 	# =====================================================
 
 	if transition != null:
 
-		print(
-			"REVELANDO STROOP..."
-		)
-
-		await _reveal_screen(
-			STROOP_REVEAL_TIME
-		)
-
-
-	# =====================================================
-	# RESTAURA TRANSIÇÃO
-	# =====================================================
-
-	_restore_transition_layer()
-
-
-	_put_hud_in_front()
+		await _reveal_screen()
 
 
 	transition_busy = false
@@ -718,9 +626,10 @@ func _open_stroop_with_transition():
 # COBRIR TELA
 # =========================================================
 
-func _cover_screen():
+func _cover_screen() -> void:
 
 	if transition == null:
+
 		return
 
 
@@ -731,7 +640,7 @@ func _cover_screen():
 		transition.color_rect,
 		"threshold",
 		1.0,
-		0.55
+		0.5
 	).set_trans(
 		Tween.TRANS_SINE
 	).set_ease(
@@ -746,9 +655,10 @@ func _cover_screen():
 # REVELAR TELA
 # =========================================================
 
-func _reveal_screen(duration: float):
+func _reveal_screen() -> void:
 
 	if transition == null:
+
 		return
 
 
@@ -759,7 +669,7 @@ func _reveal_screen(duration: float):
 		transition.color_rect,
 		"threshold",
 		0.0,
-		duration
+		0.5
 	).set_trans(
 		Tween.TRANS_SINE
 	).set_ease(
@@ -771,107 +681,13 @@ func _reveal_screen(duration: float):
 
 
 # =========================================================
-# GANHA FRAGMENTO
-# =========================================================
-
-func _give_attention_fragment():
-
-	if fragment_awarded:
-		return
-
-
-	fragment_awarded = true
-
-
-	Globals.atencao_fragments += 1
-
-
-	print(
-		"================================"
-	)
-
-	print(
-		"FRAGMENTO DE ATENÇÃO GANHO!"
-	)
-
-	print(
-		"TOTAL DE ATENÇÃO: ",
-		Globals.atencao_fragments
-	)
-
-	print(
-		"================================"
-	)
-
-
-# =========================================================
-# ANIMAÇÃO DE VITÓRIA
-# =========================================================
-
-func _play_completion_animation():
-
-	if player == null:
-		return
-
-
-	if player.has_method("play_victory"):
-
-		print(
-			"PLAYER: ANIMAÇÃO DE VITÓRIA!"
-		)
-
-		player.play_victory()
-
-	else:
-
-		print(
-			"ERRO: player não possui play_victory()!"
-		)
-
-
-# =========================================================
-# PARA A VITÓRIA E DEVOLVE O MOVIMENTO
-# =========================================================
-
-func _finish_victory_animation():
-
-	if player == null:
-		return
-
-
-	# Cancela o estado de comemoração.
-	if player.get("celebrating") != null:
-
-		player.set(
-			"celebrating",
-			false
-		)
-
-
-	# Devolve movimento.
-	if player.get("can_move") != null:
-
-		player.set(
-			"can_move",
-			true
-		)
-
-
-	player.velocity = Vector2.ZERO
-
-
-	print(
-		"ANIMAÇÃO DE VITÓRIA FINALIZADA!"
-	)
-
-
-# =========================================================
 # STROOP TERMINOU
 # =========================================================
 
-func _on_stroop_completed():
+func _on_stroop_completed() -> void:
 
 	if transition_busy:
+
 		return
 
 
@@ -883,7 +699,9 @@ func _on_stroop_completed():
 	)
 
 	print(
-		"STROOP CONCLUÍDO!"
+		"STROOP ",
+		difficulty,
+		" CONCLUÍDO!"
 	)
 
 	print(
@@ -892,35 +710,10 @@ func _on_stroop_completed():
 
 
 	# =====================================================
-	# FRAGMENTO
-	# =====================================================
-
-	_give_attention_fragment()
-
-
-	# =====================================================
-	# HUD
-	# =====================================================
-
-	_put_hud_in_front()
-
-
-	# =====================================================
-	# TRANSIÇÃO
-	# =====================================================
-
-	_put_transition_in_front()
-
-
-	# =====================================================
-	# FECHA A TELA
+	# COBRE TELA
 	# =====================================================
 
 	if transition != null:
-
-		print(
-			"TRANSIÇÃO DE SAÍDA..."
-		)
 
 		await _cover_screen()
 
@@ -940,22 +733,31 @@ func _on_stroop_completed():
 
 
 	# =====================================================
-	# ESPERA UM FRAME
+	# AVANÇA A ORDEM
 	# =====================================================
 
-	await get_tree().process_frame
+	var current_scene = get_tree().current_scene
+
+
+	if current_scene != null:
+
+		current_scene.set_meta(
+			"stroop_progress",
+			difficulty + 1
+		)
 
 
 	# =====================================================
-	# ESTADO
+	# ATUALIZA ESTADO
 	# =====================================================
 
 	challenge_open = false
+
 	challenge_completed = true
 
 
 	# =====================================================
-	# PEGA PLAYER
+	# DEVOLVE MOVIMENTO
 	# =====================================================
 
 	if player == null:
@@ -965,120 +767,33 @@ func _on_stroop_completed():
 		)
 
 
-	# =====================================================
-	# MANTÉM PLAYER PARADO
-	# =====================================================
-
 	if player != null:
-
-		player.velocity = Vector2.ZERO
 
 		if player.get("can_move") != null:
 
 			player.set(
 				"can_move",
-				false
+				true
 			)
 
-
-	# =====================================================
-	# ESPERA
-	# =====================================================
-
-	print(
-		"AGUARDANDO ANTES DO RETORNO..."
-	)
-
-
-	await get_tree().create_timer(
-		MAP_REVEAL_DELAY
-	).timeout
+		player.velocity = Vector2.ZERO
 
 
 	# =====================================================
-	# TRANSIÇÃO NA FRENTE
-	# =====================================================
-
-	_put_transition_in_front()
-
-
-	# =====================================================
-	# REVELA O MAPA PRIMEIRO
+	# REVELA MAPA
 	# =====================================================
 
 	if transition != null:
 
-		print(
-			"REVELANDO MAPA..."
-		)
+		await _reveal_screen()
 
-		await _reveal_screen(
-			MAP_REVEAL_TIME
-		)
-
-
-	# =====================================================
-	# AGORA O PLAYER ESTÁ VISÍVEL
-	# =====================================================
-
-	_play_completion_animation()
-
-
-	# =====================================================
-	# DANÇA
-	# =====================================================
-
-	print(
-		"PLAYER VAI DANÇAR POR ",
-		VICTORY_DANCE_TIME,
-		" SEGUNDOS!"
-	)
-
-
-	await get_tree().create_timer(
-		VICTORY_DANCE_TIME
-	).timeout
-
-
-	# =====================================================
-	# PARA DANÇA E DEVOLVE CONTROLE
-	# =====================================================
-
-	_finish_victory_animation()
-
-
-	# =====================================================
-	# RESTAURA CAMADAS
-	# =====================================================
-
-	_restore_transition_layer()
-
-	_restore_hud_layer()
-
-	_restore_hud_mouse()
-
-
-	# =====================================================
-	# FINAL
-	# =====================================================
 
 	transition_busy = false
 
 
 	print(
-		"================================"
-	)
-
-	print(
-		"MAPA REVELADO!"
-	)
-
-	print(
-		"PLAYER VOLTOU AO MAPA!"
-	)
-
-	print(
-		"================================"
+		"PRÓXIMO STROOP LIBERADO: ",
+		difficulty + 1
 	)
 
 
@@ -1086,7 +801,7 @@ func _on_stroop_completed():
 # LIMPEZA
 # =========================================================
 
-func _exit_tree():
+func _exit_tree() -> void:
 
 	if challenge_canvas != null:
 
@@ -1094,11 +809,5 @@ func _exit_tree():
 
 		challenge_canvas = null
 
-
-	_restore_transition_layer()
-
-	_restore_hud_layer()
-
-	_restore_hud_mouse()
 
 	stroop_instance = null
