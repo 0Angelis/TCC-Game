@@ -922,13 +922,13 @@ scale = Vector2(0.016, 0.016)
 sprite_frames = SubResource("SpriteFrames_ffp5f")
 autoplay = "default"
 
+[node name="player" parent="." unique_id=1042794639 instance=ExtResource("4_naeyk")]
+position = Vector2(48, 822)
+
 [node name="portal chegada" type="AnimatedSprite2D" parent="." unique_id=654761614]
 position = Vector2(23, 810)
 sprite_frames = SubResource("SpriteFrames_4xcht")
 autoplay = "default"
-
-[node name="player" parent="." unique_id=1042794639 instance=ExtResource("4_naeyk")]
-position = Vector2(48, 822)
 
 [node name="coins" type="TileMap" parent="." unique_id=624749532]
 position = Vector2(-1, 0)
