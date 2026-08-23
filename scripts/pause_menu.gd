@@ -19,20 +19,52 @@ const PAUSE_LAYER := 1000
 
 
 # ==========================================
+# SELEÇÃO MANUAL
+# ==========================================
+
+var selected_button: Button = null
+
+
+# ==========================================
+# MODO MOUSE
+# ==========================================
+
+var mouse_mode_active := false
+
+
+# ==========================================
+# CORES NORMAIS
+# ==========================================
+
+var normal_resume_color: Color = Color.WHITE
+var normal_restart_color: Color = Color.WHITE
+var normal_quit_color: Color = Color.WHITE
+
+
+# ==========================================
+# CORES DO HOVER
+# ==========================================
+
+var hover_resume_color: Color = Color("#7B3FC6")
+var hover_restart_color: Color = Color("#7B3FC6")
+var hover_quit_color: Color = Color("#7B3FC6")
+
+
+# ==========================================
 # READY
 # ==========================================
 
 func _ready():
 
 	# ==========================================
-	# CONTINUA FUNCIONANDO DURANTE O PAUSE
+	# MENU PRECISA FUNCIONAR NO PAUSE
 	# ==========================================
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
 	# ==========================================
-	# CAMADA ACIMA DO STROOP
+	# CAMADA
 	# ==========================================
 
 	layer = PAUSE_LAYER
@@ -49,28 +81,157 @@ func _ready():
 	# OVERLAY
 	# ==========================================
 
-	bg_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bg_overlay.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
 
 
 	# ==========================================
-	# BOTÕES
+	# BOTÕES SEM FOCO REAL
+	# ==========================================
+	# A navegação agora é 100% controlada
+	# pelo nosso selected_button.
+	#
+	# Isso evita que a Godot tente navegar
+	# automaticamente com as setas.
+
+	resume_btn.focus_mode = Control.FOCUS_NONE
+
+	restart_btn.focus_mode = Control.FOCUS_NONE
+
+	quit_btn.focus_mode = Control.FOCUS_NONE
+
+
+	# ==========================================
+	# BOTÕES PROCESSAM DURANTE PAUSE
 	# ==========================================
 
-	resume_btn.process_mode = Node.PROCESS_MODE_ALWAYS
-	restart_btn.process_mode = Node.PROCESS_MODE_ALWAYS
-	quit_btn.process_mode = Node.PROCESS_MODE_ALWAYS
+	resume_btn.process_mode = (
+		Node.PROCESS_MODE_ALWAYS
+	)
 
-	resume_btn.mouse_filter = Control.MOUSE_FILTER_STOP
-	restart_btn.mouse_filter = Control.MOUSE_FILTER_STOP
-	quit_btn.mouse_filter = Control.MOUSE_FILTER_STOP
+	restart_btn.process_mode = (
+		Node.PROCESS_MODE_ALWAYS
+	)
 
-	resume_btn.focus_mode = Control.FOCUS_ALL
-	restart_btn.focus_mode = Control.FOCUS_ALL
-	quit_btn.focus_mode = Control.FOCUS_ALL
+	quit_btn.process_mode = (
+		Node.PROCESS_MODE_ALWAYS
+	)
 
 
 	# ==========================================
-	# SINAIS
+	# MOUSE
+	# ==========================================
+
+	resume_btn.mouse_filter = (
+		Control.MOUSE_FILTER_STOP
+	)
+
+	restart_btn.mouse_filter = (
+		Control.MOUSE_FILTER_STOP
+	)
+
+	quit_btn.mouse_filter = (
+		Control.MOUSE_FILTER_STOP
+	)
+
+
+	# ==========================================
+	# PEGA COR NORMAL
+	# ==========================================
+
+	var detected_resume_normal: Color = (
+		resume_btn.get_theme_color(
+			"font_color"
+		)
+	)
+
+	var detected_restart_normal: Color = (
+		restart_btn.get_theme_color(
+			"font_color"
+		)
+	)
+
+	var detected_quit_normal: Color = (
+		quit_btn.get_theme_color(
+			"font_color"
+		)
+	)
+
+
+	if detected_resume_normal.a > 0.0:
+
+		normal_resume_color = detected_resume_normal
+
+
+	if detected_restart_normal.a > 0.0:
+
+		normal_restart_color = detected_restart_normal
+
+
+	if detected_quit_normal.a > 0.0:
+
+		normal_quit_color = detected_quit_normal
+
+
+	# ==========================================
+	# PEGA COR DO HOVER
+	# ==========================================
+
+	var detected_resume_hover: Color = (
+		resume_btn.get_theme_color(
+			"font_hover_color"
+		)
+	)
+
+	var detected_restart_hover: Color = (
+		restart_btn.get_theme_color(
+			"font_hover_color"
+		)
+	)
+
+	var detected_quit_hover: Color = (
+		quit_btn.get_theme_color(
+			"font_hover_color"
+		)
+	)
+
+
+	if detected_resume_hover.a > 0.0:
+
+		hover_resume_color = detected_resume_hover
+
+	else:
+
+		hover_resume_color = Color(
+			"#7B3FC6"
+		)
+
+
+	if detected_restart_hover.a > 0.0:
+
+		hover_restart_color = detected_restart_hover
+
+	else:
+
+		hover_restart_color = Color(
+			"#7B3FC6"
+		)
+
+
+	if detected_quit_hover.a > 0.0:
+
+		hover_quit_color = detected_quit_hover
+
+	else:
+
+		hover_quit_color = Color(
+			"#7B3FC6"
+		)
+
+
+	# ==========================================
+	# CLIQUES
 	# ==========================================
 
 	if not resume_btn.pressed.is_connected(
@@ -79,7 +240,7 @@ func _ready():
 
 		resume_btn.pressed.connect(
 			_on_resume_btn_pressed
-		)
+	)
 
 
 	if not restart_btn.pressed.is_connected(
@@ -88,7 +249,7 @@ func _ready():
 
 		restart_btn.pressed.connect(
 			_on_restart_btn_pressed
-		)
+	)
 
 
 	if not quit_btn.pressed.is_connected(
@@ -97,20 +258,119 @@ func _ready():
 
 		quit_btn.pressed.connect(
 			_on_quit_btn_pressed
+	)
+
+
+	# ==========================================
+	# MOUSE ENTER
+	# ==========================================
+
+	if not resume_btn.mouse_entered.is_connected(
+		_on_resume_mouse_entered
+	):
+
+		resume_btn.mouse_entered.connect(
+			_on_resume_mouse_entered
+	)
+
+
+	if not restart_btn.mouse_entered.is_connected(
+		_on_restart_mouse_entered
+	):
+
+		restart_btn.mouse_entered.connect(
+			_on_restart_mouse_entered
+	)
+
+
+	if not quit_btn.mouse_entered.is_connected(
+		_on_quit_mouse_entered
+	):
+
+		quit_btn.mouse_entered.connect(
+			_on_quit_mouse_entered
+	)
+
+
+	# ==========================================
+	# MOUSE EXIT
+	# ==========================================
+
+	if not resume_btn.mouse_exited.is_connected(
+		_on_button_mouse_exited
+	):
+
+		resume_btn.mouse_exited.connect(
+			_on_button_mouse_exited
 		)
+
+
+	if not restart_btn.mouse_exited.is_connected(
+		_on_button_mouse_exited
+	):
+
+		restart_btn.mouse_exited.connect(
+			_on_button_mouse_exited
+		)
+
+
+	if not quit_btn.mouse_exited.is_connected(
+		_on_button_mouse_exited
+	):
+
+		quit_btn.mouse_exited.connect(
+			_on_button_mouse_exited
+		)
+
+
+	# ==========================================
+	# SELEÇÃO INICIAL
+	# ==========================================
+
+	selected_button = resume_btn
+
+
+# ==========================================
+# MARCA INPUT COMO TRATADO
+# ==========================================
+
+func _mark_input_handled() -> void:
+
+	if not is_inside_tree():
+
+		return
+
+
+	var viewport := get_viewport()
+
+
+	if viewport == null:
+
+		return
+
+
+	viewport.set_input_as_handled()
 
 
 # ==========================================
 # INPUT
 # ==========================================
+# IMPORTANTE:
+# usamos _input para pegar as setas
+# antes dos Buttons.
 
-func _unhandled_input(event):
+func _input(event):
 
 	# ==========================================
 	# ESC
 	# ==========================================
 
-	if event.is_action_pressed("ui_cancel"):
+	if event.is_action_pressed(
+		"ui_cancel"
+	):
+
+		_mark_input_handled()
+
 
 		if get_tree().paused:
 
@@ -120,89 +380,267 @@ func _unhandled_input(event):
 
 			pause_game()
 
-		get_viewport().set_input_as_handled()
 
 		return
 
 
 	# ==========================================
-	# CONTROLES DO MENU
+	# SÓ FUNCIONA NO PAUSE
 	# ==========================================
 
-	if get_tree().paused and event is InputEventKey and event.pressed:
+	if not get_tree().paused:
 
-		# ==========================================
-		# CIMA
-		# ==========================================
-
-		if (
-			event.keycode == KEY_W
-			or event.keycode == KEY_UP
-		):
-
-			if resume_btn.has_focus():
-
-				quit_btn.grab_focus()
-
-			elif restart_btn.has_focus():
-
-				resume_btn.grab_focus()
-
-			elif quit_btn.has_focus():
-
-				restart_btn.grab_focus()
-
-			else:
-
-				resume_btn.grab_focus()
+		return
 
 
-		# ==========================================
-		# BAIXO
-		# ==========================================
+	# ==========================================
+	# PRECISA SER TECLA
+	# ==========================================
 
-		elif (
-			event.keycode == KEY_S
-			or event.keycode == KEY_DOWN
-		):
+	if not (
+		event is InputEventKey
+	):
 
-			if resume_btn.has_focus():
-
-				restart_btn.grab_focus()
-
-			elif restart_btn.has_focus():
-
-				quit_btn.grab_focus()
-
-			elif quit_btn.has_focus():
-
-				resume_btn.grab_focus()
-
-			else:
-
-				resume_btn.grab_focus()
+		return
 
 
-		# ==========================================
-		# ENTER
-		# ==========================================
+	if not event.pressed:
 
-		elif (
-			event.keycode == KEY_ENTER
-			or event.keycode == KEY_KP_ENTER
-		):
+		return
 
-			if resume_btn.has_focus():
 
-				resume_game()
+	# ==========================================
+	# IGNORA AUTO-REPETIÇÃO DO SISTEMA
+	# ==========================================
+	# Assim uma tecla pressionada não gera
+	# comportamento estranho.
 
-			elif restart_btn.has_focus():
+	if event.echo:
 
-				restart_game()
+		return
 
-			elif quit_btn.has_focus():
 
-				quit_game()
+	# ==========================================
+	# CIMA
+	# ==========================================
+
+	if (
+		event.keycode == KEY_UP
+		or event.keycode == KEY_W
+	):
+
+		_mark_input_handled()
+
+		mouse_mode_active = false
+
+
+		if selected_button == resume_btn:
+
+			selected_button = quit_btn
+
+		elif selected_button == restart_btn:
+
+			selected_button = resume_btn
+
+		elif selected_button == quit_btn:
+
+			selected_button = restart_btn
+
+		else:
+
+			selected_button = resume_btn
+
+
+		_apply_keyboard_visual()
+
+		return
+
+
+	# ==========================================
+	# BAIXO
+	# ==========================================
+
+	if (
+		event.keycode == KEY_DOWN
+		or event.keycode == KEY_S
+	):
+
+		_mark_input_handled()
+
+		mouse_mode_active = false
+
+
+		if selected_button == resume_btn:
+
+			selected_button = restart_btn
+
+		elif selected_button == restart_btn:
+
+			selected_button = quit_btn
+
+		elif selected_button == quit_btn:
+
+			selected_button = resume_btn
+
+		else:
+
+			selected_button = resume_btn
+
+
+		_apply_keyboard_visual()
+
+		return
+
+
+	# ==========================================
+	# ENTER
+	# ==========================================
+
+	if (
+		event.keycode == KEY_ENTER
+		or event.keycode == KEY_KP_ENTER
+	):
+
+		_mark_input_handled()
+
+
+		if selected_button == resume_btn:
+
+			resume_game()
+
+		elif selected_button == restart_btn:
+
+			restart_game()
+
+		elif selected_button == quit_btn:
+
+			quit_game()
+
+		return
+
+
+# ==========================================
+# APLICA COR DO TECLADO
+# ==========================================
+
+func _apply_keyboard_visual():
+
+	# ==========================================
+	# MOUSE ESTÁ ATIVO
+	# ==========================================
+
+	if mouse_mode_active:
+
+		return
+
+
+	# ==========================================
+	# TODOS VOLTAM AO NORMAL
+	# ==========================================
+
+	_clear_all_keyboard_colors()
+
+
+	# ==========================================
+	# RESUME
+	# ==========================================
+
+	if selected_button == resume_btn:
+
+		resume_btn.add_theme_color_override(
+			"font_color",
+			hover_resume_color
+		)
+
+
+	# ==========================================
+	# RESTART
+	# ==========================================
+
+	elif selected_button == restart_btn:
+
+		restart_btn.add_theme_color_override(
+			"font_color",
+			hover_restart_color
+		)
+
+
+	# ==========================================
+	# QUIT
+	# ==========================================
+
+	elif selected_button == quit_btn:
+
+		quit_btn.add_theme_color_override(
+			"font_color",
+			hover_quit_color
+		)
+
+
+# ==========================================
+# REMOVE COR DO TECLADO
+# ==========================================
+
+func _clear_all_keyboard_colors():
+
+	resume_btn.add_theme_color_override(
+		"font_color",
+		normal_resume_color
+	)
+
+	restart_btn.add_theme_color_override(
+		"font_color",
+		normal_restart_color
+	)
+
+	quit_btn.add_theme_color_override(
+		"font_color",
+		normal_quit_color
+	)
+
+
+# ==========================================
+# MOUSE ENTROU - RESUME
+# ==========================================
+
+func _on_resume_mouse_entered():
+
+	mouse_mode_active = true
+
+	_clear_all_keyboard_colors()
+
+
+# ==========================================
+# MOUSE ENTROU - RESTART
+# ==========================================
+
+func _on_restart_mouse_entered():
+
+	mouse_mode_active = true
+
+	_clear_all_keyboard_colors()
+
+
+# ==========================================
+# MOUSE ENTROU - QUIT
+# ==========================================
+
+func _on_quit_mouse_entered():
+
+	mouse_mode_active = true
+
+	_clear_all_keyboard_colors()
+
+
+# ==========================================
+# MOUSE SAIU
+# ==========================================
+
+func _on_button_mouse_exited():
+
+	mouse_mode_active = false
+
+	_apply_keyboard_visual()
 
 
 # ==========================================
@@ -225,31 +663,37 @@ func pause_game():
 
 
 	# ==========================================
-	# PRIMEIRO MOSTRA O MENU
+	# MODO TECLADO
+	# ==========================================
+
+	mouse_mode_active = false
+
+
+	# ==========================================
+	# MOSTRA
 	# ==========================================
 
 	visible = true
 
 
-	# ==========================================
-	# GARANTE QUE ESTÁ NA FRENTE DO STROOP
-	# ==========================================
-
 	layer = PAUSE_LAYER
 
 
 	# ==========================================
-	# DEPOIS PAUSA O JOGO
+	# PAUSA
 	# ==========================================
 
 	get_tree().paused = true
 
 
 	# ==========================================
-	# FOCO
+	# SELEÇÃO INICIAL
 	# ==========================================
 
-	resume_btn.grab_focus()
+	selected_button = resume_btn
+
+
+	_apply_keyboard_visual()
 
 
 # ==========================================
@@ -279,7 +723,7 @@ func resume_game():
 
 
 	# ==========================================
-	# ESCONDE MENU
+	# ESCONDE
 	# ==========================================
 
 	visible = false
@@ -319,25 +763,13 @@ func restart_game():
 	)
 
 
-	# ==========================================
-	# FECHA WARNING / DIÁLOGO
-	# ==========================================
-
 	close_dialog()
 
-
-	# ==========================================
-	# DESPAUSA
-	# ==========================================
 
 	get_tree().paused = false
 
 	visible = false
 
-
-	# ==========================================
-	# RESET DOS DADOS
-	# ==========================================
 
 	Globals.coins = 0
 	Globals.score = 0
@@ -376,16 +808,8 @@ func restart_game():
 	)
 
 
-	# ==========================================
-	# ESPERA UM FRAME
-	# ==========================================
-
 	await get_tree().process_frame
 
-
-	# ==========================================
-	# RECARREGA CENA
-	# ==========================================
 
 	get_tree().reload_current_scene()
 
@@ -409,32 +833,16 @@ func quit_game():
 	)
 
 
-	# ==========================================
-	# FECHA WARNING / DIÁLOGO
-	# ==========================================
-
 	close_dialog()
 
-
-	# ==========================================
-	# DESPAUSA
-	# ==========================================
 
 	get_tree().paused = false
 
 	visible = false
 
 
-	# ==========================================
-	# ESPERA UM FRAME
-	# ==========================================
-
 	await get_tree().process_frame
 
-
-	# ==========================================
-	# TELA INICIAL
-	# ==========================================
 
 	get_tree().change_scene_to_file(
 		"res://scenes/title_screen.tscn"
@@ -447,6 +855,12 @@ func quit_game():
 
 func _on_resume_btn_pressed():
 
+	selected_button = resume_btn
+
+	mouse_mode_active = false
+
+	_apply_keyboard_visual()
+
 	resume_game()
 
 
@@ -456,6 +870,12 @@ func _on_resume_btn_pressed():
 
 func _on_restart_btn_pressed():
 
+	selected_button = restart_btn
+
+	mouse_mode_active = false
+
+	_apply_keyboard_visual()
+
 	restart_game()
 
 
@@ -464,5 +884,11 @@ func _on_restart_btn_pressed():
 # ==========================================
 
 func _on_quit_btn_pressed():
+
+	selected_button = quit_btn
+
+	mouse_mode_active = false
+
+	_apply_keyboard_visual()
 
 	quit_game()

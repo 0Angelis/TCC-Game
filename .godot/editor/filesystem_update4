@@ -9,3 +9,5 @@ res://scripts/stroop_challenge.gd
 res://stroop_challenge.tscn
 res://scripts/pause_menu.gd
 res://levels/world_02.tscn
+res://scripts/title_screen.gd
+res://scripts/game_over.gd
