@@ -607,6 +607,9 @@ func restart_game():
 
 	Globals.score = 0
 
+	# Depois da morte, o novo começo da fase parte de 0 moedas.
+	Globals.coins_before_level = 0
+
 	Globals.level_coins = 0
 
 	Globals.level_score = 0

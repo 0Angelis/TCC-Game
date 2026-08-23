@@ -734,6 +734,9 @@ func die():
 	Globals.coins = 0
 	Globals.score = 0
 
+	# Morte real perde o progresso de moedas.
+	Globals.coins_before_level = 0
+
 	Globals.level_coins = 0
 	Globals.level_score = 0
 

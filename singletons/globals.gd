@@ -11,7 +11,14 @@ var player_life := 5
 
 
 # ==========================================
-# DADOS DA FASE
+# MOEDAS ANTES DO MAPA ATUAL
+# ==========================================
+
+var coins_before_level := 0
+
+
+# ==========================================
+# DADOS DA FASE ATUAL
 # ==========================================
 
 var level_coins := 0

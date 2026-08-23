@@ -1878,12 +1878,20 @@ func _close_result_screen() -> void:
 
 
 	# =====================================================
-	# RESET SCORE E MOEDAS
+	# SALVA O TOTAL DE MOEDAS PARA O PRÓXIMO MAPA
+	# =====================================================
+
+	# O total fica acumulado entre os mapas.
+	# Esse valor será usado pelo RESTART do PAUSE
+	# para voltar ao saldo que existia antes do mapa atual.
+
+	Globals.coins_before_level = Globals.coins
+
+	# =====================================================
+	# RESET SCORE / DADOS DA FASE
 	# =====================================================
 
 	Globals.score = 0
-
-	Globals.coins = 0
 
 	Globals.level_score = 0
 

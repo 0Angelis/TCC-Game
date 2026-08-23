@@ -801,10 +801,14 @@ func restart_game():
 
 
 	# ==========================================
-	# RESET
+	# RESTART PELO PAUSE
 	# ==========================================
+	# Mantém as moedas dos mapas anteriores.
+	# Remove somente as moedas coletadas no mapa atual.
 
-	Globals.coins = 0
+	Globals.coins = Globals.coins_before_level
+
+	# O score continua sendo resetado no restart.
 	Globals.score = 0
 
 	Globals.level_coins = 0

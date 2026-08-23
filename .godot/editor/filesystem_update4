@@ -7,3 +7,9 @@ res://frag/frag_memoria.tres
 res://frag/frag_raciocinio.tres
 res://scripts/pause_menu.gd
 res://levels/world_02.tscn
+res://scripts/game_over.gd
+res://scripts/goal.gd
+res://scripts/player.gd
+res://scripts/coin.gd
+res://singletons/globals.gd
+res://scripts/title_screen.gd
