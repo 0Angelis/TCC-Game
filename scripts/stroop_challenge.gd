@@ -307,6 +307,7 @@ var enter_label: Label = null
 
 var tutorial_hover_tween: Tween = null
 var tutorial_button_base_position: Vector2 = Vector2.ZERO
+var tutorial_button_is_hovered := false
 
 
 # =========================================================
@@ -930,52 +931,67 @@ func _process(
 ) -> void:
 
 	# =====================================================
+	# HOVER DO BOTÃO DO TUTORIAL
+	# =====================================================
+	# Faz a detecção diretamente a cada frame.
+	# Assim a animação funciona mesmo se algum Control
+	# pai interferir nos sinais de mouse.
+
+	if tutorial_active and tutorial_button != null:
+		if is_instance_valid(tutorial_button):
+
+			var viewport := get_viewport()
+
+			if viewport != null:
+
+				var mouse_position := (
+					viewport.get_mouse_position()
+				)
+
+				var hovered := (
+					tutorial_button.get_global_rect().has_point(
+						mouse_position
+					)
+				)
+
+				if hovered and not tutorial_button_is_hovered:
+
+					tutorial_button_is_hovered = true
+					_on_tutorial_button_mouse_entered()
+
+				elif not hovered and tutorial_button_is_hovered:
+
+					tutorial_button_is_hovered = false
+					_on_tutorial_button_mouse_exited()
+
+	# =====================================================
 	# PAUSE
 	# =====================================================
-	# O minigame continua processando para que as telas
-	# finais dinâmicas possam funcionar normalmente, mas
-	# o cronômetro NÃO avança enquanto o jogo está pausado.
+	# O cronômetro não avança enquanto o jogo está pausado.
 
 	if get_tree().paused:
-
 		return
-
 
 	if not challenge_active:
-
 		return
-
 
 	if not timer_running:
-
 		return
-
 
 	if result_screen_active:
-
 		return
 
-
 	time_left -= delta
-
 
 	if time_left <= 0.0:
 
 		time_left = 0.0
-
 		_update_timer_ui()
-
 		_time_finished()
-
 		return
-
 
 	_update_timer_ui()
 
-
-# =========================================================
-# QUANTIDADE DE CORES
-# =========================================================
 
 func get_active_color_count() -> int:
 
@@ -1497,9 +1513,17 @@ func _setup_tutorial() -> void:
 		# Acima do conteúdo visual do tutorial.
 		tutorial_button.z_index = 9999
 
-		tutorial_button_base_position = tutorial_button.position
+		tutorial_button_base_position = (
+			tutorial_button.position
+			+ Vector2(-20, 0)
+		)
+		tutorial_button.position = tutorial_button_base_position
 		tutorial_button.scale = Vector2(1.0, 1.0)
 		tutorial_button.modulate = Color.WHITE
+		tutorial_button.pivot_offset = (
+			tutorial_button.size * 0.5
+		)
+		tutorial_button_is_hovered = false
 
 		_style_tutorial_button(
 			tutorial_button
@@ -1549,17 +1573,24 @@ func _setup_tutorial() -> void:
 func _on_tutorial_button_mouse_entered() -> void:
 
 	if tutorial_button == null:
-
 		return
 
 	if tutorial_hover_tween != null:
-
 		tutorial_hover_tween.kill()
 
-	# =============================================
-	# ANIMAÇÃO DE HOVER
-	# =============================================
-	# O botão cresce, clareia e sobe levemente.
+	tutorial_button_is_hovered = true
+
+	# =====================================================
+	# HOVER SIMPLES
+	# =====================================================
+	# Apenas sinaliza que o botão está selecionado:
+	# ele cresce levemente no próprio centro e clareia.
+	# Não se move, não pulsa e não anda para os lados.
+
+	# Garante que o crescimento aconteça para os dois lados.
+	tutorial_button.pivot_offset = (
+		tutorial_button.size * 0.5
+	)
 
 	tutorial_hover_tween = create_tween()
 	tutorial_hover_tween.set_parallel(true)
@@ -1567,21 +1598,10 @@ func _on_tutorial_button_mouse_entered() -> void:
 	tutorial_hover_tween.tween_property(
 		tutorial_button,
 		"scale",
-		Vector2(1.08, 1.08),
-		0.16
+		Vector2(1.045, 1.045),
+		0.12
 	).set_trans(
-		Tween.TRANS_BACK
-	).set_ease(
-		Tween.EASE_OUT
-	)
-
-	tutorial_hover_tween.tween_property(
-		tutorial_button,
-		"position",
-		tutorial_button_base_position + Vector2(0, -3),
-		0.16
-	).set_trans(
-		Tween.TRANS_SINE
+		Tween.TRANS_QUAD
 	).set_ease(
 		Tween.EASE_OUT
 	)
@@ -1589,10 +1609,10 @@ func _on_tutorial_button_mouse_entered() -> void:
 	tutorial_hover_tween.tween_property(
 		tutorial_button,
 		"modulate",
-		Color(1.10, 1.10, 1.10, 1.0),
-		0.16
+		Color(1.08, 1.08, 1.08, 1.0),
+		0.12
 	).set_trans(
-		Tween.TRANS_SINE
+		Tween.TRANS_QUAD
 	).set_ease(
 		Tween.EASE_OUT
 	)
@@ -1601,38 +1621,27 @@ func _on_tutorial_button_mouse_entered() -> void:
 func _on_tutorial_button_mouse_exited() -> void:
 
 	if tutorial_button == null:
-
 		return
 
 	if tutorial_hover_tween != null:
-
 		tutorial_hover_tween.kill()
+
+	tutorial_button_is_hovered = false
+
+	# =====================================================
+	# VOLTA AO NORMAL
+	# =====================================================
 
 	tutorial_hover_tween = create_tween()
 	tutorial_hover_tween.set_parallel(true)
-
-	# =============================================
-	# VOLTA AO ESTADO NORMAL
-	# =============================================
 
 	tutorial_hover_tween.tween_property(
 		tutorial_button,
 		"scale",
 		Vector2(1.0, 1.0),
-		0.14
+		0.10
 	).set_trans(
-		Tween.TRANS_SINE
-	).set_ease(
-		Tween.EASE_OUT
-	)
-
-	tutorial_hover_tween.tween_property(
-		tutorial_button,
-		"position",
-		tutorial_button_base_position,
-		0.14
-	).set_trans(
-		Tween.TRANS_SINE
+		Tween.TRANS_QUAD
 	).set_ease(
 		Tween.EASE_OUT
 	)
@@ -1641,17 +1650,13 @@ func _on_tutorial_button_mouse_exited() -> void:
 		tutorial_button,
 		"modulate",
 		Color.WHITE,
-		0.14
+		0.10
 	).set_trans(
-		Tween.TRANS_SINE
+		Tween.TRANS_QUAD
 	).set_ease(
 		Tween.EASE_OUT
 	)
 
-
-# =========================================================
-# ENTER DO TUTORIAL
-# =========================================================
 
 func _create_enter_label() -> void:
 
@@ -1747,6 +1752,7 @@ func _on_tutorial_button_pressed() -> void:
 		tutorial_button.scale = Vector2(1.0, 1.0)
 		tutorial_button.position = tutorial_button_base_position
 		tutorial_button.modulate = Color.WHITE
+		tutorial_button_is_hovered = false
 
 
 	if tutorial != null:
