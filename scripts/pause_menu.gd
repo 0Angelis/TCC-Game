@@ -57,7 +57,7 @@ var hover_quit_color: Color = Color("#7B3FC6")
 func _ready():
 
 	# ==========================================
-	# MENU PRECISA FUNCIONAR NO PAUSE
+	# CONTINUA FUNCIONANDO DURANTE O PAUSE
 	# ==========================================
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -87,23 +87,7 @@ func _ready():
 
 
 	# ==========================================
-	# BOTÕES SEM FOCO REAL
-	# ==========================================
-	# A navegação agora é 100% controlada
-	# pelo nosso selected_button.
-	#
-	# Isso evita que a Godot tente navegar
-	# automaticamente com as setas.
-
-	resume_btn.focus_mode = Control.FOCUS_NONE
-
-	restart_btn.focus_mode = Control.FOCUS_NONE
-
-	quit_btn.focus_mode = Control.FOCUS_NONE
-
-
-	# ==========================================
-	# BOTÕES PROCESSAM DURANTE PAUSE
+	# BOTÕES
 	# ==========================================
 
 	resume_btn.process_mode = (
@@ -119,10 +103,6 @@ func _ready():
 	)
 
 
-	# ==========================================
-	# MOUSE
-	# ==========================================
-
 	resume_btn.mouse_filter = (
 		Control.MOUSE_FILTER_STOP
 	)
@@ -133,6 +113,23 @@ func _ready():
 
 	quit_btn.mouse_filter = (
 		Control.MOUSE_FILTER_STOP
+	)
+
+
+	# ==========================================
+	# NÃO DEIXA A GODOT CONTROLAR O FOCO
+	# ==========================================
+
+	resume_btn.focus_mode = (
+		Control.FOCUS_NONE
+	)
+
+	restart_btn.focus_mode = (
+		Control.FOCUS_NONE
+	)
+
+	quit_btn.focus_mode = (
+		Control.FOCUS_NONE
 	)
 
 
@@ -161,21 +158,27 @@ func _ready():
 
 	if detected_resume_normal.a > 0.0:
 
-		normal_resume_color = detected_resume_normal
+		normal_resume_color = (
+			detected_resume_normal
+		)
 
 
 	if detected_restart_normal.a > 0.0:
 
-		normal_restart_color = detected_restart_normal
+		normal_restart_color = (
+			detected_restart_normal
+		)
 
 
 	if detected_quit_normal.a > 0.0:
 
-		normal_quit_color = detected_quit_normal
+		normal_quit_color = (
+			detected_quit_normal
+		)
 
 
 	# ==========================================
-	# PEGA COR DO HOVER
+	# PEGA COR REAL DO HOVER
 	# ==========================================
 
 	var detected_resume_hover: Color = (
@@ -199,7 +202,9 @@ func _ready():
 
 	if detected_resume_hover.a > 0.0:
 
-		hover_resume_color = detected_resume_hover
+		hover_resume_color = (
+			detected_resume_hover
+		)
 
 	else:
 
@@ -210,7 +215,9 @@ func _ready():
 
 	if detected_restart_hover.a > 0.0:
 
-		hover_restart_color = detected_restart_hover
+		hover_restart_color = (
+			detected_restart_hover
+		)
 
 	else:
 
@@ -221,7 +228,9 @@ func _ready():
 
 	if detected_quit_hover.a > 0.0:
 
-		hover_quit_color = detected_quit_hover
+		hover_quit_color = (
+			detected_quit_hover
+		)
 
 	else:
 
@@ -302,7 +311,7 @@ func _ready():
 
 		resume_btn.mouse_exited.connect(
 			_on_button_mouse_exited
-		)
+	)
 
 
 	if not restart_btn.mouse_exited.is_connected(
@@ -311,7 +320,7 @@ func _ready():
 
 		restart_btn.mouse_exited.connect(
 			_on_button_mouse_exited
-		)
+	)
 
 
 	if not quit_btn.mouse_exited.is_connected(
@@ -320,7 +329,7 @@ func _ready():
 
 		quit_btn.mouse_exited.connect(
 			_on_button_mouse_exited
-		)
+	)
 
 
 	# ==========================================
@@ -355,11 +364,29 @@ func _mark_input_handled() -> void:
 # ==========================================
 # INPUT
 # ==========================================
-# IMPORTANTE:
-# usamos _input para pegar as setas
-# antes dos Buttons.
 
 func _input(event):
+
+	# ==========================================
+	# SÓ TRATA TECLAS
+	# ==========================================
+
+	if not (
+		event is InputEventKey
+	):
+
+		return
+
+
+	if not event.pressed:
+
+		return
+
+
+	if event.echo:
+
+		return
+
 
 	# ==========================================
 	# ESC
@@ -385,7 +412,8 @@ func _input(event):
 
 
 	# ==========================================
-	# SÓ FUNCIONA NO PAUSE
+	# SE O JOGO NÃO ESTÁ PAUSADO
+	# NÃO BLOQUEIA NADA
 	# ==========================================
 
 	if not get_tree().paused:
@@ -393,29 +421,41 @@ func _input(event):
 		return
 
 
-	# ==========================================
-	# PRECISA SER TECLA
-	# ==========================================
+	# ==================================================
+	# BLOQUEIA RESPOSTAS DO STROOP
+	# ==================================================
+	# 1 = vermelho
+	# 2 = azul
+	# 3 = verde
+	# 4 = amarelo
+	# 5 = roxo
+	# 6 = laranja
+	#
+	# IMPORTANTE:
+	# Essas teclas são consumidas aqui antes de
+	# chegarem ao stroop_challenge.gd.
 
-	if not (
-		event is InputEventKey
+	if (
+		event.keycode == KEY_1
+		or event.keycode == KEY_2
+		or event.keycode == KEY_3
+		or event.keycode == KEY_4
+		or event.keycode == KEY_5
+		or event.keycode == KEY_6
 	):
 
-		return
-
-
-	if not event.pressed:
+		_mark_input_handled()
 
 		return
 
 
 	# ==========================================
-	# IGNORA AUTO-REPETIÇÃO DO SISTEMA
+	# BLOQUEIA SPACE NO PAUSE
 	# ==========================================
-	# Assim uma tecla pressionada não gera
-	# comportamento estranho.
 
-	if event.echo:
+	if event.keycode == KEY_SPACE:
+
+		_mark_input_handled()
 
 		return
 
@@ -425,8 +465,8 @@ func _input(event):
 	# ==========================================
 
 	if (
-		event.keycode == KEY_UP
-		or event.keycode == KEY_W
+		event.keycode == KEY_W
+		or event.keycode == KEY_UP
 	):
 
 		_mark_input_handled()
@@ -461,8 +501,8 @@ func _input(event):
 	# ==========================================
 
 	if (
-		event.keycode == KEY_DOWN
-		or event.keycode == KEY_S
+		event.keycode == KEY_S
+		or event.keycode == KEY_DOWN
 	):
 
 		_mark_input_handled()
@@ -516,6 +556,7 @@ func _input(event):
 
 			quit_game()
 
+
 		return
 
 
@@ -524,10 +565,6 @@ func _input(event):
 # ==========================================
 
 func _apply_keyboard_visual():
-
-	# ==========================================
-	# MOUSE ESTÁ ATIVO
-	# ==========================================
 
 	if mouse_mode_active:
 
@@ -662,16 +699,8 @@ func pause_game():
 	)
 
 
-	# ==========================================
-	# MODO TECLADO
-	# ==========================================
-
 	mouse_mode_active = false
 
-
-	# ==========================================
-	# MOSTRA
-	# ==========================================
 
 	visible = true
 
@@ -679,15 +708,11 @@ func pause_game():
 	layer = PAUSE_LAYER
 
 
-	# ==========================================
-	# PAUSA
-	# ==========================================
-
 	get_tree().paused = true
 
 
 	# ==========================================
-	# SELEÇÃO INICIAL
+	# COMEÇA NO CONTINUAR
 	# ==========================================
 
 	selected_button = resume_btn
@@ -715,16 +740,8 @@ func resume_game():
 	)
 
 
-	# ==========================================
-	# DESPAUSA
-	# ==========================================
-
 	get_tree().paused = false
 
-
-	# ==========================================
-	# ESCONDE
-	# ==========================================
 
 	visible = false
 
@@ -771,6 +788,10 @@ func restart_game():
 	visible = false
 
 
+	# ==========================================
+	# RESET DOS DADOS
+	# ==========================================
+
 	Globals.coins = 0
 	Globals.score = 0
 
@@ -808,8 +829,16 @@ func restart_game():
 	)
 
 
+	# ==========================================
+	# ESPERA UM FRAME
+	# ==========================================
+
 	await get_tree().process_frame
 
+
+	# ==========================================
+	# RECARREGA CENA
+	# ==========================================
 
 	get_tree().reload_current_scene()
 

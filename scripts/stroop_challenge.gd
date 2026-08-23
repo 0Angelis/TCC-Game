@@ -296,6 +296,9 @@ var timer_pulse_tween: Tween = null
 
 var enter_label: Label = null
 
+var tutorial_hover_tween: Tween = null
+var tutorial_button_base_position: Vector2 = Vector2.ZERO
+
 
 # =========================================================
 # TELA DE PREPARAÇÃO - DESAFIOS 2 E 3
@@ -1478,7 +1481,7 @@ func _setup_tutorial() -> void:
 
 	if tutorial_button != null:
 
-		tutorial_button.text = "VAMOS LÁ"
+		tutorial_button.text = "↵  Iniciar"
 
 
 		tutorial_button.mouse_filter = (
@@ -1487,7 +1490,7 @@ func _setup_tutorial() -> void:
 
 
 		tutorial_button.focus_mode = (
-			Control.FOCUS_ALL
+			Control.FOCUS_NONE
 		)
 
 
@@ -1495,6 +1498,10 @@ func _setup_tutorial() -> void:
 
 
 		tutorial_button.z_index = 50
+
+		tutorial_button_base_position = tutorial_button.position
+		tutorial_button.scale = Vector2(1.0, 1.0)
+		tutorial_button.modulate = Color.WHITE
 
 
 		_style_tutorial_button(
@@ -1511,10 +1518,132 @@ func _setup_tutorial() -> void:
 			)
 
 
-		_create_enter_label()
+		if not tutorial_button.mouse_entered.is_connected(
+			_on_tutorial_button_mouse_entered
+		):
+
+			tutorial_button.mouse_entered.connect(
+				_on_tutorial_button_mouse_entered
+			)
+
+
+		if not tutorial_button.mouse_exited.is_connected(
+			_on_tutorial_button_mouse_exited
+		):
+
+			tutorial_button.mouse_exited.connect(
+				_on_tutorial_button_mouse_exited
+			)
 
 
 		tutorial_button.grab_focus()
+
+
+# =========================================================
+# ANIMAÇÃO AO PASSAR O MOUSE NO VAMOS LÁ
+# =========================================================
+
+func _on_tutorial_button_mouse_entered() -> void:
+
+	if tutorial_button == null:
+
+		return
+
+	if tutorial_hover_tween != null:
+
+		tutorial_hover_tween.kill()
+
+	# =============================================
+	# ANIMAÇÃO DE HOVER
+	# =============================================
+	# O botão cresce, clareia e sobe levemente.
+
+	tutorial_hover_tween = create_tween()
+	tutorial_hover_tween.set_parallel(true)
+
+	tutorial_hover_tween.tween_property(
+		tutorial_button,
+		"scale",
+		Vector2(1.08, 1.08),
+		0.16
+	).set_trans(
+		Tween.TRANS_BACK
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+	tutorial_hover_tween.tween_property(
+		tutorial_button,
+		"position",
+		tutorial_button_base_position + Vector2(0, -3),
+		0.16
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+	tutorial_hover_tween.tween_property(
+		tutorial_button,
+		"modulate",
+		Color(1.10, 1.10, 1.10, 1.0),
+		0.16
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+
+func _on_tutorial_button_mouse_exited() -> void:
+
+	if tutorial_button == null:
+
+		return
+
+	if tutorial_hover_tween != null:
+
+		tutorial_hover_tween.kill()
+
+	tutorial_hover_tween = create_tween()
+	tutorial_hover_tween.set_parallel(true)
+
+	# =============================================
+	# VOLTA AO ESTADO NORMAL
+	# =============================================
+
+	tutorial_hover_tween.tween_property(
+		tutorial_button,
+		"scale",
+		Vector2(1.0, 1.0),
+		0.14
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+	tutorial_hover_tween.tween_property(
+		tutorial_button,
+		"position",
+		tutorial_button_base_position,
+		0.14
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+	tutorial_hover_tween.tween_property(
+		tutorial_button,
+		"modulate",
+		Color.WHITE,
+		0.14
+	).set_trans(
+		Tween.TRANS_SINE
+	).set_ease(
+		Tween.EASE_OUT
+	)
 
 
 # =========================================================
@@ -1604,6 +1733,18 @@ func _on_tutorial_button_pressed() -> void:
 
 	tutorial_active = false
 
+	if tutorial_hover_tween != null:
+
+		tutorial_hover_tween.kill()
+
+		tutorial_hover_tween = null
+
+	if tutorial_button != null:
+
+		tutorial_button.scale = Vector2(1.0, 1.0)
+		tutorial_button.position = tutorial_button_base_position
+		tutorial_button.modulate = Color.WHITE
+
 
 	if tutorial != null:
 
@@ -1627,6 +1768,20 @@ func _on_tutorial_button_pressed() -> void:
 func _unhandled_input(
 	event: InputEvent
 ) -> void:
+
+	# =====================================================
+	# SPACE NÃO CONFIRMA NADA
+	# =====================================================
+
+	if event is InputEventKey:
+
+		if event.pressed and not event.echo:
+
+			if event.keycode == KEY_SPACE:
+
+				get_viewport().set_input_as_handled()
+
+				return
 
 	# =====================================================
 	# TELA DE PREPARAÇÃO
@@ -1657,13 +1812,40 @@ func _unhandled_input(
 
 	if tutorial_active:
 
-		if event.is_action_pressed(
-			"ui_accept"
-		):
+		if event is InputEventKey:
 
-			_on_tutorial_button_pressed()
+			if not event.pressed:
 
-			get_viewport().set_input_as_handled()
+				return
+
+			if event.echo:
+
+				return
+
+			# =============================================
+			# SPACE NÃO FAZ NADA
+			# =============================================
+
+			if event.keycode == KEY_SPACE:
+
+				get_viewport().set_input_as_handled()
+
+				return
+
+			# =============================================
+			# ENTER CONFIRMA
+			# =============================================
+
+			if (
+				event.keycode == KEY_ENTER
+				or event.keycode == KEY_KP_ENTER
+			):
+
+				_on_tutorial_button_pressed()
+
+				get_viewport().set_input_as_handled()
+
+				return
 
 
 		return
@@ -3252,7 +3434,7 @@ func _show_final_screen(
 	)
 
 	final_enter_button.focus_mode = (
-		Control.FOCUS_ALL
+		Control.FOCUS_NONE
 	)
 
 	final_enter_button.mouse_filter = (
@@ -3850,7 +4032,7 @@ func _setup_pre_start_screen() -> void:
 	)
 
 	pre_start_button.focus_mode = (
-		Control.FOCUS_ALL
+		Control.FOCUS_NONE
 	)
 
 	pre_start_button.mouse_filter = (

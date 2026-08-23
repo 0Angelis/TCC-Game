@@ -1535,8 +1535,11 @@ func _show_result_screen() -> void:
 		Control.MOUSE_FILTER_STOP
 	)
 
+	# =====================================================
+	# NÃO DEIXA O SPACE ATIVAR O BOTÃO
+	# =====================================================
 	result_button.focus_mode = (
-		Control.FOCUS_ALL
+		Control.FOCUS_NONE
 	)
 
 	result_button.process_mode = (
@@ -1792,7 +1795,7 @@ func _input(
 
 
 	# =====================================================
-	# ENTER NORMAL OU ENTER DO TECLADO NUMÉRICO
+	# SPACE NÃO FAZ NADA
 	# =====================================================
 
 	if event is InputEventKey:
@@ -1806,6 +1809,21 @@ func _input(
 
 			return
 
+
+		if event.keycode == KEY_SPACE:
+
+			var viewport_space := get_viewport()
+
+			if viewport_space != null:
+
+				viewport_space.set_input_as_handled()
+
+			return
+
+
+		# =================================================
+		# ENTER NORMAL OU ENTER DO TECLADO NUMÉRICO
+		# =================================================
 
 		if (
 			event.keycode == KEY_ENTER
