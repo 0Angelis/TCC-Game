@@ -1261,6 +1261,8 @@ vertical_alignment = 1
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
+offset_transform_enabled = true
+offset_transform_position = Vector2(-10, 0)
 
 [node name="score_counter" type="Label" parent="HUD/control/container/score_container" unique_id=1995727330]
 layout_mode = 2
