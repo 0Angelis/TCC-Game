@@ -56,9 +56,9 @@ offset_bottom = 522.0
 
 [node name="tutorial_stroop" type="TextureRect" parent="tutorial" unique_id=166132751]
 layout_mode = 0
-offset_left = -429.0
+offset_left = -424.0
 offset_top = -469.0
-offset_right = 1247.0
+offset_right = 1252.0
 offset_bottom = 472.0
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("4_5hghr")

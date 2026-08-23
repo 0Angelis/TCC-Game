@@ -250,6 +250,15 @@ var correct_answers := 0
 
 var error_count := 0
 
+# =========================================================
+# FRAGMENTO DO DESAFIO ATUAL
+# =========================================================
+# Cada instância do desafio pode dar 1 fragmento.
+# Isso evita que o desafio 1 e o desafio 2 do mundo 02
+# acabem compartilhando a mesma trava por "difficulty".
+
+var fragment_awarded := false
+
 
 # =========================================================
 # ESTADOS
@@ -341,6 +350,9 @@ var final_info_label: Label = null
 var final_error_label: Label = null
 
 var final_enter_button: Button = null
+
+# Evita qualquer acionamento duplicado da tela final.
+var final_action_locked := false
 
 
 # =========================================================
@@ -874,29 +886,17 @@ func _ready() -> void:
 	# =====================================================
 	# TUTORIAL
 	# =====================================================
-	# SOMENTE DESAFIO 1.
+	# O DESAFIO 1 SEMPRE ABRE COM O TUTORIAL.
+	# Isso garante que o tutorial volte depois de um RESTART.
 
 	if difficulty == 1:
 
-		var tutorial_seen := get_tree().has_meta(
-			"stroop_tutorial_seen"
-		)
+		# Remove qualquer estado antigo que pudesse esconder
+		# o tutorial depois de uma reinicialização.
+		get_tree().remove_meta("stroop_tutorial_seen")
+		get_tree().remove_meta("stroop_force_tutorial")
 
-
-		if tutorial_seen:
-
-			tutorial_active = false
-
-			if tutorial != null:
-
-				tutorial.hide()
-
-			start_challenge()
-
-		else:
-
-			_setup_tutorial()
-
+		_setup_tutorial()
 
 	else:
 
@@ -913,7 +913,6 @@ func _ready() -> void:
 			enter_label = null
 
 		_setup_pre_start_screen()
-
 
 	# =====================================================
 	# COMBINAÇÕES
@@ -1481,28 +1480,26 @@ func _setup_tutorial() -> void:
 
 	if tutorial_button != null:
 
-		tutorial_button.text = "↵  Iniciar"
-
+		tutorial_button.text = "↵  INICIAR"
 
 		tutorial_button.mouse_filter = (
 			Control.MOUSE_FILTER_STOP
 		)
 
-
 		tutorial_button.focus_mode = (
 			Control.FOCUS_NONE
 		)
 
-
 		tutorial_button.disabled = false
+		tutorial_button.visible = true
+		tutorial_button.show()
 
-
-		tutorial_button.z_index = 50
+		# Acima do conteúdo visual do tutorial.
+		tutorial_button.z_index = 9999
 
 		tutorial_button_base_position = tutorial_button.position
 		tutorial_button.scale = Vector2(1.0, 1.0)
 		tutorial_button.modulate = Color.WHITE
-
 
 		_style_tutorial_button(
 			tutorial_button
@@ -1535,12 +1532,18 @@ func _setup_tutorial() -> void:
 				_on_tutorial_button_mouse_exited
 			)
 
+		if not tutorial_button.gui_input.is_connected(
+			_on_tutorial_button_gui_input
+		):
 
-		tutorial_button.grab_focus()
+			tutorial_button.gui_input.connect(
+				_on_tutorial_button_gui_input
+			)
+
 
 
 # =========================================================
-# ANIMAÇÃO AO PASSAR O MOUSE NO VAMOS LÁ
+# ANIMAÇÃO AO PASSAR O MOUSE NO BOTÃO INICIAR
 # =========================================================
 
 func _on_tutorial_button_mouse_entered() -> void:
@@ -1762,6 +1765,63 @@ func _on_tutorial_button_pressed() -> void:
 
 
 # =========================================================
+# CLIQUE DO MOUSE NO BOTÃO
+# =========================================================
+
+func _on_tutorial_button_gui_input(event: InputEvent) -> void:
+	if not tutorial_active:
+		return
+
+	if event is InputEventMouseButton:
+		if (
+			event.button_index == MOUSE_BUTTON_LEFT
+			and event.pressed
+		):
+			_on_tutorial_button_pressed()
+			get_viewport().set_input_as_handled()
+
+
+# =========================================================
+# CLIQUE DIRETO DO MOUSE NO BOTÃO DO TUTORIAL
+# =========================================================
+# Tratamos aqui para garantir que o botão funcione mesmo
+# quando existe outro Control/Canvas por cima da interface.
+
+func _input(event: InputEvent) -> void:
+
+	if not tutorial_active:
+		return
+
+	if tutorial_button == null:
+		return
+
+	if tutorial_button.disabled:
+		return
+
+	if event is InputEventMouseButton:
+
+		if (
+			event.button_index == MOUSE_BUTTON_LEFT
+			and event.pressed
+		):
+
+			var viewport := get_viewport()
+
+			if viewport == null:
+				return
+
+			var mouse_position := viewport.get_mouse_position()
+
+			if tutorial_button.get_global_rect().has_point(
+				mouse_position
+			):
+
+				_on_tutorial_button_pressed()
+				viewport.set_input_as_handled()
+				return
+
+
+# =========================================================
 # INPUT
 # =========================================================
 
@@ -1828,7 +1888,11 @@ func _unhandled_input(
 
 			if event.keycode == KEY_SPACE:
 
-				get_viewport().set_input_as_handled()
+				var viewport_space := get_viewport()
+
+				if viewport_space != null:
+
+					viewport_space.set_input_as_handled()
 
 				return
 
@@ -1843,7 +1907,11 @@ func _unhandled_input(
 
 				_on_tutorial_button_pressed()
 
-				get_viewport().set_input_as_handled()
+				var viewport_enter := get_viewport()
+
+				if viewport_enter != null:
+
+					viewport_enter.set_input_as_handled()
 
 				return
 
@@ -1857,19 +1925,42 @@ func _unhandled_input(
 
 	if result_screen_active:
 
-		if event.is_action_pressed(
-			"ui_accept"
-		):
+		# =================================================
+		# ENTER CONFIRMA DIRETAMENTE
+		# =================================================
+		# Não usamos ui_accept nem pressed.emit() aqui.
+		# Isso evita o duplo processamento do ENTER.
 
-			if final_enter_button != null:
+		if event is InputEventKey:
 
-				final_enter_button.grab_focus()
+			if not event.pressed:
+				return
 
-				final_enter_button.pressed.emit()
+			if event.echo:
+				return
 
+			if (
+				event.keycode == KEY_ENTER
+				or event.keycode == KEY_KP_ENTER
+			):
 
-			get_viewport().set_input_as_handled()
+				get_viewport().set_input_as_handled()
 
+				if final_enter_button != null:
+
+					if final_enter_button.disabled:
+						return
+
+				# Executa a ação uma única vez.
+				if time_up_message:
+
+					_restart_after_timeout()
+
+				else:
+
+					_close_result_screen()
+
+			return
 
 		return
 
@@ -2726,24 +2817,21 @@ func _new_round() -> void:
 
 func _award_attention_fragment() -> void:
 
-	var fragment_key := (
-		"stroop_fragment_awarded_"
-		+ str(difficulty)
-	)
+	# =====================================================
+	# CADA DESAFIO SÓ PODE DAR 1 FRAGMENTO
+	# =====================================================
 
-
-	if get_tree().has_meta(
-		fragment_key
-	):
+	if fragment_awarded:
 
 		return
 
 
-	get_tree().set_meta(
-		fragment_key,
-		true
-	)
+	fragment_awarded = true
 
+
+	# =====================================================
+	# ADICIONA FRAGMENTO DE ATENÇÃO
+	# =====================================================
 
 	Globals.atencao_fragments += 1
 
@@ -2829,6 +2917,8 @@ func _complete_challenge() -> void:
 func _show_final_screen(
 	success: bool
 ) -> void:
+
+	final_action_locked = false
 
 	_clear_final_screen()
 
@@ -3315,7 +3405,7 @@ func _show_final_screen(
 	if success:
 
 		fragment_info_label.text = (
-			"✦  FRAGMENTO DE ATENÇÃO +1  ✦"
+			"✦  FRAGMENTO DE ATENÇÃO + 1  ✦"
 		)
 
 	else:
@@ -3507,8 +3597,10 @@ func _show_final_screen(
 	# =====================================================
 	# FOCO
 	# =====================================================
+	# O botão não recebe foco do Godot.
+	# O ENTER é tratado manualmente no _unhandled_input().
 
-	final_enter_button.grab_focus()
+	final_enter_button.release_focus()
 
 	# =====================================================
 	# ANIMAÇÃO
@@ -4388,6 +4480,11 @@ func _close_result_screen() -> void:
 
 		return
 
+	if final_action_locked:
+
+		return
+
+	final_action_locked = true
 
 	result_screen_active = false
 
@@ -4433,6 +4530,11 @@ func _restart_after_timeout() -> void:
 
 		return
 
+	if final_action_locked:
+
+		return
+
+	final_action_locked = true
 
 	result_screen_active = false
 
@@ -4453,87 +4555,111 @@ func _style_tutorial_button(
 	button: Button
 ) -> void:
 
-	button.custom_minimum_size = Vector2(
-		260,
-		62
-	)
-
+	# =====================================================
+	# TAMANHO / CURSOR
+	# =====================================================
+	button.custom_minimum_size = Vector2(320, 72)
 	button.add_theme_font_size_override(
 		"font_size",
-		22
+		24
 	)
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.focus_mode = Control.FOCUS_NONE
 
+	# =====================================================
+	# TEXTO
+	# =====================================================
 	button.add_theme_color_override(
 		"font_color",
-		Color.WHITE
+		Color("#FFFFFF")
 	)
 
 	button.add_theme_color_override(
 		"font_hover_color",
-		Color.WHITE
+		Color("#FFFFFF")
 	)
 
 	button.add_theme_color_override(
 		"font_pressed_color",
-		Color.WHITE
+		Color("#FFFFFF")
+	)
+
+	button.add_theme_color_override(
+		"font_hover_pressed_color",
+		Color("#FFFFFF")
 	)
 
 	button.add_theme_color_override(
 		"font_focus_color",
-		Color.WHITE
+		Color("#FFFFFF")
 	)
 
 	button.add_theme_color_override(
 		"font_outline_color",
-		Color.BLACK
+		Color("#120A1F")
 	)
 
 	button.add_theme_constant_override(
 		"outline_size",
-		3
+		4
 	)
 
-
+	# =====================================================
+	# ESTILO NORMAL
+	# =====================================================
 	var normal := StyleBoxFlat.new()
 
-	normal.bg_color = Color(
-		"#7B3FC6"
-	)
+	normal.bg_color = Color("#7136B5")
 
-	normal.border_width_left = 2
-	normal.border_width_top = 2
-	normal.border_width_right = 2
-	normal.border_width_bottom = 2
+	normal.border_width_left = 3
+	normal.border_width_top = 3
+	normal.border_width_right = 3
+	normal.border_width_bottom = 3
+	normal.border_color = Color("#C98CFF")
 
-	normal.border_color = Color.BLACK
+	normal.corner_radius_top_left = 16
+	normal.corner_radius_top_right = 16
+	normal.corner_radius_bottom_left = 16
+	normal.corner_radius_bottom_right = 16
 
-	normal.corner_radius_top_left = 8
-	normal.corner_radius_top_right = 8
-	normal.corner_radius_bottom_left = 8
-	normal.corner_radius_bottom_right = 8
+	normal.shadow_color = Color(0, 0, 0, 0.42)
+	normal.shadow_size = 8
+	normal.shadow_offset = Vector2(0, 5)
 
+	# =====================================================
+	# HOVER
+	# =====================================================
+	var hover := normal.duplicate() as StyleBoxFlat
 
-	var hover := normal.duplicate()
+	hover.bg_color = Color("#8E4DCE")
+	hover.border_color = Color("#E0B8FF")
+	hover.shadow_color = Color("#8E4DCE", 0.42)
+	hover.shadow_size = 12
+	hover.shadow_offset = Vector2(0, 5)
 
-	hover.bg_color = Color(
-		"#A75AEA"
-	)
+	# =====================================================
+	# PRESSIONADO
+	# =====================================================
+	var pressed := normal.duplicate() as StyleBoxFlat
 
+	pressed.bg_color = Color("#542684")
+	pressed.border_color = Color("#A45DE1")
+	pressed.shadow_size = 3
+	pressed.shadow_offset = Vector2(0, 2)
 
-	var pressed := normal.duplicate()
+	# =====================================================
+	# FOCUS
+	# Não usamos foco visual no tutorial.
+	# =====================================================
+	var focus := hover.duplicate() as StyleBoxFlat
 
-	pressed.bg_color = Color(
-		"#5E299A"
-	)
+	focus.bg_color = Color("#8E4DCE")
+	focus.border_color = Color("#E0B8FF")
 
-
-	var focus := normal.duplicate()
-
-	focus.bg_color = Color(
-		"#8A48D8"
-	)
-
-
+	# =====================================================
+	# APLICA OS ESTILOS
+	# =====================================================
 	button.add_theme_stylebox_override(
 		"normal",
 		normal
@@ -4550,12 +4676,13 @@ func _style_tutorial_button(
 	)
 
 	button.add_theme_stylebox_override(
-		"focus",
-		focus
+		"hover_pressed",
+		pressed
 	)
 
-	button.mouse_default_cursor_shape = (
-		Control.CURSOR_POINTING_HAND
+	button.add_theme_stylebox_override(
+		"focus",
+		focus
 	)
 
 

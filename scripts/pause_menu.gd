@@ -57,7 +57,7 @@ var hover_quit_color: Color = Color("#7B3FC6")
 func _ready():
 
 	# ==========================================
-	# CONTINUA FUNCIONANDO DURANTE O PAUSE
+	# FUNCIONA DURANTE O PAUSE
 	# ==========================================
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -71,7 +71,7 @@ func _ready():
 
 
 	# ==========================================
-	# COMEÇA ESCONDIDO
+	# ESCONDIDO NO COMEÇO
 	# ==========================================
 
 	visible = false
@@ -117,7 +117,7 @@ func _ready():
 
 
 	# ==========================================
-	# NÃO DEIXA A GODOT CONTROLAR O FOCO
+	# FOCO AUTOMÁTICO DESATIVADO
 	# ==========================================
 
 	resume_btn.focus_mode = (
@@ -134,7 +134,7 @@ func _ready():
 
 
 	# ==========================================
-	# PEGA COR NORMAL
+	# CORES NORMAIS
 	# ==========================================
 
 	var detected_resume_normal: Color = (
@@ -178,7 +178,7 @@ func _ready():
 
 
 	# ==========================================
-	# PEGA COR REAL DO HOVER
+	# CORES HOVER
 	# ==========================================
 
 	var detected_resume_hover: Color = (
@@ -240,7 +240,7 @@ func _ready():
 
 
 	# ==========================================
-	# CLIQUES
+	# SINAIS DOS BOTÕES
 	# ==========================================
 
 	if not resume_btn.pressed.is_connected(
@@ -368,7 +368,7 @@ func _mark_input_handled() -> void:
 func _input(event):
 
 	# ==========================================
-	# SÓ TRATA TECLAS
+	# SOMENTE TECLAS
 	# ==========================================
 
 	if not (
@@ -396,24 +396,61 @@ func _input(event):
 		"ui_cancel"
 	):
 
-		_mark_input_handled()
+		# ======================================
+		# SE O MENU DO PAUSE ESTÁ VISÍVEL
+		# ESC FECHA O PAUSE
+		# ======================================
 
+		if visible:
 
-		if get_tree().paused:
+			_mark_input_handled()
 
 			resume_game()
 
-		else:
+			return
 
-			pause_game()
 
+		# ======================================
+		# SE O MENU NÃO ESTÁ VISÍVEL E O JOGO
+		# ESTÁ PAUSADO POR OUTRA TELA
+		#
+		# NÃO FAZ NADA.
+		#
+		# Isso é importante para a tela final
+		# do Stroop não ser afetada.
+		# ======================================
+
+		if get_tree().paused:
+
+			return
+
+
+		# ======================================
+		# JOGO NORMAL
+		# ESC ABRE O PAUSE
+		# ======================================
+
+		_mark_input_handled()
+
+		pause_game()
 
 		return
 
 
 	# ==========================================
-	# SE O JOGO NÃO ESTÁ PAUSADO
-	# NÃO BLOQUEIA NADA
+	# A PARTIR DAQUI:
+	#
+	# SOMENTE O MENU DE PAUSE PODE RECEBER
+	# W / S / SETAS / ENTER / ESPAÇO
+	# ==========================================
+
+	if not visible:
+
+		return
+
+
+	# ==========================================
+	# O JOGO PRECISA ESTAR PAUSADO
 	# ==========================================
 
 	if not get_tree().paused:
@@ -421,19 +458,9 @@ func _input(event):
 		return
 
 
-	# ==================================================
-	# BLOQUEIA RESPOSTAS DO STROOP
-	# ==================================================
-	# 1 = vermelho
-	# 2 = azul
-	# 3 = verde
-	# 4 = amarelo
-	# 5 = roxo
-	# 6 = laranja
-	#
-	# IMPORTANTE:
-	# Essas teclas são consumidas aqui antes de
-	# chegarem ao stroop_challenge.gd.
+	# ==========================================
+	# BLOQUEIA RESPOSTAS 1-6 DO STROOP
+	# ==========================================
 
 	if (
 		event.keycode == KEY_1
@@ -450,7 +477,7 @@ func _input(event):
 
 
 	# ==========================================
-	# BLOQUEIA SPACE NO PAUSE
+	# SPACE NÃO CONFIRMA
 	# ==========================================
 
 	if event.keycode == KEY_SPACE:
@@ -465,8 +492,8 @@ func _input(event):
 	# ==========================================
 
 	if (
-		event.keycode == KEY_W
-		or event.keycode == KEY_UP
+		event.keycode == KEY_UP
+		or event.keycode == KEY_W
 	):
 
 		_mark_input_handled()
@@ -501,8 +528,8 @@ func _input(event):
 	# ==========================================
 
 	if (
-		event.keycode == KEY_S
-		or event.keycode == KEY_DOWN
+		event.keycode == KEY_DOWN
+		or event.keycode == KEY_S
 	):
 
 		_mark_input_handled()
@@ -561,7 +588,7 @@ func _input(event):
 
 
 # ==========================================
-# APLICA COR DO TECLADO
+# VISUAL DO TECLADO
 # ==========================================
 
 func _apply_keyboard_visual():
@@ -571,16 +598,8 @@ func _apply_keyboard_visual():
 		return
 
 
-	# ==========================================
-	# TODOS VOLTAM AO NORMAL
-	# ==========================================
-
 	_clear_all_keyboard_colors()
 
-
-	# ==========================================
-	# RESUME
-	# ==========================================
 
 	if selected_button == resume_btn:
 
@@ -590,10 +609,6 @@ func _apply_keyboard_visual():
 		)
 
 
-	# ==========================================
-	# RESTART
-	# ==========================================
-
 	elif selected_button == restart_btn:
 
 		restart_btn.add_theme_color_override(
@@ -601,10 +616,6 @@ func _apply_keyboard_visual():
 			hover_restart_color
 		)
 
-
-	# ==========================================
-	# QUIT
-	# ==========================================
 
 	elif selected_button == quit_btn:
 
@@ -637,7 +648,7 @@ func _clear_all_keyboard_colors():
 
 
 # ==========================================
-# MOUSE ENTROU - RESUME
+# MOUSE - RESUME
 # ==========================================
 
 func _on_resume_mouse_entered():
@@ -648,7 +659,7 @@ func _on_resume_mouse_entered():
 
 
 # ==========================================
-# MOUSE ENTROU - RESTART
+# MOUSE - RESTART
 # ==========================================
 
 func _on_restart_mouse_entered():
@@ -659,7 +670,7 @@ func _on_restart_mouse_entered():
 
 
 # ==========================================
-# MOUSE ENTROU - QUIT
+# MOUSE - MENU
 # ==========================================
 
 func _on_quit_mouse_entered():
@@ -785,11 +796,12 @@ func restart_game():
 
 	get_tree().paused = false
 
+
 	visible = false
 
 
 	# ==========================================
-	# RESET DOS DADOS
+	# RESET
 	# ==========================================
 
 	Globals.coins = 0
@@ -829,16 +841,8 @@ func restart_game():
 	)
 
 
-	# ==========================================
-	# ESPERA UM FRAME
-	# ==========================================
-
 	await get_tree().process_frame
 
-
-	# ==========================================
-	# RECARREGA CENA
-	# ==========================================
 
 	get_tree().reload_current_scene()
 
@@ -866,6 +870,7 @@ func quit_game():
 
 
 	get_tree().paused = false
+
 
 	visible = false
 
