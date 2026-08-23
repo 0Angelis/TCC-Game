@@ -922,8 +922,12 @@ scale = Vector2(0.016, 0.016)
 sprite_frames = SubResource("SpriteFrames_ffp5f")
 autoplay = "default"
 
+[node name="goal" parent="." unique_id=1383269650 instance=ExtResource("29_gmex4")]
+position = Vector2(4199, 628)
+next_level = "uid://2lrgxc7earf0"
+
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("4_naeyk")]
-position = Vector2(48, 822)
+position = Vector2(47, 822)
 
 [node name="portal chegada" type="AnimatedSprite2D" parent="." unique_id=654761614]
 position = Vector2(23, 810)
@@ -1131,10 +1135,6 @@ position = Vector2(-18, 420)
 
 [node name="moving_platform-horizontal2" parent="platforms" unique_id=1919973187 instance=ExtResource("1_l86n5")]
 position = Vector2(-16, 347)
-
-[node name="goal" parent="." unique_id=1383269650 instance=ExtResource("29_gmex4")]
-position = Vector2(4199, 624)
-next_level = "uid://2lrgxc7earf0"
 
 [node name="BG" type="ParallaxBackground" parent="." unique_id=2092705572]
 

@@ -346,6 +346,8 @@ func restart_game():
 	Globals.level_score = 0
 
 	Globals.raciocinio_fragments = 0
+	Globals.atencao_fragments = 0
+	Globals.memoria_fragments = 0
 
 
 	print(
@@ -359,8 +361,18 @@ func restart_game():
 	)
 
 	print(
-		"FRAGMENTOS: ",
+		"RACIOCÍNIO: ",
 		Globals.raciocinio_fragments
+	)
+
+	print(
+		"ATENÇÃO: ",
+		Globals.atencao_fragments
+	)
+
+	print(
+		"MEMÓRIA: ",
+		Globals.memoria_fragments
 	)
 
 

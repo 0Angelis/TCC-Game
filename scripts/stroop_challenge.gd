@@ -341,10 +341,158 @@ var final_enter_button: Button = null
 
 
 # =========================================================
+# FONTE / THEME DO HUD
+# =========================================================
+
+var game_font: Font = null
+
+var game_theme: Theme = null
+
+
+# =========================================================
+# CAMADA DA TELA FINAL
+# =========================================================
+
+var final_layer: CanvasLayer = null
+
+var final_overlay: Control = null
+
+var final_panel: Panel = null
+
+
+# =========================================================
+# CORES DA TELA FINAL RETRÔ
+# =========================================================
+
+const RETRO_PANEL_COLOR := Color("#1B1030")
+
+const RETRO_PURPLE := Color("#8E4DCE")
+
+const RETRO_PURPLE_LIGHT := Color("#C88BFF")
+
+const RETRO_MAGENTA := Color("#E35BFF")
+
+const RETRO_CYAN := Color("#7BE7FF")
+
+const RETRO_GOLD := Color("#F5D56A")
+
+const RETRO_WHITE := Color("#F7F1FF")
+
+const RETRO_BLACK := Color("#0A0610")
+
+
+# =========================================================
+# PEGA A FONTE / THEME DO HUD
+# =========================================================
+
+func _get_hud_font_and_theme() -> void:
+
+	var current_scene := get_tree().current_scene
+
+	if current_scene == null:
+
+		return
+
+	var hud_label := current_scene.find_child(
+		"coins_counter",
+		true,
+		false
+	) as Label
+
+	if hud_label == null:
+
+		print(
+			"AVISO: coins_counter não encontrado para fonte."
+		)
+
+		return
+
+	game_font = hud_label.get_theme_font(
+		"font"
+	)
+
+	game_theme = hud_label.get_theme()
+
+	if game_font != null:
+
+		print(
+			"FONTE RETRÔ DO HUD ENCONTRADA."
+		)
+
+	else:
+
+		print(
+			"AVISO: fonte retrô do HUD não encontrada."
+		)
+
+
+# =========================================================
+# APLICA FONTE A UM CONTROLE
+# =========================================================
+
+func _apply_game_font(
+	control: Control
+) -> void:
+
+	if control == null:
+
+		return
+
+	if game_theme != null:
+
+		control.theme = game_theme
+
+	if game_font != null:
+
+		control.add_theme_font_override(
+			"font",
+			game_font
+		)
+
+	control.texture_filter = (
+		CanvasItem.TEXTURE_FILTER_NEAREST
+	)
+
+
+# =========================================================
+# APLICA A FONTE RETRÔ A UMA ÁRVORE DE CONTROLES
+# =========================================================
+
+func _apply_game_font_tree(node: Node) -> void:
+
+	if node is Control:
+
+		_apply_game_font(
+			node as Control
+		)
+
+	for child in node.get_children():
+
+		_apply_game_font_tree(
+			child
+		)
+
+
+
+# =========================================================
 # READY
 # =========================================================
 
 func _ready() -> void:
+
+	# =====================================================
+	# IMPORTANTE: O MINIGAME DEVE PAUSAR JUNTO COM O JOGO
+	# O MENU DE PAUSE usa PROCESS_MODE_ALWAYS, mas o Stroop
+	# precisa continuar no modo pausável. Assim o _process()
+	# para automaticamente quando get_tree().paused = true.
+	# =====================================================
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# =====================================================
+	# FONTE RETRÔ DO HUD
+	# =====================================================
+
+	_get_hud_font_and_theme()
 
 	difficulty = clamp(
 		difficulty,
@@ -778,6 +926,18 @@ func _ready() -> void:
 func _process(
 	delta: float
 ) -> void:
+
+	# =====================================================
+	# PAUSE
+	# =====================================================
+	# O minigame continua processando para que as telas
+	# finais dinâmicas possam funcionar normalmente, mas
+	# o cronômetro NÃO avança enquanto o jogo está pausado.
+
+	if get_tree().paused:
+
+		return
+
 
 	if not challenge_active:
 
@@ -2062,6 +2222,8 @@ func _force_white_text(
 
 func start_challenge() -> void:
 
+	get_tree().paused = false
+
 	_clear_final_screen()
 
 
@@ -2479,7 +2641,7 @@ func _complete_challenge() -> void:
 
 
 # =========================================================
-# TELA FINAL
+# TELA FINAL DO DESAFIO
 # =========================================================
 
 func _show_final_screen(
@@ -2488,9 +2650,247 @@ func _show_final_screen(
 
 	_clear_final_screen()
 
+	# =====================================================
+	# PAUSA O DESAFIO
+	# =====================================================
+
+	get_tree().paused = true
+
+	# =====================================================
+	# CANVAS LAYER
+	# =====================================================
+
+	final_layer = CanvasLayer.new()
+
+	final_layer.name = "StroopFinalLayer"
+
+	final_layer.layer = 300
+
+	final_layer.process_mode = (
+		Node.PROCESS_MODE_ALWAYS
+	)
+
+	get_tree().root.add_child(
+		final_layer
+	)
+
+	# =====================================================
+	# OVERLAY
+	# =====================================================
+
+	final_overlay = Control.new()
+
+	final_overlay.name = "StroopFinalOverlay"
+
+	final_overlay.set_anchors_and_offsets_preset(
+		Control.PRESET_FULL_RECT
+	)
+
+	final_overlay.mouse_filter = (
+		Control.MOUSE_FILTER_STOP
+	)
+
+	final_overlay.process_mode = (
+		Node.PROCESS_MODE_ALWAYS
+	)
+
+	final_layer.add_child(
+		final_overlay
+	)
+
+	# =====================================================
+	# FUNDO ESCURECIDO
+	# =====================================================
+
+	var dark_background := ColorRect.new()
+
+	dark_background.set_anchors_and_offsets_preset(
+		Control.PRESET_FULL_RECT
+	)
+
+	dark_background.color = Color(
+		0.035,
+		0.015,
+		0.07,
+		0.62
+	)
+
+	dark_background.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	final_overlay.add_child(
+		dark_background
+	)
+
+	# =====================================================
+	# PAINEL CENTRAL
+	# =====================================================
+
+	final_panel = Panel.new()
+
+	final_panel.name = "StroopFinalPanel"
+
+	final_panel.anchor_left = 0.5
+	final_panel.anchor_top = 0.5
+	final_panel.anchor_right = 0.5
+	final_panel.anchor_bottom = 0.5
+
+	final_panel.offset_left = -330
+	final_panel.offset_top = -190
+	final_panel.offset_right = 330
+	final_panel.offset_bottom = 190
+
+	final_panel.mouse_filter = (
+		Control.MOUSE_FILTER_STOP
+	)
+
+	final_panel.process_mode = (
+		Node.PROCESS_MODE_ALWAYS
+	)
+
+	var panel_style := StyleBoxFlat.new()
+
+	panel_style.bg_color = RETRO_PANEL_COLOR
+
+	panel_style.border_width_left = 3
+	panel_style.border_width_top = 3
+	panel_style.border_width_right = 3
+	panel_style.border_width_bottom = 3
+
+	panel_style.border_color = RETRO_PURPLE
+
+	panel_style.corner_radius_top_left = 12
+	panel_style.corner_radius_top_right = 12
+	panel_style.corner_radius_bottom_left = 12
+	panel_style.corner_radius_bottom_right = 12
+
+	panel_style.shadow_color = Color(
+		0.35,
+		0.05,
+		0.55,
+		0.70
+	)
+
+	panel_style.shadow_size = 12
+
+	panel_style.shadow_offset = Vector2(
+		0,
+		5
+	)
+
+	final_panel.add_theme_stylebox_override(
+		"panel",
+		panel_style
+	)
+
+	final_overlay.add_child(
+		final_panel
+	)
+
+	# =====================================================
+	# LINHA SUPERIOR
+	# =====================================================
+
+	var top_line := ColorRect.new()
+
+	top_line.position = Vector2(
+		28,
+		18
+	)
+
+	top_line.size = Vector2(
+		604,
+		2
+	)
+
+	top_line.color = RETRO_MAGENTA
+
+	top_line.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	final_panel.add_child(
+		top_line
+	)
+
+	# =====================================================
+	# DECORAÇÃO
+	# =====================================================
+
+	var left_decor := Label.new()
+
+	left_decor.text = "◆  ◆  ◆"
+
+	left_decor.position = Vector2(
+		35,
+		42
+	)
+
+	left_decor.size = Vector2(
+		110,
+		24
+	)
+
+	left_decor.add_theme_font_size_override(
+		"font_size",
+		11
+	)
+
+	left_decor.add_theme_color_override(
+		"font_color",
+		RETRO_PURPLE_LIGHT
+	)
+
+	left_decor.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	final_panel.add_child(
+		left_decor
+	)
+
+	var right_decor := Label.new()
+
+	right_decor.text = "◆  ◆  ◆"
+
+	right_decor.position = Vector2(
+		520,
+		42
+	)
+
+	right_decor.size = Vector2(
+		110,
+		24
+	)
+
+	right_decor.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_RIGHT
+	)
+
+	right_decor.add_theme_font_size_override(
+		"font_size",
+		11
+	)
+
+	right_decor.add_theme_color_override(
+		"font_color",
+		RETRO_PURPLE_LIGHT
+	)
+
+	right_decor.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	final_panel.add_child(
+		right_decor
+	)
+
+	# =====================================================
+	# TÍTULO
+	# =====================================================
 
 	final_title_label = Label.new()
-
 
 	if success:
 
@@ -2504,23 +2904,14 @@ func _show_final_screen(
 			"✦  TEMPO ESGOTADO!  ✦"
 		)
 
-
-	final_title_label.set_anchors_preset(
-		Control.PRESET_CENTER_TOP
-	)
-
 	final_title_label.position = Vector2(
-		-500,
-		65
+		20,
+		62
 	)
 
 	final_title_label.size = Vector2(
-		1000,
-		65
-	)
-
-	final_title_label.mouse_filter = (
-		Control.MOUSE_FILTER_IGNORE
+		620,
+		52
 	)
 
 	final_title_label.horizontal_alignment = (
@@ -2531,68 +2922,113 @@ func _show_final_screen(
 		VERTICAL_ALIGNMENT_CENTER
 	)
 
+	final_title_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
 	final_title_label.add_theme_font_size_override(
 		"font_size",
-		38
+		28
 	)
 
 	final_title_label.add_theme_color_override(
 		"font_color",
-		FINAL_WHITE
+		RETRO_WHITE
 	)
 
 	final_title_label.add_theme_color_override(
 		"font_outline_color",
-		Color("#101820")
+		RETRO_BLACK
 	)
 
 	final_title_label.add_theme_constant_override(
 		"outline_size",
-		7
+		5
 	)
 
-	add_child(
+	final_panel.add_child(
 		final_title_label
 	)
 
+	# =====================================================
+	# IDENTIFICAÇÃO
+	# =====================================================
+
+	var stage_label := Label.new()
+
+	stage_label.text = (
+		"DESAFIO "
+		+ str(difficulty)
+		+ "  •  ATENÇÃO"
+	)
+
+	stage_label.position = Vector2(
+		40,
+		108
+	)
+
+	stage_label.size = Vector2(
+		580,
+		30
+	)
+
+	stage_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	stage_label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+	stage_label.add_theme_font_size_override(
+		"font_size",
+		13
+	)
+
+	stage_label.add_theme_color_override(
+		"font_color",
+		RETRO_CYAN
+	)
+
+	stage_label.add_theme_color_override(
+		"font_outline_color",
+		RETRO_BLACK
+	)
+
+	stage_label.add_theme_constant_override(
+		"outline_size",
+		2
+	)
+
+	stage_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	final_panel.add_child(
+		stage_label
+	)
+
+	# =====================================================
+	# ACERTOS
+	# =====================================================
 
 	final_info_label = Label.new()
 
-
-	if success:
-
-		final_info_label.text = (
-			"✦  FRAGMENTO DE ATENÇÃO  ✦\n"
-			+ "+1"
-		)
-
-	else:
-
-		final_info_label.text = (
-			str(correct_answers)
-			+ " / "
-			+ str(TOTAL_ACERTOS)
-			+ "\n"
-			+ "ACERTOS"
-		)
-
-
-	final_info_label.set_anchors_preset(
-		Control.PRESET_CENTER_TOP
+	final_info_label.text = (
+		"ACERTOS      "
+		+ str(correct_answers)
+		+ " / "
+		+ str(TOTAL_ACERTOS)
 	)
 
 	final_info_label.position = Vector2(
-		-430,
-		150
+		40,
+		137
 	)
 
 	final_info_label.size = Vector2(
-		860,
-		115
-	)
-
-	final_info_label.mouse_filter = (
-		Control.MOUSE_FILTER_IGNORE
+		580,
+		62
 	)
 
 	final_info_label.horizontal_alignment = (
@@ -2605,52 +3041,51 @@ func _show_final_screen(
 
 	final_info_label.add_theme_font_size_override(
 		"font_size",
-		28
+		22
 	)
 
 	final_info_label.add_theme_color_override(
 		"font_color",
-		Color.WHITE
+		RETRO_WHITE
 	)
 
 	final_info_label.add_theme_color_override(
 		"font_outline_color",
-		Color("#101820")
+		RETRO_BLACK
 	)
 
 	final_info_label.add_theme_constant_override(
 		"outline_size",
-		5
+		3
 	)
 
-	add_child(
+	final_info_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	final_panel.add_child(
 		final_info_label
 	)
 
+	# =====================================================
+	# FRAGMENTO / ERROS
+	# =====================================================
 
 	final_error_label = Label.new()
 
 	final_error_label.text = (
-		"ERROS: "
+		"ERROS      "
 		+ str(error_count)
 	)
 
-	final_error_label.set_anchors_preset(
-		Control.PRESET_CENTER_TOP
-	)
-
 	final_error_label.position = Vector2(
-		-300,
-		285
+		40,
+		196
 	)
 
 	final_error_label.size = Vector2(
-		600,
-		45
-	)
-
-	final_error_label.mouse_filter = (
-		Control.MOUSE_FILTER_IGNORE
+		580,
+		42
 	)
 
 	final_error_label.horizontal_alignment = (
@@ -2663,35 +3098,131 @@ func _show_final_screen(
 
 	final_error_label.add_theme_font_size_override(
 		"font_size",
-		21
+		18
 	)
 
 	final_error_label.add_theme_color_override(
 		"font_color",
-		FINAL_TEXT
+		RETRO_PURPLE_LIGHT
 	)
 
 	final_error_label.add_theme_color_override(
 		"font_outline_color",
-		Color("#101820")
+		RETRO_BLACK
 	)
 
 	final_error_label.add_theme_constant_override(
 		"outline_size",
-		4
+		3
 	)
 
-	add_child(
+	final_error_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	final_panel.add_child(
 		final_error_label
 	)
 
+	# =====================================================
+	# MENSAGEM DO FRAGMENTO
+	# =====================================================
+
+	var fragment_info_label := Label.new()
+
+	if success:
+
+		fragment_info_label.text = (
+			"✦  FRAGMENTO DE ATENÇÃO +1  ✦"
+		)
+
+	else:
+
+		fragment_info_label.text = (
+			"TENTE NOVAMENTE"
+		)
+
+	fragment_info_label.position = Vector2(
+		40,
+		246
+	)
+
+	fragment_info_label.size = Vector2(
+		580,
+		32
+	)
+
+	fragment_info_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	fragment_info_label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+	fragment_info_label.add_theme_font_size_override(
+		"font_size",
+		14
+	)
+
+	fragment_info_label.add_theme_color_override(
+		"font_color",
+		RETRO_GOLD if success else RETRO_MAGENTA
+	)
+
+	fragment_info_label.add_theme_color_override(
+		"font_outline_color",
+		RETRO_BLACK
+	)
+
+	fragment_info_label.add_theme_constant_override(
+		"outline_size",
+		2
+	)
+
+	fragment_info_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	final_panel.add_child(
+		fragment_info_label
+	)
+
+	# =====================================================
+	# LINHA INFERIOR
+	# =====================================================
+
+	var bottom_line := ColorRect.new()
+
+	bottom_line.position = Vector2(
+		28,
+		276
+	)
+
+	bottom_line.size = Vector2(
+		604,
+		2
+	)
+
+	bottom_line.color = RETRO_PURPLE
+
+	bottom_line.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	final_panel.add_child(
+		bottom_line
+	)
+
+	# =====================================================
+	# BOTÃO
+	# =====================================================
 
 	final_enter_button = Button.new()
 
 	final_enter_button.name = (
 		"FinalEnterButton"
 	)
-
 
 	if success:
 
@@ -2705,23 +3236,18 @@ func _show_final_screen(
 			"↻   TENTAR NOVAMENTE"
 		)
 
-
-	final_enter_button.set_anchors_preset(
-		Control.PRESET_CENTER_BOTTOM
-	)
-
 	final_enter_button.position = Vector2(
-		-125,
-		-80
+		175,
+		300
 	)
 
 	final_enter_button.size = Vector2(
-		250,
+		310,
 		48
 	)
 
 	final_enter_button.custom_minimum_size = Vector2(
-		250,
+		310,
 		48
 	)
 
@@ -2733,9 +3259,13 @@ func _show_final_screen(
 		Control.MOUSE_FILTER_STOP
 	)
 
+	final_enter_button.process_mode = (
+		Node.PROCESS_MODE_ALWAYS
+	)
+
 	final_enter_button.add_theme_font_size_override(
 		"font_size",
-		18
+		17
 	)
 
 	final_enter_button.add_theme_color_override(
@@ -2760,7 +3290,7 @@ func _show_final_screen(
 
 	final_enter_button.add_theme_color_override(
 		"font_outline_color",
-		Color("#111820")
+		RETRO_BLACK
 	)
 
 	final_enter_button.add_theme_constant_override(
@@ -2768,16 +3298,13 @@ func _show_final_screen(
 		2
 	)
 
-
 	_style_final_button(
 		final_enter_button
 	)
 
-
 	final_enter_button.mouse_default_cursor_shape = (
 		Control.CURSOR_POINTING_HAND
 	)
-
 
 	if success:
 
@@ -2791,75 +3318,63 @@ func _show_final_screen(
 			_restart_after_timeout
 		)
 
-
-	add_child(
+	final_panel.add_child(
 		final_enter_button
 	)
 
+	# =====================================================
+	# FOCO
+	# =====================================================
 
 	final_enter_button.grab_focus()
 
+	# =====================================================
+	# ANIMAÇÃO
+	# =====================================================
 
-	final_title_label.modulate = Color(
+	final_panel.modulate = Color(
 		1,
 		1,
 		1,
 		0
 	)
 
-	final_info_label.modulate = Color(
-		1,
-		1,
-		1,
-		0
+	final_panel.scale = Vector2(
+		0.94,
+		0.94
 	)
 
-	final_error_label.modulate = Color(
-		1,
-		1,
-		1,
-		0
-	)
+	# =====================================================
+	# FONTE RETRÔ SOMENTE NA TELA FINAL
+	# =====================================================
 
-	final_enter_button.modulate = Color(
-		1,
-		1,
-		1,
-		0
+	_apply_game_font_tree(
+		final_panel
 	)
-
 
 	var tween := create_tween()
 
 	tween.set_parallel(true)
 
-
 	tween.tween_property(
-		final_title_label,
+		final_panel,
 		"modulate",
 		Color.WHITE,
-		0.20
+		0.18
 	)
 
 	tween.tween_property(
-		final_info_label,
-		"modulate",
-		Color.WHITE,
-		0.25
-	)
-
-	tween.tween_property(
-		final_error_label,
-		"modulate",
-		Color.WHITE,
-		0.30
-	)
-
-	tween.tween_property(
-		final_enter_button,
-		"modulate",
-		Color.WHITE,
-		0.40
+		final_panel,
+		"scale",
+		Vector2(
+			1.0,
+			1.0
+		),
+		0.22
+	).set_trans(
+		Tween.TRANS_BACK
+	).set_ease(
+		Tween.EASE_OUT
 	)
 
 
@@ -3379,7 +3894,6 @@ func _setup_pre_start_screen() -> void:
 		2
 	)
 
-
 	_style_final_button(
 		pre_start_button
 	)
@@ -3394,6 +3908,14 @@ func _setup_pre_start_screen() -> void:
 		pre_start_button
 	)
 
+
+	# =====================================================
+	# FONTE RETRÔ SOMENTE NA TELA DE PREPARAÇÃO
+	# =====================================================
+
+	_apply_game_font_tree(
+		pre_start_panel
+	)
 
 	# =====================================================
 	# FOCO
@@ -3617,6 +4139,19 @@ func _style_final_button(
 
 func _clear_final_screen() -> void:
 
+	if final_layer != null:
+
+		if is_instance_valid(
+			final_layer
+		):
+
+			final_layer.queue_free()
+
+		final_layer = null
+
+	final_overlay = null
+	final_panel = null
+
 	if final_title_label != null:
 
 		if is_instance_valid(
@@ -3675,6 +4210,9 @@ func _close_result_screen() -> void:
 	result_screen_active = false
 
 	time_up_message = false
+
+
+	get_tree().paused = false
 
 
 	_clear_final_screen()
