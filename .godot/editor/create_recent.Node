@@ -1,3 +1,5 @@
+Node2D
+Node
 TextureRect
 CharacterBody2D
 AnimatedSprite2D
@@ -7,8 +9,6 @@ HBoxContainer
 Button
 Control
 CollisionShape2D
-Node2D
 Label
 VBoxContainer
 ColorRect
-RayCast2D

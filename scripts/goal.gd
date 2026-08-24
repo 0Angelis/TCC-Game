@@ -183,14 +183,14 @@ func _ready() -> void:
 	# =====================================================
 
 	portal_message_label.position = Vector2(
-		-120,
-		-42
+		-130,
+		-39
 	)
 
 
 	portal_message_label.size = Vector2(
-		240,
-		28
+		260,
+		26
 	)
 
 
@@ -207,20 +207,34 @@ func _ready() -> void:
 	# PIXEL ART
 	# =====================================================
 
+	# PIXEL ART: mantém a fonte sem suavização/blur
 	portal_message_label.texture_filter = (
 		CanvasItem.TEXTURE_FILTER_NEAREST
 	)
 
+	# Usa EXATAMENTE a mesma fonte pixel art da HUD
+	if game_font != null:
+		portal_message_label.add_theme_font_override(
+			"font",
+			game_font
+		)
 
+	# Tamanho maior para a mensagem ficar nítida e legível
 	portal_message_label.add_theme_font_size_override(
 		"font_size",
 		8
 	)
 
 
+	# Desliga antialiasing para manter o aspecto pixel art
 	portal_message_label.add_theme_constant_override(
 		"font_antialiasing",
 		0
+	)
+
+	portal_message_label.add_theme_constant_override(
+		"outline_size",
+		2
 	)
 
 
@@ -241,11 +255,6 @@ func _ready() -> void:
 	)
 
 
-	portal_message_label.add_theme_constant_override(
-		"outline_size",
-		1
-	)
-
 
 	portal_message_label.add_theme_color_override(
 		"font_shadow_color",
@@ -253,20 +262,20 @@ func _ready() -> void:
 			0,
 			0,
 			0,
-			0
+			0.65
 		)
 	)
 
 
 	portal_message_label.add_theme_constant_override(
 		"shadow_offset_x",
-		0
+		1
 	)
 
 
 	portal_message_label.add_theme_constant_override(
 		"shadow_offset_y",
-		0
+		1
 	)
 
 

@@ -45,6 +45,7 @@
 [ext_resource type="Texture2D" uid="uid://nrwo3oga712x" path="res://Sunny-land-files/Assets/environment/Props/palm.png" id="37_ln80i"]
 [ext_resource type="PackedScene" uid="uid://cu31oefxt7lgm" path="res://prefabs/frag_raciocinio.tscn" id="40_0aqq2"]
 [ext_resource type="Texture2D" uid="uid://cthvhxko1jkd8" path="res://Sunny-land-files/Assets/environment/Props/tree-house.png" id="45_ln80i"]
+[ext_resource type="Texture2D" uid="uid://cg3h7vxms8duv" path="res://Sunny-land-files/Assets/environment/Props/wooden-house.png" id="46_jt6s7"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_j8rs1"]
 tile_data = PackedInt32Array(0, 65537, 1)
@@ -907,6 +908,23 @@ script = ExtResource("1_dl4q8")
 [node name="pause_menu" parent="." unique_id=1799463148 instance=ExtResource("15_0uwfl")]
 visible = false
 
+[node name="cenario" type="Node2D" parent="." unique_id=68952426]
+position = Vector2(1885, 442.99997)
+scale = Vector2(0.964, 0.964)
+
+[node name="TreeHouse" type="Sprite2D" parent="cenario" unique_id=2029647541]
+position = Vector2(-66.390015, 14.522858)
+scale = Vector2(1.0373445, 1.0373445)
+texture = ExtResource("45_ln80i")
+
+[node name="Palm" type="Sprite2D" parent="cenario" unique_id=2008317284]
+texture = ExtResource("37_ln80i")
+
+[node name="WoodenHouse" type="Sprite2D" parent="cenario" unique_id=120302721]
+position = Vector2(-1851.6598, 187.7594)
+scale = Vector2(1.0373445, 1.0373445)
+texture = ExtResource("46_jt6s7")
+
 [node name="level" type="TileMap" parent="." unique_id=2135947595]
 tile_set = SubResource("TileSet_or7x1")
 format = 2
@@ -1193,6 +1211,7 @@ limit_left = 0
 position_smoothing_enabled = true
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=184126909]
+visible = false
 
 [node name="control" type="Control" parent="HUD" unique_id=1623216057]
 layout_mode = 3
@@ -1331,10 +1350,6 @@ theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("27_gmex4")
 theme_override_font_sizes/font_size = 40
 text = "0/5"
-
-[node name="Palm" type="Sprite2D" parent="HUD/control/container" unique_id=2008317284]
-position = Vector2(1970.4357, 459.54355)
-texture = ExtResource("37_ln80i")
 
 [node name="warning" type="Node2D" parent="." unique_id=1954291522]
 position = Vector2(487, 346)
@@ -1799,7 +1814,3 @@ tipo_fragmento = "Raciocinio"
 [node name="frag_raciocinio5" parent="Fragmentos" unique_id=1284541050 instance=ExtResource("40_0aqq2")]
 position = Vector2(3132, -35)
 tipo_fragmento = "Raciocinio"
-
-[node name="TreeHouse" type="Sprite2D" parent="." unique_id=2029647541]
-position = Vector2(1821, 457)
-texture = ExtResource("45_ln80i")
