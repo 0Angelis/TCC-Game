@@ -1,0 +1,133 @@
+[gd_scene format=3 uid="uid://b8oxoefpjsd4e"]
+
+[ext_resource type="Script" uid="uid://olh4nfbnklem" path="res://scripts/stroop_challenge.gd" id="1_8r4bf"]
+[ext_resource type="Texture2D" uid="uid://b6gh7p3ydemrw" path="res://assets/Sunny-land-files/Assets/environment/Background/back.png" id="2_pdijl"]
+[ext_resource type="Texture2D" uid="uid://k1lrsupgeu5t" path="res://assets/Comandos/comando stroop.png" id="4_5hghr"]
+[ext_resource type="Texture2D" uid="uid://cgy04jtyd0m57" path="res://assets/portal/fundo desafio 2.png" id="4_agayc"]
+[ext_resource type="Texture2D" uid="uid://d3qvsema2motn" path="res://assets/Sprite Pack 6/1 - Penguin/Looking_Off (16 x 16).png" id="4_y85ea"]
+[ext_resource type="Texture2D" uid="uid://dyixm1inxu0cr" path="res://assets/Seasonal Tilesets/1 - Grassland/Background parts/3 - Cloud_cover_1.png" id="5_k604q"]
+
+[node name="StroopChallenge" type="Control" unique_id=642136524]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_8r4bf")
+
+[node name="BG" type="TextureRect" parent="." unique_id=275574043]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="05" type="ParallaxLayer" parent="BG" unique_id=735705115]
+motion_mirroring = Vector2(1280, 0)
+
+[node name="texture" type="Sprite2D" parent="BG/05" unique_id=1642186313]
+position = Vector2(0, 7.6293945e-06)
+scale = Vector2(3.3454857, 4.351282)
+texture = ExtResource("2_pdijl")
+centered = false
+
+[node name="03" type="ParallaxLayer" parent="BG" unique_id=1041644989]
+motion_mirroring = Vector2(1280, 0)
+
+[node name="clouds" type="Sprite2D" parent="BG/03" unique_id=1874980503]
+position = Vector2(76, 171)
+scale = Vector2(2.128472, 1.3076922)
+texture = ExtResource("5_k604q")
+centered = false
+
+[node name="BG2" type="TextureRect" parent="." unique_id=1355522468]
+layout_mode = 0
+offset_left = -202.0
+offset_top = -103.0
+offset_right = 1470.0
+offset_bottom = 838.0
+offset_transform_enabled = true
+offset_transform_scale = Vector2(0.8, 0.8)
+texture = ExtResource("4_agayc")
+
+[node name="tutorial" type="Control" parent="." unique_id=211962290]
+anchors_preset = 0
+offset_left = 640.0
+offset_top = 482.0
+offset_right = 680.0
+offset_bottom = 522.0
+
+[node name="tutorial_stroop" type="TextureRect" parent="tutorial" unique_id=166132751]
+layout_mode = 0
+offset_left = -417.0
+offset_top = -469.0
+offset_right = 1259.0
+offset_bottom = 472.0
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("4_5hghr")
+
+[node name="Button" type="Button" parent="tutorial" unique_id=110131191]
+layout_mode = 0
+offset_left = -133.0
+offset_top = -67.0
+offset_right = -106.0
+offset_bottom = -36.0
+text = "aa"
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1185692518]
+layout_mode = 1
+offset_left = 16.0
+offset_top = -24.0
+offset_right = 1296.0
+offset_bottom = 696.0
+
+[node name="MainContainer" type="VBoxContainer" parent="CenterContainer" unique_id=1615883025]
+layout_mode = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="InstructionLabel" type="Label" parent="CenterContainer/MainContainer" unique_id=1481491531]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+text = "ESCOLHA A COR"
+
+[node name="WordLabel" type="Label" parent="CenterContainer/MainContainer" unique_id=541265554]
+modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "bbbbb"
+
+[node name="ButtonsContainer" type="HBoxContainer" parent="CenterContainer/MainContainer" unique_id=1408058768]
+layout_mode = 2
+
+[node name="RedButton" type="Button" parent="CenterContainer/MainContainer/ButtonsContainer" unique_id=114820998]
+modulate = Color(1, 0, 0, 1)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "VERMELHO"
+
+[node name="BlueButton" type="Button" parent="CenterContainer/MainContainer/ButtonsContainer" unique_id=841507892]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "     AZUL     "
+
+[node name="GreenButton" type="Button" parent="CenterContainer/MainContainer/ButtonsContainer" unique_id=394376544]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "    VERDE     "
+
+[node name="ProgressLabel" type="Label" parent="CenterContainer/MainContainer" unique_id=1422380936]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "0 / 10"
+
+[node name="ResultLabel" type="Label" parent="CenterContainer/MainContainer" unique_id=46387883]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "CORRETO"
+
+[node name="LookingOff(16X16)" type="Sprite2D" parent="." unique_id=2313427]
+position = Vector2(1108, 556)
+scale = Vector2(21.1875, 21.500004)
+texture = ExtResource("4_y85ea")

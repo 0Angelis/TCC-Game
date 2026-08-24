@@ -6,7 +6,7 @@ extends Area2D
 # =========================================================
 
 const STROOP_SCENE = preload(
-	"res://stroop_challenge.tscn"
+	"res://scenes/stroop_challenge.tscn"
 )
 
 
