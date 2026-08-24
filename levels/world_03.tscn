@@ -1076,7 +1076,7 @@ position = Vector2(-787, -134)
 tipo_fragmento = "Memoria"
 
 [node name="frag_raciocinio3" parent="Fragmentos2" unique_id=1318221784 instance=ExtResource("39_ooim6")]
-position = Vector2(-785, -102)
+position = Vector2(-784, -105)
 tipo_fragmento = "Memoria"
 
 [node name="frag_raciocinio4" parent="Fragmentos2" unique_id=369199563 instance=ExtResource("39_ooim6")]
