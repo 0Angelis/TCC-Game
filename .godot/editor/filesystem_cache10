@@ -1,6 +1,6 @@
 78098b89c88a74ebe8c20117b8754620
-::res://::1787573541
-export_presets.cfg::TextFile::-1::1787441478::0::1::::<><><>0<>0<><>::
+::res://::1787586818
+export_presets.cfg::TextFile::-1::1787573555::0::1::::<><><>0<>0<><>::
 icon.svg::CompressedTexture2D::6063952031870446696::1781536624::1785347248::1::::<><><>0<>0<>cfd3e028912ec79602b0ab10f9796824<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
 stroop_challenge.tscn::PackedScene::4732975522764996778::1787528149::0::1::::<><><>0<>0<><>::uid://olh4nfbnklem::::res://scripts/stroop_challenge.gd<>uid://b6gh7p3ydemrw::::res://Sunny-land-files/Assets/environment/Background/back.png<>uid://k1lrsupgeu5t::::res://assets/Comandos/comando stroop.png<>uid://cgy04jtyd0m57::::res://assets/portal/fundo desafio 2.png<>uid://d3qvsema2motn::::res://assets/Sprite Pack 6/1 - Penguin/Looking_Off (16 x 16).png<>uid://dyixm1inxu0cr::::res://assets/Seasonal Tilesets/1 - Grassland/Background parts/3 - Cloud_cover_1.png
 ::res://actors/::1787425648
