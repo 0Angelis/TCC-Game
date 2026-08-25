@@ -5,51 +5,63 @@ extends CharacterBody2D
 # MOVIMENTO
 # ==========================================
 
-const SPEED = 120.0
-const JUMP_FORCE = -300.0
+const SPEED: float = 120.0
+const JUMP_FORCE: float = -300.0
 
 
 # ==========================================
 # KNOCKBACK
 # ==========================================
 
-const ENEMY_KNOCKBACK_X = 120.0
-const ENEMY_KNOCKBACK_Y = -45.0
-const SPIKE_KNOCKBACK_Y = -35.0
+const ENEMY_KNOCKBACK_X: float = 85.0
+const ENEMY_KNOCKBACK_Y: float = -55.0
 
-var knockback_vector := Vector2.ZERO
+const SPIKE_KNOCKBACK_Y: float = -35.0
+
+const KNOCKBACK_TIME: float = 0.08
+
+var knockback_vector: Vector2 = Vector2.ZERO
+var knockback_active: bool = false
+
+
+# ==========================================
+# TEMPOS DE DANO
+# ==========================================
+
+const HURT_ANIMATION_TIME: float = 0.12
+const INVINCIBILITY_TIME: float = 0.4
 
 
 # ==========================================
 # ESTADOS
 # ==========================================
 
-var taking_damage := false
-var can_take_damage := true
-var can_move := true
-var is_dead := false
+var taking_damage: bool = false
+var can_take_damage: bool = true
+var can_move: bool = true
+var is_dead: bool = false
 
 
 # ==========================================
-# WARNING DA PLACA
+# WARNING
 # ==========================================
 
-var showing_warning := false
+var showing_warning: bool = false
 
 
 # ==========================================
 # VITÓRIA / DANÇA
 # ==========================================
 
-var celebrating := false
+var celebrating: bool = false
 
 
 # ==========================================
 # NÓS
 # ==========================================
 
-@onready var animation = $Anim as AnimatedSprite2D
-@onready var remote_transform = $remote as RemoteTransform2D
+@onready var animation: AnimatedSprite2D = $Anim
+@onready var remote_transform: RemoteTransform2D = $remote
 @onready var level = get_tree().current_scene.get_node("level")
 
 
@@ -57,7 +69,7 @@ var celebrating := false
 # READY
 # ==========================================
 
-func _ready():
+func _ready() -> void:
 
 	add_to_group("player")
 
@@ -70,6 +82,9 @@ func _ready():
 	showing_warning = false
 	celebrating = false
 
+	knockback_vector = Vector2.ZERO
+	knockback_active = false
+
 	print("PLAYER INICIADO")
 	print("Vidas: ", Globals.player_life)
 	print("TileMap encontrado: ", level)
@@ -79,7 +94,7 @@ func _ready():
 # INPUT
 # ==========================================
 
-func _unhandled_input(event):
+func _unhandled_input(event: InputEvent) -> void:
 
 	if is_dead:
 		return
@@ -153,17 +168,10 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# KNOCKBACK
-	# ==========================================
-
-	velocity += knockback_vector
-
-
-	# ==========================================
 	# AGACHAR
 	# ==========================================
 
-	var moving_down := (
+	var moving_down: bool = (
 		Input.is_key_pressed(KEY_DOWN)
 		or Input.is_key_pressed(KEY_S)
 	)
@@ -173,57 +181,85 @@ func _physics_process(delta: float) -> void:
 	# DIREÇÃO
 	# ==========================================
 
-	var direction := 0
+	var direction: int = 0
 
 	if not moving_down:
 
-		if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+		if (
+			Input.is_key_pressed(KEY_A)
+			or Input.is_key_pressed(KEY_LEFT)
+		):
 
 			direction = -1
 
-		elif Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+		elif (
+			Input.is_key_pressed(KEY_D)
+			or Input.is_key_pressed(KEY_RIGHT)
+		):
 
 			direction = 1
 
 
 	# ==========================================
-	# PULO NORMAL
+	# PULO
 	# ==========================================
 
 	if (
-		Input.is_key_pressed(KEY_W)
-		or Input.is_key_pressed(KEY_SPACE)
-		or Input.is_key_pressed(KEY_UP)
-	) and is_on_floor() and can_move and not moving_down:
+		(
+			Input.is_key_pressed(KEY_W)
+			or Input.is_key_pressed(KEY_SPACE)
+			or Input.is_key_pressed(KEY_UP)
+		)
+		and is_on_floor()
+		and can_move
+		and not moving_down
+		and not taking_damage
+		and not knockback_active
+	):
 
 		velocity.y = JUMP_FORCE
 
 
 	# ==========================================
-	# MOVIMENTO HORIZONTAL
+	# MOVIMENTO NORMAL
 	# ==========================================
 
-	if moving_down:
+	if not knockback_active:
 
-		velocity.x = 0
+		if moving_down:
 
-	elif direction != 0 and can_move:
+			velocity.x = 0.0
 
-		velocity.x = direction * SPEED
+		elif direction != 0 and can_move:
 
-		animation.flip_h = direction < 0
+			velocity.x = direction * SPEED
 
-	elif can_move:
+			animation.flip_h = direction < 0
+
+		elif can_move:
+
+			velocity.x = move_toward(
+				velocity.x,
+				0.0,
+				SPEED
+			)
+
+
+	# ==========================================
+	# KNOCKBACK
+	# ==========================================
+
+	if knockback_active:
 
 		velocity.x = move_toward(
 			velocity.x,
-			0,
-			SPEED
+			0.0,
+			900.0 * delta
 		)
 
 
 	# ==========================================
-	# CANCELA WARNING
+	# WARNING
 	# ==========================================
 
 	if showing_warning:
@@ -297,29 +333,29 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# ÚLTIMA VIDA PISCANDO
+	# ÚLTIMA VIDA
 	# ==========================================
 
 	if Globals.player_life == 1 and not taking_damage:
 
-		var blink = abs(
+		var blink: float = abs(
 			sin(Time.get_ticks_msec() * 0.005)
 		)
 
 		animation.modulate = Color(
-			1,
+			1.0,
 			blink,
 			blink,
-			1
+			1.0
 		)
 
 	elif not taking_damage:
 
 		animation.modulate = Color(
-			1,
-			1,
-			1,
-			1
+			1.0,
+			1.0,
+			1.0,
+			1.0
 		)
 
 
@@ -347,28 +383,48 @@ func _on_hurtbox_body_entered(body: Node2D) -> void:
 		return
 
 
-	if body.is_in_group("enemies"):
+	if not body.is_in_group("enemies"):
+		return
 
-		var direction = (
-			global_position - body.global_position
-		).normalized()
 
-		take_damage(
-			Vector2(
-				direction.x * ENEMY_KNOCKBACK_X,
-				ENEMY_KNOCKBACK_Y
-			)
+	# ==========================================
+	# PLAYER ESTÁ ACIMA DO INIMIGO
+	# ==========================================
+
+	if (
+		body.global_position.y > global_position.y
+		and velocity.y >= 0.0
+	):
+
+		return
+
+
+	# ==========================================
+	# DIREÇÃO DO KNOCKBACK
+	# ==========================================
+
+	var knockback_direction: Vector2 = (
+		global_position - body.global_position
+	).normalized()
+
+
+	take_damage(
+		Vector2(
+			knockback_direction.x * ENEMY_KNOCKBACK_X,
+			ENEMY_KNOCKBACK_Y
 		)
+	)
 
 
 # ==========================================
-# VERIFICA ESPINHOS
+# ESPINHOS
 # ==========================================
 
 func check_damage_tile() -> void:
 
 	if is_dead:
 		return
+
 
 	if not can_take_damage:
 		return
@@ -381,9 +437,12 @@ func check_damage_tile() -> void:
 		return
 
 
-	var feet_position = global_position + Vector2(0, 12)
+	var feet_position: Vector2 = (
+		global_position + Vector2(0, 12)
+	)
 
-	var positions = [
+
+	var positions: Array[Vector2] = [
 		feet_position,
 		feet_position + Vector2(-8, 0),
 		feet_position + Vector2(8, 0),
@@ -394,17 +453,19 @@ func check_damage_tile() -> void:
 
 	for layer_index in range(
 		level.get_layers_count()
-		):
+	):
 
 		for world_position in positions:
 
-			var local_position = level.to_local(
+			var local_position: Vector2 = level.to_local(
 				world_position
 			)
 
-			var tile_position = level.local_to_map(
+
+			var tile_position: Vector2i = level.local_to_map(
 				local_position
 			)
+
 
 			var tile_data = level.get_cell_tile_data(
 				layer_index,
@@ -413,7 +474,6 @@ func check_damage_tile() -> void:
 
 
 			if tile_data == null:
-
 				continue
 
 
@@ -424,20 +484,16 @@ func check_damage_tile() -> void:
 
 			if damage == true:
 
-				print("================================")
 				print("ESPINHO DETECTADO!")
-				print("Camada: ", layer_index)
-				print("Tile: ", tile_position)
-				print("Damage: ", damage)
-				print("================================")
 
 
 				take_damage(
 					Vector2(
-						0,
+						0.0,
 						SPIKE_KNOCKBACK_Y
 					)
 				)
+
 
 				return
 
@@ -447,16 +503,20 @@ func check_damage_tile() -> void:
 # ==========================================
 
 func take_damage(
-	knockback_force := Vector2.ZERO,
-	duration := 0.20
-):
+	knockback_force: Vector2 = Vector2.ZERO
+) -> void:
 
 	if is_dead:
 		return
 
+
 	if not can_take_damage:
 		return
 
+
+	# ==========================================
+	# BLOQUEAR NOVO DANO
+	# ==========================================
 
 	can_take_damage = false
 	can_move = false
@@ -503,11 +563,6 @@ func take_damage(
 
 	animation.play("hurt")
 
-
-	# ==========================================
-	# VERMELHO
-	# ==========================================
-
 	animation.modulate = Color(
 		1.0,
 		0.55,
@@ -522,64 +577,86 @@ func take_damage(
 
 	if knockback_force != Vector2.ZERO:
 
-		knockback_vector = knockback_force
+		velocity = knockback_force
 
-		var knockback_tween := get_tree().create_tween()
+		knockback_active = true
 
-		knockback_tween.tween_property(
-			self,
-			"knockback_vector",
-			Vector2.ZERO,
-			duration
-		)
+
+		# ==========================================
+		# KNOCKBACK CURTO
+		# ==========================================
+
+		await get_tree().create_timer(
+			KNOCKBACK_TIME
+		).timeout
+
+
+		if is_dead:
+			return
+
+
+		knockback_active = false
+
+
+		# Reduz o impulso restante
+		velocity.x *= 0.15
+		velocity.y *= 0.15
 
 
 	# ==========================================
-	# STUN
+	# ANIMAÇÃO DE HURT CURTA
 	# ==========================================
 
 	await get_tree().create_timer(
-		0.08
+		HURT_ANIMATION_TIME
 	).timeout
+
 
 	if is_dead:
 		return
 
+
+	# ==========================================
+	# VOLTA AO NORMAL RAPIDAMENTE
+	# ==========================================
+
+	taking_damage = false
 	can_move = true
 
 
+	animation.modulate = Color(
+		1.0,
+		1.0,
+		1.0,
+		1.0
+	)
+
+
 	# ==========================================
-	# INVENCIBILIDADE
+	# INVENCIBILIDADE CONTINUA
 	# ==========================================
+	#
+	# O player pode se mover normalmente,
+	# mas ainda não pode tomar outro dano.
+	#
 
 	await get_tree().create_timer(
-		0.4
+		INVINCIBILITY_TIME - HURT_ANIMATION_TIME
 	).timeout
+
 
 	if is_dead:
 		return
 
+
 	can_take_damage = true
-	taking_damage = false
-
-
-	# ==========================================
-	# VOLTA AO NORMAL
-	# ==========================================
-
-	animation.modulate = Color(
-		1,
-		1,
-		1,
-		1
-	)
 
 
 # ==========================================
 # WARNING
 # ==========================================
 
-func play_warning():
+func play_warning() -> void:
 
 	if is_dead:
 		return
@@ -595,16 +672,14 @@ func play_warning():
 
 	animation.play("warning")
 
-	print(
-		"WARNING DO PLAYER!"
-	)
+	print("WARNING DO PLAYER!")
 
 
 # ==========================================
 # PARA WARNING
 # ==========================================
 
-func stop_warning():
+func stop_warning() -> void:
 
 	if is_dead:
 		return
@@ -623,7 +698,7 @@ func stop_warning():
 # VITÓRIA
 # ==========================================
 
-func play_victory():
+func play_victory() -> void:
 
 	if is_dead:
 		return
@@ -638,7 +713,7 @@ func play_victory():
 
 	can_move = false
 
-	velocity.x = 0
+	velocity.x = 0.0
 
 	animation.stop()
 	animation.play("vitoria")
@@ -650,10 +725,10 @@ func play_victory():
 
 
 # ==========================================
-# DANÇA MANUAL - B
+# DANÇA
 # ==========================================
 
-func play_dance():
+func play_dance() -> void:
 
 	if is_dead:
 		return
@@ -668,7 +743,7 @@ func play_dance():
 
 	can_move = false
 
-	velocity.x = 0
+	velocity.x = 0.0
 
 	animation.stop()
 	animation.play("vitoria")
@@ -683,7 +758,7 @@ func play_dance():
 # MORTE
 # ==========================================
 
-func die():
+func die() -> void:
 
 	if is_dead:
 		return
@@ -700,6 +775,7 @@ func die():
 
 	velocity = Vector2.ZERO
 	knockback_vector = Vector2.ZERO
+	knockback_active = false
 
 
 	# ==========================================
@@ -734,7 +810,6 @@ func die():
 	Globals.coins = 0
 	Globals.score = 0
 
-	# Morte real perde o progresso de moedas.
 	Globals.coins_before_level = 0
 
 	Globals.level_coins = 0
@@ -752,26 +827,6 @@ func die():
 
 	print("==============================")
 	print("JOGADOR MORREU")
-	print(
-		"MOEDAS RESETADAS: ",
-		Globals.coins
-	)
-	print(
-		"SCORE RESETADO: ",
-		Globals.score
-	)
-	print(
-		"FRAGMENTOS DE RACIOCÍNIO: ",
-		Globals.raciocinio_fragments
-	)
-	print(
-		"FRAGMENTOS DE ATENÇÃO: ",
-		Globals.atencao_fragments
-	)
-	print(
-		"FRAGMENTOS DE MEMÓRIA: ",
-		Globals.memoria_fragments
-	)
 	print("==============================")
 
 
@@ -797,8 +852,8 @@ func die():
 # CÂMERA
 # ==========================================
 
-func follow_camera(camera):
+func follow_camera(camera: Camera2D) -> void:
 
-	var camera_path = camera.get_path()
+	var camera_path: NodePath = camera.get_path()
 
 	remote_transform.remote_path = camera_path

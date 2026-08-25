@@ -1,8 +1,8 @@
+AnimatedSprite2D
+CharacterBody2D
 Node2D
 Node
 TextureRect
-CharacterBody2D
-AnimatedSprite2D
 Area2D
 CenterContainer
 HBoxContainer

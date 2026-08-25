@@ -1,0 +1,98 @@
+[gd_scene format=3 uid="uid://88brkob8stts"]
+
+[ext_resource type="Script" uid="uid://w7o4t52hjuir" path="res://scripts/mosquito.gd" id="1_7q676"]
+[ext_resource type="Texture2D" uid="uid://du1v85i4v3phd" path="res://assets/Sprite Pack 5/5 - Moe Scotty/Sting_Attack_(32 x 32).png" id="2_hw6pu"]
+[ext_resource type="Texture2D" uid="uid://b32fdirapoefm" path="res://assets/Sprite Pack 5/5 - Moe Scotty/Hurt_(32 x 32).png" id="3_eqrae"]
+[ext_resource type="Texture2D" uid="uid://6esilelmlyqb" path="res://assets/Sprite Pack 5/5 - Moe Scotty/Flying_(32 x 32).png" id="4_ivpho"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mxmc4"]
+atlas = ExtResource("2_hw6pu")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ru1va"]
+atlas = ExtResource("3_eqrae")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7264w"]
+atlas = ExtResource("4_ivpho")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xyj4m"]
+atlas = ExtResource("4_ivpho")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hiu4u"]
+atlas = ExtResource("4_ivpho")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7fhit"]
+atlas = ExtResource("4_ivpho")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sob1t"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mxmc4")
+}],
+"loop": 1,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ru1va")
+}],
+"loop": 1,
+"name": &"hurt",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7264w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xyj4m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hiu4u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7fhit")
+}],
+"loop": 1,
+"name": &"walking",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nmf40"]
+size = Vector2(23, 21)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_p4m67"]
+size = Vector2(19, 7.875)
+
+[node name="mosquito" type="CharacterBody2D" unique_id=1871454067]
+collision_layer = 4
+collision_mask = 38
+script = ExtResource("1_7q676")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=479980314]
+sprite_frames = SubResource("SpriteFrames_sob1t")
+animation = &"attack"
+autoplay = "walking"
+frame_progress = 0.20749639
+
+[node name="collision" type="CollisionShape2D" parent="." unique_id=1783763184]
+position = Vector2(0.5, 4.5)
+shape = SubResource("RectangleShape2D_nmf40")
+
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=283626019]
+target_position = Vector2(-18, 0)
+collision_mask = 3
+
+[node name="Area2D" type="Area2D" parent="." unique_id=188875261]
+
+[node name="hitbox" type="CollisionShape2D" parent="Area2D" unique_id=222196218]
+position = Vector2(0.5, -7.0625)
+shape = SubResource("RectangleShape2D_p4m67")
+debug_color = Color(0.97, 0.048500013, 0.46317485, 0.21960784)
