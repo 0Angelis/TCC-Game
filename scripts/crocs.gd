@@ -5,29 +5,44 @@ extends CharacterBody2D
 # MOVIMENTO
 # ==========================================
 
-var direction := -1
+var direction: int = -1
 
-const SPEED := 30.0
+const SPEED: float = 30.0
 
 
 # ==========================================
 # SCORE
 # ==========================================
 
-const SCORE_REWARD := 100
+const SCORE_REWARD: int = 100
+
+
+# ==========================================
+# DANO
+# ==========================================
+
+const DAMAGE_COOLDOWN: float = 0.7
+const KNOCKBACK_X: float = 70.0
+const KNOCKBACK_Y: float = -35.0
+
+var damage_cooldown: float = 0.0
 
 
 # ==========================================
 # ESTADOS
 # ==========================================
 
-var is_dead := false
-var is_hurt := false
+var is_dead: bool = false
+var is_hurt: bool = false
 
-# Evita ficar virando várias vezes seguidas
-var turn_cooldown := 0.0
 
-const TURN_COOLDOWN := 0.20
+# ==========================================
+# VIRADA
+# ==========================================
+
+var turn_cooldown: float = 0.0
+
+const TURN_COOLDOWN: float = 0.20
 
 
 # ==========================================
@@ -62,7 +77,13 @@ func _ready() -> void:
 	# ANIMAÇÃO INICIAL
 	# ==========================================
 
-	animated_sprite.play("walking")
+	if animated_sprite.sprite_frames != null:
+
+		if animated_sprite.sprite_frames.has_animation(
+			"walking"
+		):
+
+			animated_sprite.play("walking")
 
 
 	# ==========================================
@@ -116,6 +137,15 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
+	# COOLDOWN DO DANO
+	# ==========================================
+
+	if damage_cooldown > 0.0:
+
+		damage_cooldown -= delta
+
+
+	# ==========================================
 	# COOLDOWN DA VIRADA
 	# ==========================================
 
@@ -139,7 +169,7 @@ func _physics_process(delta: float) -> void:
 
 	if is_hurt:
 
-		velocity.x = 0
+		velocity.x = 0.0
 
 		move_and_slide()
 
@@ -179,25 +209,75 @@ func _physics_process(delta: float) -> void:
 
 	for i in get_slide_collision_count():
 
-		var slide_collision := get_slide_collision(i)
+		var slide_collision: KinematicCollision2D = (
+			get_slide_collision(i)
+		)
 
-		var collider := slide_collision.get_collider()
 
-		var normal := slide_collision.get_normal()
+		var collider: Object = (
+			slide_collision.get_collider()
+		)
+
+
+		var normal: Vector2 = (
+			slide_collision.get_normal()
+		)
 
 
 		# ==========================================
-		# COLISÃO COM OUTRO INIMIGO
+		# COLISÃO COM PLAYER
 		# ==========================================
 
 		if collider != null:
+
+			if collider.is_in_group("player"):
+
+				# ==========================================
+				# PLAYER ESTÁ ACIMA
+				# ==========================================
+				#
+				# Nesse caso o pisão será tratado pela
+				# hitbox vermelha.
+				#
+
+				if (
+					collider.global_position.y
+					< global_position.y
+				):
+
+					continue
+
+
+				# ==========================================
+				# DAR DANO
+				# ==========================================
+
+				dar_dano_no_player(
+					collider as Node2D
+				)
+
+
+				# ==========================================
+				# IMPORTANTE
+				# ==========================================
+				#
+				# NÃO CHAMA VIRAR() AQUI.
+				#
+				# O Crocs continua olhando para o mesmo
+				# lado depois de causar dano.
+				#
+
+				break
+
+
+			# ==========================================
+			# COLISÃO COM OUTRO INIMIGO
+			# ==========================================
 
 			if collider.is_in_group("enemies"):
 
 				virar()
 
-				# Sai imediatamente para não processar
-				# a mesma colisão novamente.
 				break
 
 
@@ -218,16 +298,24 @@ func _physics_process(delta: float) -> void:
 
 	if is_on_floor():
 
-		velocity.y = 0
+		velocity.y = 0.0
 
 
 	# ==========================================
 	# WALKING
 	# ==========================================
 
-	if animated_sprite.animation != "walking":
+	if not is_dead and not is_hurt:
 
-		animated_sprite.play("walking")
+		if animated_sprite.sprite_frames != null:
+
+			if animated_sprite.sprite_frames.has_animation(
+				"walking"
+			):
+
+				if animated_sprite.animation != "walking":
+
+					animated_sprite.play("walking")
 
 
 # ==========================================
@@ -237,14 +325,16 @@ func _physics_process(delta: float) -> void:
 func _update_ray_cast() -> void:
 
 	if ray_cast == null:
-
 		return
 
 
 	ray_cast.target_position = Vector2(
-		direction * 18.0,
+		float(direction) * 18.0,
 		24.0
 	)
+
+
+	ray_cast.force_raycast_update()
 
 
 # ==========================================
@@ -254,12 +344,10 @@ func _update_ray_cast() -> void:
 func virar() -> void:
 
 	if is_dead:
-
 		return
 
 
 	if is_hurt:
-
 		return
 
 
@@ -307,10 +395,11 @@ func virar() -> void:
 # HITBOX DA CABEÇA
 # ==========================================
 
-func _on_hitbox_body_entered(body: Node2D) -> void:
+func _on_hitbox_body_entered(
+	body: Node2D
+) -> void:
 
 	if is_dead:
-
 		return
 
 
@@ -324,6 +413,11 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 	# ==========================================
 
 	if body.global_position.y >= global_position.y:
+
+		# Se não estiver acima,
+		# não é pisão.
+
+		dar_dano_no_player(body)
 
 		return
 
@@ -349,6 +443,93 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 
 
 # ==========================================
+# DAR DANO NO PLAYER
+# ==========================================
+
+func dar_dano_no_player(
+	body: Node2D
+) -> void:
+
+	if is_dead:
+		return
+
+
+	if damage_cooldown > 0.0:
+
+		return
+
+
+	if body == null:
+
+		return
+
+
+	if not is_instance_valid(body):
+
+		return
+
+
+	# ==========================================
+	# NÃO DAR DANO SE O PLAYER ESTIVER ACIMA
+	# ==========================================
+
+	if body.global_position.y < global_position.y:
+
+		return
+
+
+	# ==========================================
+	# VERIFICAR FUNÇÃO
+	# ==========================================
+
+	if not body.has_method(
+		"take_damage"
+	):
+
+		print(
+			"CROCS: Player não possui take_damage()"
+		)
+
+		return
+
+
+	# ==========================================
+	# DIREÇÃO DO KNOCKBACK
+	# ==========================================
+
+	var knockback_direction: float = 1.0
+
+
+	if body.global_position.x < global_position.x:
+
+		knockback_direction = -1.0
+
+
+	# ==========================================
+	# DANO
+	# ==========================================
+
+	body.take_damage(
+		Vector2(
+			knockback_direction * KNOCKBACK_X,
+			KNOCKBACK_Y
+		)
+	)
+
+
+	# ==========================================
+	# COOLDOWN
+	# ==========================================
+
+	damage_cooldown = DAMAGE_COOLDOWN
+
+
+	print(
+		"CROCS DEU DANO NO PLAYER!"
+	)
+
+
+# ==========================================
 # RECEBER DANO
 # ==========================================
 
@@ -360,12 +541,10 @@ func hurt() -> void:
 func take_damage() -> void:
 
 	if is_dead:
-
 		return
 
 
 	if is_hurt:
-
 		return
 
 
@@ -376,14 +555,20 @@ func take_damage() -> void:
 	# PARA
 	# ==========================================
 
-	velocity.x = 0
+	velocity.x = 0.0
 
 
 	# ==========================================
 	# HURT
 	# ==========================================
 
-	animated_sprite.play("hurt")
+	if animated_sprite.sprite_frames != null:
+
+		if animated_sprite.sprite_frames.has_animation(
+			"hurt"
+		):
+
+			animated_sprite.play("hurt")
 
 
 	# ==========================================
@@ -417,10 +602,10 @@ func take_damage() -> void:
 	# ==========================================
 
 	animated_sprite.modulate = Color(
-		1,
-		1,
-		1,
-		1
+		1.0,
+		1.0,
+		1.0,
+		1.0
 	)
 
 
@@ -429,7 +614,15 @@ func take_damage() -> void:
 
 	if not is_dead:
 
-		animated_sprite.play("walking")
+		if animated_sprite.sprite_frames != null:
+
+			if animated_sprite.sprite_frames.has_animation(
+				"walking"
+			):
+
+				animated_sprite.play(
+					"walking"
+				)
 
 
 # ==========================================
@@ -491,6 +684,7 @@ func matar_crocs() -> void:
 		false
 	)
 
+
 	hitbox.set_deferred(
 		"disabled",
 		true
@@ -530,24 +724,20 @@ func matar_crocs() -> void:
 
 
 	# ==========================================
-	# 1. MICRO PULO + VIRA
+	# MICRO PULO + VIRA
 	# ==========================================
 
-	var jump_tween := create_tween()
+	var jump_tween: Tween = create_tween()
 
 	jump_tween.set_parallel(true)
 
-
-	# ------------------------------------------
-	# SOBE APENAS 5 PIXELS
-	# ------------------------------------------
 
 	jump_tween.tween_property(
 		animated_sprite,
 		"position",
 		original_position + Vector2(
-			0,
-			-5
+			0.0,
+			-5.0
 		),
 		0.18
 	).set_trans(
@@ -556,10 +746,6 @@ func matar_crocs() -> void:
 		Tween.EASE_OUT
 	)
 
-
-	# ------------------------------------------
-	# VIRA DE CABEÇA PARA BAIXO
-	# ------------------------------------------
 
 	jump_tween.tween_property(
 		animated_sprite,
@@ -577,7 +763,7 @@ func matar_crocs() -> void:
 
 
 	# ==========================================
-	# 2. PAUSA BEM CURTA
+	# PAUSA
 	# ==========================================
 
 	await get_tree().create_timer(
@@ -586,24 +772,20 @@ func matar_crocs() -> void:
 
 
 	# ==========================================
-	# 3. CAI
+	# CAI
 	# ==========================================
 
-	var fall_tween := create_tween()
+	var fall_tween: Tween = create_tween()
 
 	fall_tween.set_parallel(true)
 
-
-	# ------------------------------------------
-	# CAI POUCO
-	# ------------------------------------------
 
 	fall_tween.tween_property(
 		animated_sprite,
 		"position",
 		original_position + Vector2(
-			0,
-			14
+			0.0,
+			14.0
 		),
 		0.20
 	).set_trans(
@@ -612,10 +794,6 @@ func matar_crocs() -> void:
 		Tween.EASE_IN
 	)
 
-
-	# ------------------------------------------
-	# MANTÉM DE CABEÇA PARA BAIXO
-	# ------------------------------------------
 
 	fall_tween.tween_property(
 		animated_sprite,
@@ -629,24 +807,20 @@ func matar_crocs() -> void:
 
 
 	# ==========================================
-	# 4. DESAPARECE
+	# DESAPARECE
 	# ==========================================
 
-	var fade_tween := create_tween()
+	var fade_tween: Tween = create_tween()
 
 	fade_tween.set_parallel(true)
 
-
-	# ------------------------------------------
-	# DESCE MAIS UM POUQUINHO
-	# ------------------------------------------
 
 	fade_tween.tween_property(
 		animated_sprite,
 		"position",
 		original_position + Vector2(
-			0,
-			18
+			0.0,
+			18.0
 		),
 		0.12
 	).set_trans(
@@ -655,10 +829,6 @@ func matar_crocs() -> void:
 		Tween.EASE_IN
 	)
 
-
-	# ------------------------------------------
-	# SOME
-	# ------------------------------------------
 
 	fade_tween.tween_property(
 		animated_sprite,
@@ -674,10 +844,6 @@ func matar_crocs() -> void:
 
 	await fade_tween.finished
 
-
-	# ==========================================
-	# REMOVE
-	# ==========================================
 
 	queue_free()
 

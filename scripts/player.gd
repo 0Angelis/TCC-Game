@@ -10,26 +10,39 @@ const JUMP_FORCE: float = -300.0
 
 
 # ==========================================
-# KNOCKBACK
+# KNOCKBACK DOS INIMIGOS
 # ==========================================
 
-const ENEMY_KNOCKBACK_X: float = 85.0
-const ENEMY_KNOCKBACK_Y: float = -55.0
+const ENEMY_KNOCKBACK_X: float = 180.0
+const ENEMY_KNOCKBACK_Y: float = -150.0
 
 const SPIKE_KNOCKBACK_Y: float = -35.0
 
-const KNOCKBACK_TIME: float = 0.08
 
-var knockback_vector: Vector2 = Vector2.ZERO
+# ==========================================
+# KNOCKBACK
+# ==========================================
+
 var knockback_active: bool = false
+
+const KNOCKBACK_CONTROL_TIME: float = 0.12
+
+var knockback_control_timer: float = 0.0
 
 
 # ==========================================
-# TEMPOS DE DANO
+# DANO
 # ==========================================
 
 const HURT_ANIMATION_TIME: float = 0.12
 const INVINCIBILITY_TIME: float = 0.4
+
+
+# ==========================================
+# COOLDOWN DE INIMIGO
+# ==========================================
+
+var enemy_damage_cooldown: float = 0.0
 
 
 # ==========================================
@@ -79,15 +92,17 @@ func _ready() -> void:
 	taking_damage = false
 	can_take_damage = true
 	can_move = true
+
 	showing_warning = false
 	celebrating = false
 
-	knockback_vector = Vector2.ZERO
 	knockback_active = false
+	knockback_control_timer = 0.0
+
+	enemy_damage_cooldown = 0.0
 
 	print("PLAYER INICIADO")
-	print("Vidas: ", Globals.player_life)
-	print("TileMap encontrado: ", level)
+	print("VIDAS: ", Globals.player_life)
 
 
 # ==========================================
@@ -101,7 +116,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 	# ==========================================
-	# TECLA B = DANÇA
+	# B = DANÇA
 	# ==========================================
 
 	if (
@@ -119,7 +134,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 	# ==========================================
-	# CANCELAR DANÇA COM MOVIMENTO
+	# CANCELAR DANÇA
 	# ==========================================
 
 	if celebrating:
@@ -168,6 +183,28 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
+	# COOLDOWN
+	# ==========================================
+
+	if enemy_damage_cooldown > 0.0:
+
+		enemy_damage_cooldown -= delta
+
+
+	# ==========================================
+	# TIMER KNOCKBACK
+	# ==========================================
+
+	if knockback_control_timer > 0.0:
+
+		knockback_control_timer -= delta
+
+	else:
+
+		knockback_active = false
+
+
+	# ==========================================
 	# AGACHAR
 	# ==========================================
 
@@ -182,6 +219,7 @@ func _physics_process(delta: float) -> void:
 	# ==========================================
 
 	var direction: int = 0
+
 
 	if not moving_down:
 
@@ -212,16 +250,16 @@ func _physics_process(delta: float) -> void:
 		)
 		and is_on_floor()
 		and can_move
-		and not moving_down
 		and not taking_damage
 		and not knockback_active
+		and not moving_down
 	):
 
 		velocity.y = JUMP_FORCE
 
 
 	# ==========================================
-	# MOVIMENTO NORMAL
+	# MOVIMENTO
 	# ==========================================
 
 	if not knockback_active:
@@ -251,32 +289,14 @@ func _physics_process(delta: float) -> void:
 
 	if knockback_active:
 
+		# Mantém o impulso horizontal,
+		# mas deixa ele diminuir naturalmente.
+
 		velocity.x = move_toward(
 			velocity.x,
 			0.0,
-			900.0 * delta
+			120.0 * delta
 		)
-
-
-	# ==========================================
-	# WARNING
-	# ==========================================
-
-	if showing_warning:
-
-		if (
-			Input.is_key_pressed(KEY_A)
-			or Input.is_key_pressed(KEY_D)
-			or Input.is_key_pressed(KEY_LEFT)
-			or Input.is_key_pressed(KEY_RIGHT)
-			or Input.is_key_pressed(KEY_W)
-			or Input.is_key_pressed(KEY_UP)
-			or Input.is_key_pressed(KEY_DOWN)
-			or Input.is_key_pressed(KEY_S)
-			or Input.is_key_pressed(KEY_SPACE)
-		):
-
-			showing_warning = false
 
 
 	# ==========================================
@@ -307,7 +327,7 @@ func _physics_process(delta: float) -> void:
 
 			animation.play("arrastar")
 
-	elif not is_on_floor() and velocity.y > 0:
+	elif not is_on_floor() and velocity.y > 0.0:
 
 		if animation.animation != "falling":
 
@@ -336,11 +356,17 @@ func _physics_process(delta: float) -> void:
 	# ÚLTIMA VIDA
 	# ==========================================
 
-	if Globals.player_life == 1 and not taking_damage:
+	if (
+		Globals.player_life == 1
+		and not taking_damage
+	):
 
 		var blink: float = abs(
-			sin(Time.get_ticks_msec() * 0.005)
+			sin(
+				Time.get_ticks_msec() * 0.005
+			)
 		)
+
 
 		animation.modulate = Color(
 			1.0,
@@ -360,10 +386,23 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# MOVIMENTO
+	# MOVIMENTO FÍSICO
 	# ==========================================
 
 	move_and_slide()
+
+
+	# ==========================================
+	# AQUI ESTÁ A CORREÇÃO
+	# ==========================================
+	#
+	# O PLAYER verifica as colisões que ELE
+	# acabou de fazer.
+	#
+	# Isso detecta o collision azul do urso.
+	#
+
+	verificar_colisao_com_inimigo()
 
 
 	# ==========================================
@@ -374,46 +413,170 @@ func _physics_process(delta: float) -> void:
 
 
 # ==========================================
-# DANO DOS INIMIGOS
+# VERIFICAR COLISÃO COM INIMIGO
 # ==========================================
 
-func _on_hurtbox_body_entered(body: Node2D) -> void:
+func verificar_colisao_com_inimigo() -> void:
 
 	if is_dead:
 		return
 
 
-	if not body.is_in_group("enemies"):
+	if not can_take_damage:
+		return
+
+
+	if enemy_damage_cooldown > 0.0:
 		return
 
 
 	# ==========================================
-	# PLAYER ESTÁ ACIMA DO INIMIGO
+	# PEGAR TODAS AS COLISÕES DO PLAYER
 	# ==========================================
 
-	if (
-		body.global_position.y > global_position.y
-		and velocity.y >= 0.0
-	):
-
-		return
-
-
-	# ==========================================
-	# DIREÇÃO DO KNOCKBACK
-	# ==========================================
-
-	var knockback_direction: Vector2 = (
-		global_position - body.global_position
-	).normalized()
-
-
-	take_damage(
-		Vector2(
-			knockback_direction.x * ENEMY_KNOCKBACK_X,
-			ENEMY_KNOCKBACK_Y
-		)
+	var collision_count: int = (
+		get_slide_collision_count()
 	)
+
+
+	if collision_count <= 0:
+		return
+
+
+	for i in collision_count:
+
+		var slide_collision: KinematicCollision2D = (
+			get_slide_collision(i)
+		)
+
+
+		var collider: Object = (
+			slide_collision.get_collider()
+		)
+
+
+		if collider == null:
+			continue
+
+
+		if not collider is Node2D:
+			continue
+
+
+		var other_body: Node2D = (
+			collider as Node2D
+		)
+
+
+		# ==========================================
+		# PRECISA SER INIMIGO
+		# ==========================================
+
+		if not other_body.is_in_group("enemies"):
+
+			continue
+
+
+		# ==========================================
+		# INIMIGO MORTO?
+		# ==========================================
+
+		var enemy_dead = (
+			other_body.get("is_dead")
+		)
+
+
+		if enemy_dead == true:
+
+			continue
+
+
+		# ==========================================
+		# NORMAL DA COLISÃO
+		# ==========================================
+
+		var normal: Vector2 = (
+			slide_collision.get_normal()
+		)
+
+
+		# ==========================================
+		# PLAYER ESTÁ EM CIMA
+		# ==========================================
+		#
+		# Normal apontando para cima significa
+		# que o player bateu por cima.
+		#
+		# NÃO toma dano.
+		#
+
+		if normal.y < -0.5:
+
+			continue
+
+
+		# ==========================================
+		# PRECISA SER COLISÃO LATERAL
+		# ==========================================
+
+		if abs(normal.x) < 0.5:
+
+			continue
+
+
+		# ==========================================
+		# DANO
+		# ==========================================
+
+		print("==============================")
+		print("PLAYER BATEU NO CORPO DO INIMIGO!")
+		print(
+			"Inimigo: ",
+			other_body.name
+		)
+		print(
+			"Normal: ",
+			normal
+		)
+		print("==============================")
+
+
+		var knockback_direction: float = 1.0
+
+
+		if (
+			global_position.x
+			< other_body.global_position.x
+		):
+
+			knockback_direction = -1.0
+
+
+		receber_dano_inimigo(
+			Vector2(
+				knockback_direction
+				* ENEMY_KNOCKBACK_X,
+				ENEMY_KNOCKBACK_Y
+			)
+		)
+
+
+		enemy_damage_cooldown = 0.7
+
+
+		return
+
+
+# ==========================================
+# HURTBOX
+# ==========================================
+
+func _on_hurtbox_body_entered(
+	body: Node2D
+) -> void:
+
+	# Não usamos Hurtbox para inimigos.
+	return
 
 
 # ==========================================
@@ -432,22 +595,24 @@ func check_damage_tile() -> void:
 
 	if level == null:
 
-		print("ERRO: TileMap 'level' não encontrado!")
-
 		return
 
 
 	var feet_position: Vector2 = (
-		global_position + Vector2(0, 12)
+		global_position
+		+ Vector2(
+			0.0,
+			12.0
+		)
 	)
 
 
 	var positions: Array[Vector2] = [
 		feet_position,
-		feet_position + Vector2(-8, 0),
-		feet_position + Vector2(8, 0),
-		feet_position + Vector2(0, 8),
-		feet_position + Vector2(0, 16)
+		feet_position + Vector2(-8.0, 0.0),
+		feet_position + Vector2(8.0, 0.0),
+		feet_position + Vector2(0.0, 8.0),
+		feet_position + Vector2(0.0, 16.0)
 	]
 
 
@@ -457,34 +622,45 @@ func check_damage_tile() -> void:
 
 		for world_position in positions:
 
-			var local_position: Vector2 = level.to_local(
-				world_position
+			var local_position: Vector2 = (
+				level.to_local(
+					world_position
+				)
 			)
 
 
-			var tile_position: Vector2i = level.local_to_map(
-				local_position
+			var tile_position: Vector2i = (
+				level.local_to_map(
+					local_position
+				)
 			)
 
 
-			var tile_data = level.get_cell_tile_data(
-				layer_index,
-				tile_position
+			var tile_data = (
+				level.get_cell_tile_data(
+					layer_index,
+					tile_position
+				)
 			)
 
 
 			if tile_data == null:
+
 				continue
 
 
-			var damage = tile_data.get_custom_data(
-				"damage"
+			var damage = (
+				tile_data.get_custom_data(
+					"damage"
+				)
 			)
 
 
 			if damage == true:
 
-				print("ESPINHO DETECTADO!")
+				print(
+					"ESPINHO DETECTADO!"
+				)
 
 
 				take_damage(
@@ -499,7 +675,7 @@ func check_damage_tile() -> void:
 
 
 # ==========================================
-# RECEBE DANO
+# RECEBER DANO
 # ==========================================
 
 func take_damage(
@@ -515,11 +691,11 @@ func take_damage(
 
 
 	# ==========================================
-	# BLOQUEAR NOVO DANO
+	# BLOQUEIA NOVO DANO
 	# ==========================================
 
 	can_take_damage = false
-	can_move = false
+
 	taking_damage = true
 
 	showing_warning = false
@@ -534,16 +710,17 @@ func take_damage(
 
 		Globals.player_life -= 1
 
-		print(
-			"VIDA: ",
-			Globals.player_life
-		)
-
 	else:
 
 		die()
 
 		return
+
+
+	print(
+		"VIDA: ",
+		Globals.player_life
+	)
 
 
 	# ==========================================
@@ -563,6 +740,7 @@ func take_damage(
 
 	animation.play("hurt")
 
+
 	animation.modulate = Color(
 		1.0,
 		0.55,
@@ -581,30 +759,13 @@ func take_damage(
 
 		knockback_active = true
 
-
-		# ==========================================
-		# KNOCKBACK CURTO
-		# ==========================================
-
-		await get_tree().create_timer(
-			KNOCKBACK_TIME
-		).timeout
-
-
-		if is_dead:
-			return
-
-
-		knockback_active = false
-
-
-		# Reduz o impulso restante
-		velocity.x *= 0.15
-		velocity.y *= 0.15
+		knockback_control_timer = (
+			KNOCKBACK_CONTROL_TIME
+		)
 
 
 	# ==========================================
-	# ANIMAÇÃO DE HURT CURTA
+	# HURT CURTO
 	# ==========================================
 
 	await get_tree().create_timer(
@@ -616,12 +777,7 @@ func take_damage(
 		return
 
 
-	# ==========================================
-	# VOLTA AO NORMAL RAPIDAMENTE
-	# ==========================================
-
 	taking_damage = false
-	can_move = true
 
 
 	animation.modulate = Color(
@@ -633,15 +789,11 @@ func take_damage(
 
 
 	# ==========================================
-	# INVENCIBILIDADE CONTINUA
+	# INVENCIBILIDADE
 	# ==========================================
-	#
-	# O player pode se mover normalmente,
-	# mas ainda não pode tomar outro dano.
-	#
 
 	await get_tree().create_timer(
-		INVINCIBILITY_TIME - HURT_ANIMATION_TIME
+		INVINCIBILITY_TIME
 	).timeout
 
 
@@ -653,6 +805,34 @@ func take_damage(
 
 
 # ==========================================
+# DANO DE INIMIGO
+# ==========================================
+
+func receber_dano_inimigo(
+	knockback: Vector2 = Vector2.ZERO
+) -> void:
+
+	print("==============================")
+	print("DANO DO INIMIGO RECEBIDO!")
+	print(
+		"VIDA ANTES: ",
+		Globals.player_life
+	)
+	print("==============================")
+
+
+	take_damage(knockback)
+
+
+	print("==============================")
+	print(
+		"VIDA DEPOIS: ",
+		Globals.player_life
+	)
+	print("==============================")
+
+
+# ==========================================
 # WARNING
 # ==========================================
 
@@ -661,8 +841,10 @@ func play_warning() -> void:
 	if is_dead:
 		return
 
+
 	if taking_damage:
 		return
+
 
 	if celebrating:
 		return
@@ -672,7 +854,10 @@ func play_warning() -> void:
 
 	animation.play("warning")
 
-	print("WARNING DO PLAYER!")
+
+	print(
+		"WARNING DO PLAYER!"
+	)
 
 
 # ==========================================
@@ -684,8 +869,10 @@ func stop_warning() -> void:
 	if is_dead:
 		return
 
+
 	if taking_damage:
 		return
+
 
 	if celebrating:
 		return
@@ -703,6 +890,7 @@ func play_victory() -> void:
 	if is_dead:
 		return
 
+
 	if taking_damage:
 		return
 
@@ -716,12 +904,21 @@ func play_victory() -> void:
 	velocity.x = 0.0
 
 	animation.stop()
+
 	animation.play("vitoria")
 
 
-	print("================================")
-	print("ANIMAÇÃO DE VITÓRIA!")
-	print("================================")
+	print(
+		"================================"
+	)
+
+	print(
+		"ANIMAÇÃO DE VITÓRIA!"
+	)
+
+	print(
+		"================================"
+	)
 
 
 # ==========================================
@@ -733,6 +930,7 @@ func play_dance() -> void:
 	if is_dead:
 		return
 
+
 	if taking_damage:
 		return
 
@@ -746,12 +944,21 @@ func play_dance() -> void:
 	velocity.x = 0.0
 
 	animation.stop()
+
 	animation.play("vitoria")
 
 
-	print("================================")
-	print("DANÇA ATIVADA PELA TECLA B!")
-	print("================================")
+	print(
+		"================================"
+	)
+
+	print(
+		"DANÇA ATIVADA PELA TECLA B!"
+	)
+
+	print(
+		"================================"
+	)
 
 
 # ==========================================
@@ -774,12 +981,13 @@ func die() -> void:
 	celebrating = false
 
 	velocity = Vector2.ZERO
-	knockback_vector = Vector2.ZERO
+
 	knockback_active = false
+	knockback_control_timer = 0.0
 
 
 	# ==========================================
-	# FECHA WARNING
+	# FECHAR WARNING
 	# ==========================================
 
 	if DialogManager.is_message_active:
@@ -788,17 +996,11 @@ func die() -> void:
 
 
 	# ==========================================
-	# GUARDA CENA
+	# SALVAR CENA
 	# ==========================================
 
 	get_tree().set_meta(
 		"restart_scene",
-		get_tree().current_scene.scene_file_path
-	)
-
-
-	print(
-		"PRÓXIMA CENA DE RESTART: ",
 		get_tree().current_scene.scene_file_path
 	)
 
@@ -815,23 +1017,26 @@ func die() -> void:
 	Globals.level_coins = 0
 	Globals.level_score = 0
 
-
-	# ==========================================
-	# RESET FRAGMENTOS
-	# ==========================================
-
 	Globals.raciocinio_fragments = 0
 	Globals.atencao_fragments = 0
 	Globals.memoria_fragments = 0
 
 
-	print("==============================")
-	print("JOGADOR MORREU")
-	print("==============================")
+	print(
+		"=============================="
+	)
+
+	print(
+		"JOGADOR MORREU"
+	)
+
+	print(
+		"=============================="
+	)
 
 
 	# ==========================================
-	# SOME
+	# SUMIR
 	# ==========================================
 
 	animation.visible = false
@@ -852,8 +1057,15 @@ func die() -> void:
 # CÂMERA
 # ==========================================
 
-func follow_camera(camera: Camera2D) -> void:
+func follow_camera(
+	camera: Camera2D
+) -> void:
 
-	var camera_path: NodePath = camera.get_path()
+	var camera_path: NodePath = (
+		camera.get_path()
+	)
 
-	remote_transform.remote_path = camera_path
+
+	remote_transform.remote_path = (
+		camera_path
+	)

@@ -24,16 +24,27 @@ const ATTACK_STOP_DISTANCE: float = 14.0
 
 
 # ==========================================
-# DISTÂNCIA DO PISÃO
+# DANO DO CORPO
 # ==========================================
 
-# Quanto o player pode estar acima do urso
-# para ser considerado um pisão.
-const STOMP_VERTICAL_DISTANCE: float = 24.0
+const ATTACK_DAMAGE_COOLDOWN: float = 0.7
 
-# Quanto o player pode estar deslocado
-# horizontalmente.
-const STOMP_HORIZONTAL_DISTANCE: float = 26.0
+const ATTACK_KNOCKBACK_X: float = 100.0
+const ATTACK_KNOCKBACK_Y: float = -120.0
+
+var attack_damage_cooldown: float = 0.0
+
+
+# ==========================================
+# PISÃO
+# ==========================================
+
+const STOMP_VERTICAL_DISTANCE: float = 24.0
+const STOMP_HORIZONTAL_DISTANCE: float = 28.0
+
+# Impede vários pisões enquanto o player
+# continua sobre a cabeça.
+var player_on_head: bool = false
 
 
 # ==========================================
@@ -44,7 +55,7 @@ var player: Node2D = null
 
 
 # ==========================================
-# ESTADO
+# ESTADOS
 # ==========================================
 
 var is_dead: bool = false
@@ -87,20 +98,19 @@ const LAST_LIFE_SPEED_MULTIPLIER: float = 1.25
 
 
 # ==========================================
-# DANO
-# ==========================================
-
-const HURT_TIME: float = 0.55
-
-
-# ==========================================
 # NÓS
 # ==========================================
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+
+# 🔵 CORPO
 @onready var collision: CollisionShape2D = $collision
+
 @onready var ray_cast: RayCast2D = $RayCast2D
+
+# 🔴 CABEÇA
 @onready var hitbox: Area2D = $Area2D
+
 @onready var hitbox_collision: CollisionShape2D = $Area2D/hitbox
 
 
@@ -124,8 +134,12 @@ func _ready() -> void:
 	can_attack = true
 	attack_cooldown_timer = 0.0
 
+	attack_damage_cooldown = 0.0
+
 	last_life = false
 	blink_time = 0.0
+
+	player_on_head = false
 
 	direction = -1
 
@@ -143,18 +157,19 @@ func _ready() -> void:
 
 
 	# ==========================================
-	# COMEÇA DEITADO
+	# DORMINDO
 	# ==========================================
 
 	deixar_dormindo()
 
 
 	# ==========================================
-	# HITBOX
+	# HITBOX DA CABEÇA
 	# ==========================================
 
 	hitbox.monitoring = true
 	hitbox.monitorable = true
+
 
 	if not hitbox.body_entered.is_connected(
 		_on_hitbox_body_entered
@@ -162,6 +177,15 @@ func _ready() -> void:
 
 		hitbox.body_entered.connect(
 			_on_hitbox_body_entered
+	)
+
+
+	if not hitbox.body_exited.is_connected(
+		_on_hitbox_body_exited
+	):
+
+		hitbox.body_exited.connect(
+			_on_hitbox_body_exited
 	)
 
 
@@ -185,17 +209,13 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# COOLDOWN DO PISÃO
+	# COOLDOWNS
 	# ==========================================
 
 	if stomp_cooldown > 0.0:
 
 		stomp_cooldown -= delta
 
-
-	# ==========================================
-	# COOLDOWN DO ATAQUE
-	# ==========================================
 
 	if attack_cooldown_timer > 0.0:
 
@@ -204,6 +224,11 @@ func _physics_process(delta: float) -> void:
 	else:
 
 		can_attack = true
+
+
+	if attack_damage_cooldown > 0.0:
+
+		attack_damage_cooldown -= delta
 
 
 	# ==========================================
@@ -215,7 +240,9 @@ func _physics_process(delta: float) -> void:
 		blink_time += delta
 
 		var blink_value: float = abs(
-			sin(blink_time * 10.0)
+			sin(
+				blink_time * 10.0
+			)
 		)
 
 
@@ -239,12 +266,20 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# ENCONTRAR PLAYER
+	# PLAYER
 	# ==========================================
 
-	if player == null or not is_instance_valid(player):
+	if (
+		player == null
+		or not is_instance_valid(player)
+	):
 
-		var players: Array[Node] = get_tree().get_nodes_in_group("player")
+		var players: Array[Node] = (
+			get_tree().get_nodes_in_group(
+				"player"
+			)
+		)
+
 
 		if players.size() > 0:
 
@@ -252,13 +287,32 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# VERIFICAR PISÃO
+	# DORMINDO
 	# ==========================================
 
-	verificar_pisao()
+	if not is_awake:
+
+		velocity.x = 0.0
+
+		move_and_slide()
+
+		deixar_dormindo()
 
 
-	if is_dead:
+		if player != null:
+
+			var distance: float = (
+				global_position.distance_to(
+					player.global_position
+				)
+			)
+
+
+			if distance <= DETECTION_DISTANCE:
+
+				acordar()
+
+
 		return
 
 
@@ -284,34 +338,6 @@ func _physics_process(delta: float) -> void:
 		velocity.x = 0.0
 
 		move_and_slide()
-
-		return
-
-
-	# ==========================================
-	# DORMINDO
-	# ==========================================
-
-	if not is_awake:
-
-		velocity.x = 0.0
-
-		move_and_slide()
-
-		deixar_dormindo()
-
-
-		if player != null:
-
-			var distance: float = global_position.distance_to(
-				player.global_position
-			)
-
-
-			if distance <= DETECTION_DISTANCE:
-
-				acordar()
-
 
 		return
 
@@ -357,7 +383,21 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# COLISÃO COM PAREDE
+	# CORPO AZUL
+	# ==========================================
+
+	verificar_colisao_corpo()
+
+
+	# ==========================================
+	# VERIFICAR SE PLAYER AINDA ESTÁ NA CABEÇA
+	# ==========================================
+
+	verificar_player_na_cabeca()
+
+
+	# ==========================================
+	# PAREDE
 	# ==========================================
 
 	for i in get_slide_collision_count():
@@ -366,7 +406,24 @@ func _physics_process(delta: float) -> void:
 			get_slide_collision(i)
 		)
 
-		var normal: Vector2 = slide_collision.get_normal()
+		var collider: Object = (
+			slide_collision.get_collider()
+		)
+
+		var normal: Vector2 = (
+			slide_collision.get_normal()
+		)
+
+
+		if collider != null:
+
+			if collider.is_in_group("enemies"):
+
+				if not is_attacking:
+
+					virar()
+
+				break
 
 
 		if abs(normal.x) > 0.5:
@@ -386,20 +443,151 @@ func _physics_process(delta: float) -> void:
 		not is_attacking
 		and not is_hurt
 		and not is_dead
-		and is_awake
 	):
 
 		if animated_sprite.sprite_frames != null:
 
-			if animated_sprite.sprite_frames.has_animation("walking"):
+			if animated_sprite.sprite_frames.has_animation(
+				"walking"
+			):
 
 				if animated_sprite.animation != "walking":
 
-					animated_sprite.play("walking")
+					animated_sprite.play(
+						"walking"
+					)
 
 
 # ==========================================
-# DEIXAR DORMINDO
+# CORPO AZUL
+# ==========================================
+
+func verificar_colisao_corpo() -> void:
+
+	if is_dead:
+		return
+
+
+	if is_hurt:
+		return
+
+
+	if attack_damage_cooldown > 0.0:
+		return
+
+
+	var collision_count: int = (
+		get_slide_collision_count()
+	)
+
+
+	for i in collision_count:
+
+		var slide_collision: KinematicCollision2D = (
+			get_slide_collision(i)
+		)
+
+
+		var collider: Object = (
+			slide_collision.get_collider()
+		)
+
+
+		if collider == null:
+			continue
+
+
+		if not collider is Node2D:
+			continue
+
+
+		var other_body: Node2D = (
+			collider as Node2D
+		)
+
+
+		if not other_body.is_in_group("player"):
+			continue
+
+
+		var normal: Vector2 = (
+			slide_collision.get_normal()
+		)
+
+
+		# Player por cima = não dá dano
+		if normal.y < -0.5:
+
+			return
+
+
+		if abs(normal.x) > 0.5:
+
+			if other_body is CharacterBody2D:
+
+				dar_dano_no_player(
+					other_body as CharacterBody2D
+				)
+
+
+			return
+
+
+# ==========================================
+# DANO NO PLAYER
+# ==========================================
+
+func dar_dano_no_player(
+	player_body: CharacterBody2D
+) -> void:
+
+	if is_dead:
+		return
+
+
+	if player_body == null:
+		return
+
+
+	if not is_instance_valid(player_body):
+		return
+
+
+	if attack_damage_cooldown > 0.0:
+		return
+
+
+	if not player_body.has_method(
+		"receber_dano_inimigo"
+	):
+
+		return
+
+
+	var knockback_direction: float = 1.0
+
+
+	if player_body.global_position.x < global_position.x:
+
+		knockback_direction = -1.0
+
+
+	player_body.receber_dano_inimigo(
+		Vector2(
+			knockback_direction
+			* ATTACK_KNOCKBACK_X,
+			ATTACK_KNOCKBACK_Y
+		)
+	)
+
+
+	attack_damage_cooldown = (
+		ATTACK_DAMAGE_COOLDOWN
+	)
+
+
+# ==========================================
+# DORMIR
 # ==========================================
 
 func deixar_dormindo() -> void:
@@ -407,10 +595,15 @@ func deixar_dormindo() -> void:
 	if is_dead:
 		return
 
+
 	if animated_sprite.sprite_frames == null:
 		return
 
-	if not animated_sprite.sprite_frames.has_animation("sleep"):
+
+	if not animated_sprite.sprite_frames.has_animation(
+		"sleep"
+	):
+
 		return
 
 
@@ -428,8 +621,10 @@ func acordar() -> void:
 	if is_dead:
 		return
 
+
 	if is_awake:
 		return
+
 
 	if returning_to_sleep:
 		return
@@ -445,9 +640,13 @@ func acordar() -> void:
 
 	if animated_sprite.sprite_frames != null:
 
-		if animated_sprite.sprite_frames.has_animation("sleep"):
+		if animated_sprite.sprite_frames.has_animation(
+			"sleep"
+		):
 
-			animated_sprite.play("sleep")
+			animated_sprite.play(
+				"sleep"
+			)
 
 			await animated_sprite.animation_finished
 
@@ -462,9 +661,13 @@ func acordar() -> void:
 
 	if animated_sprite.sprite_frames != null:
 
-		if animated_sprite.sprite_frames.has_animation("walking"):
+		if animated_sprite.sprite_frames.has_animation(
+			"walking"
+		):
 
-			animated_sprite.play("walking")
+			animated_sprite.play(
+				"walking"
+			)
 
 
 # ==========================================
@@ -476,14 +679,13 @@ func voltar_a_dormir() -> void:
 	if is_dead:
 		return
 
+
 	if not is_awake:
 		return
 
+
 	if returning_to_sleep:
 		return
-
-
-	print("URSO PERDEU O PLAYER E VAI DORMIR!")
 
 
 	returning_to_sleep = true
@@ -493,7 +695,6 @@ func voltar_a_dormir() -> void:
 	is_hurt = false
 
 	velocity = Vector2.ZERO
-
 
 	deixar_dormindo()
 
@@ -511,13 +712,14 @@ func voltar_a_dormir() -> void:
 
 
 # ==========================================
-# PERSEGUIR PLAYER
+# PERSEGUIR
 # ==========================================
 
 func perseguir_player() -> void:
 
 	if player == null:
 		return
+
 
 	if is_hurt:
 		return
@@ -554,11 +756,12 @@ func perseguir_player() -> void:
 
 
 	# ==========================================
-	# ATAQUE
+	# ATTACK
 	# ==========================================
 
 	if (
-		abs(distancia_x) <= ATTACK_TRIGGER_DISTANCE
+		abs(distancia_x)
+		<= ATTACK_TRIGGER_DISTANCE
 		and distancia_y <= 32.0
 	):
 
@@ -568,7 +771,7 @@ func perseguir_player() -> void:
 
 
 	# ==========================================
-	# PERSEGUIÇÃO
+	# WALK
 	# ==========================================
 
 	is_attacking = false
@@ -586,11 +789,15 @@ func perseguir_player() -> void:
 
 	if animated_sprite.sprite_frames != null:
 
-		if animated_sprite.sprite_frames.has_animation("walking"):
+		if animated_sprite.sprite_frames.has_animation(
+			"walking"
+		):
 
 			if animated_sprite.animation != "walking":
 
-				animated_sprite.play("walking")
+				animated_sprite.play(
+					"walking"
+				)
 
 
 # ==========================================
@@ -602,8 +809,10 @@ func entrar_attack() -> void:
 	if is_dead:
 		return
 
+
 	if is_hurt:
 		return
+
 
 	if player == null:
 		return
@@ -622,7 +831,8 @@ func entrar_attack() -> void:
 
 
 	if (
-		abs(distancia_x) > ATTACK_TRIGGER_DISTANCE
+		abs(distancia_x)
+		> ATTACK_TRIGGER_DISTANCE
 		or distancia_y > 32.0
 	):
 
@@ -631,12 +841,8 @@ func entrar_attack() -> void:
 		return
 
 
-	is_attacking = true
+	var previous_direction: int = direction
 
-
-	# ==========================================
-	# VIRAR
-	# ==========================================
 
 	if player.global_position.x > global_position.x:
 
@@ -652,9 +858,8 @@ func entrar_attack() -> void:
 	_update_ray_cast()
 
 
-	# ==========================================
-	# IR PARA O PLAYER
-	# ==========================================
+	is_attacking = true
+
 
 	var distancia_para_player: float = abs(
 		player.global_position.x
@@ -680,21 +885,26 @@ func entrar_attack() -> void:
 
 
 	# ==========================================
-	# ANIMAÇÃO ATTACK
+	# ATTACK
 	# ==========================================
 
 	if animated_sprite.sprite_frames != null:
 
-		if animated_sprite.sprite_frames.has_animation("attack"):
+		if animated_sprite.sprite_frames.has_animation(
+			"attack"
+		):
 
-			if animated_sprite.animation != "attack":
+			if (
+				animated_sprite.animation != "attack"
+				or previous_direction != direction
+			):
 
-				animated_sprite.play("attack")
+				animated_sprite.play(
+					"attack"
+				)
 
+				animated_sprite.frame = 0
 
-	# ==========================================
-	# COOLDOWN
-	# ==========================================
 
 	if can_attack:
 
@@ -711,6 +921,7 @@ func movimento_normal() -> void:
 
 	if is_attacking:
 		return
+
 
 	if is_hurt:
 		return
@@ -744,7 +955,6 @@ func _update_ray_cast() -> void:
 		24.0
 	)
 
-
 	ray_cast.force_raycast_update()
 
 
@@ -757,11 +967,14 @@ func virar() -> void:
 	if is_dead:
 		return
 
+
 	if is_attacking:
 		return
 
+
 	if is_hurt:
 		return
+
 
 	if returning_to_sleep:
 		return
@@ -775,18 +988,12 @@ func virar() -> void:
 
 
 # ==========================================
-# VERIFICAR PISÃO
+# HITBOX VERMELHA
 # ==========================================
 
-func verificar_pisao() -> void:
-
-	if player == null:
-		return
-
-
-	if not is_instance_valid(player):
-		return
-
+func _on_hitbox_body_entered(
+	body: Node2D
+) -> void:
 
 	if is_dead:
 		return
@@ -796,83 +1003,167 @@ func verificar_pisao() -> void:
 		return
 
 
-	if returning_to_sleep:
+	if not body.is_in_group("player"):
 		return
 
 
-	if stomp_cooldown > 0.0:
+	if not body is CharacterBody2D:
 		return
 
 
-	# ==========================================
-	# DISTÂNCIA HORIZONTAL
-	# ==========================================
-
-	var distancia_x: float = abs(
-		player.global_position.x
-		- global_position.x
+	var player_body: CharacterBody2D = (
+		body as CharacterBody2D
 	)
 
 
-	# ==========================================
-	# DIFERENÇA VERTICAL
-	# ==========================================
-	#
-	# Aqui está a correção principal.
-	#
-	# O valor precisa ser pequeno.
-	# Se estiver muito acima, NÃO é pisão.
-	#
+	player = player_body
 
-	var diferenca_vertical: float = (
+
+	# ==========================================
+	# PLAYER ENTROU NA CABEÇA
+	# ==========================================
+
+	var vertical_difference: float = (
+		global_position.y
+		- player_body.global_position.y
+	)
+
+
+	var horizontal_difference: float = abs(
+		global_position.x
+		- player_body.global_position.x
+	)
+
+
+	var player_above: bool = (
+		vertical_difference > 0.0
+		and vertical_difference
+		<= STOMP_VERTICAL_DISTANCE
+		and horizontal_difference
+		<= STOMP_HORIZONTAL_DISTANCE
+	)
+
+
+	if not player_above:
+		return
+
+
+	# ==========================================
+	# JÁ FOI PISADO?
+	# ==========================================
+
+	if player_on_head:
+		return
+
+
+	# ==========================================
+	# MARCA QUE ESTÁ NA CABEÇA
+	# ==========================================
+
+	player_on_head = true
+
+
+	# ==========================================
+	# PISÃO
+	# ==========================================
+
+	print("==============================")
+	print("PLAYER PISOU NA CABEÇA!")
+	print("URSO TOMOU DANO!")
+	print("==============================")
+
+
+	pisar_no_urso()
+
+
+# ==========================================
+# PLAYER SAIU DA CABEÇA
+# ==========================================
+
+func _on_hitbox_body_exited(
+	body: Node2D
+) -> void:
+
+	if not body.is_in_group("player"):
+		return
+
+
+	player_on_head = false
+
+
+# ==========================================
+# VERIFICAR PLAYER NA CABEÇA
+# ==========================================
+#
+# Isso resolve o caso em que o player entra
+# na hitbox enquanto está caindo, mas chega
+# parado e continua em cima.
+#
+# ==========================================
+
+func verificar_player_na_cabeca() -> void:
+
+	if is_dead:
+		return
+
+
+	if player == null:
+		return
+
+
+	if not is_instance_valid(player):
+		return
+
+
+	var vertical_difference: float = (
 		global_position.y
 		- player.global_position.y
 	)
 
 
-	# ==========================================
-	# PLAYER ESTÁ ACIMA
-	# ==========================================
-
-	var player_above: bool = (
-		diferenca_vertical > 0.0
-		and diferenca_vertical <= STOMP_VERTICAL_DISTANCE
+	var horizontal_difference: float = abs(
+		global_position.x
+		- player.global_position.x
 	)
 
 
+	var player_above: bool = (
+		vertical_difference > 0.0
+		and vertical_difference
+		<= STOMP_VERTICAL_DISTANCE
+		and horizontal_difference
+		<= STOMP_HORIZONTAL_DISTANCE
+	)
+
+
+	if not player_above:
+
+		player_on_head = false
+
+		return
+
+
+	if player_on_head:
+		return
+
+
 	# ==========================================
-	# PLAYER ESTÁ CAINDO
+	# PLAYER ESTÁ PARADO NA CABEÇA
 	# ==========================================
 
-	var player_falling: bool = false
+	player_on_head = true
+
+	print("==============================")
+	print("PLAYER ESTÁ NA CABEÇA!")
+	print("PISÃO CONFIRMADO!")
+	print("==============================")
 
 
-	if player is CharacterBody2D:
-
-		var player_body: CharacterBody2D = (
-			player as CharacterBody2D
-		)
-
-		player_falling = player_body.velocity.y > 0.0
-
-
-	# ==========================================
-	# PISÃO REAL
-	# ==========================================
-
-	if (
-		player_above
-		and player_falling
-		and distancia_x <= STOMP_HORIZONTAL_DISTANCE
-	):
-
-		print("PISÃO REAL DETECTADO!")
-
-		pisar_no_urso()
+	pisar_no_urso()
 
 
 # ==========================================
-# PISÃO
+# PISAR NO URSO
 # ==========================================
 
 func pisar_no_urso() -> void:
@@ -881,33 +1172,25 @@ func pisar_no_urso() -> void:
 		return
 
 
+	if stomp_cooldown > 0.0:
+		return
+
+
 	stomp_cooldown = 0.45
+
 
 	stomp_count += 1
 
 
-	# ==========================================
-	# IMPEDIR ATAQUE
-	# ==========================================
-
 	is_attacking = false
+
 	can_attack = false
 
 	attack_cooldown_timer = 0.9
 
 
-	# ==========================================
-	# DESATIVAR HITBOX
-	# ==========================================
-
-	hitbox.set_deferred(
-		"monitoring",
-		false
-	)
-
-
 	print(
-		"URSO PISADO: ",
+		"URSO FOI PISADO: ",
 		stomp_count,
 		"/",
 		MAX_STOMPS
@@ -915,7 +1198,7 @@ func pisar_no_urso() -> void:
 
 
 	# ==========================================
-	# REBATER PLAYER
+	# REBATE PLAYER
 	# ==========================================
 
 	if player != null:
@@ -926,11 +1209,18 @@ func pisar_no_urso() -> void:
 				player as CharacterBody2D
 			)
 
-			player_body.velocity.y = -120.0
+
+			player_body.velocity.y = -180.0
+
+
+			# pequeno afastamento lateral
+			player_body.velocity.x += (
+				-direction * 20.0
+			)
 
 
 	# ==========================================
-	# TERCEIRO PISÃO
+	# TERCEIRA VIDA
 	# ==========================================
 
 	if stomp_count >= MAX_STOMPS:
@@ -941,7 +1231,7 @@ func pisar_no_urso() -> void:
 
 
 	# ==========================================
-	# REAÇÃO AO DANO
+	# REAÇÃO
 	# ==========================================
 
 	reagir_ao_dano()
@@ -988,14 +1278,11 @@ func reagir_ao_dano() -> void:
 	damage_tween.set_parallel(true)
 
 
-	var recoil_x: float = -direction * 5.0
-
-
 	damage_tween.tween_property(
 		animated_sprite,
 		"position",
 		original_position + Vector2(
-			recoil_x,
+			-direction * 5.0,
 			-3.0
 		),
 		0.08
@@ -1101,7 +1388,7 @@ func reagir_ao_dano() -> void:
 
 
 	# ==========================================
-	# SEGUNDO PISÃO
+	# ÚLTIMA VIDA
 	# ==========================================
 
 	if stomp_count == 2:
@@ -1110,27 +1397,6 @@ func reagir_ao_dano() -> void:
 
 
 	is_hurt = false
-
-
-	# ==========================================
-	# REATIVAR HITBOX
-	# ==========================================
-
-	hitbox.set_deferred(
-		"monitoring",
-		true
-	)
-
-
-	# ==========================================
-	# WALKING
-	# ==========================================
-
-	if animated_sprite.sprite_frames != null:
-
-		if animated_sprite.sprite_frames.has_animation("walking"):
-
-			animated_sprite.play("walking")
 
 
 # ==========================================
@@ -1150,12 +1416,10 @@ func entrar_ultima_vida() -> void:
 	animated_sprite.speed_scale = 1.25
 
 
-	print("URSO ESTÁ NA ÚLTIMA VIDA!")
+	print(
+		"URSO ESTÁ NA ÚLTIMA VIDA!"
+	)
 
-
-	# ==========================================
-	# FLASH FORTE
-	# ==========================================
 
 	animated_sprite.modulate = Color(
 		1.0,
@@ -1183,51 +1447,6 @@ func entrar_ultima_vida() -> void:
 
 
 # ==========================================
-# HITBOX
-# ==========================================
-
-func _on_hitbox_body_entered(body: Node2D) -> void:
-
-	if is_dead:
-		return
-
-
-	if is_hurt:
-		return
-
-
-	if not body.is_in_group("player"):
-		return
-
-
-	# ==========================================
-	# SE PLAYER ESTÁ ACIMA,
-	# NÃO ATACA
-	# ==========================================
-
-	if body.global_position.y < global_position.y - 5.0:
-
-		return
-
-
-	if player == null:
-
-		player = body
-
-
-	var distancia: float = (
-		global_position.distance_to(
-			body.global_position
-		)
-	)
-
-
-	if distancia <= ATTACK_TRIGGER_DISTANCE:
-
-		entrar_attack()
-
-
-# ==========================================
 # MORTE
 # ==========================================
 
@@ -1244,6 +1463,7 @@ func matar_urso() -> void:
 	is_hurt = false
 	last_life = false
 	returning_to_sleep = false
+	player_on_head = false
 
 
 	# ==========================================
@@ -1252,9 +1472,13 @@ func matar_urso() -> void:
 
 	Globals.score += 1000
 
+
 	print("URSO DERROTADO!")
 	print("+1000 SCORE")
-	print("SCORE ATUAL: ", Globals.score)
+	print(
+		"SCORE ATUAL: ",
+		Globals.score
+	)
 
 
 	# ==========================================
@@ -1267,13 +1491,18 @@ func matar_urso() -> void:
 
 
 	# ==========================================
-	# DESATIVAR TUDO
+	# DESATIVAR AZUL
 	# ==========================================
 
 	collision.set_deferred(
 		"disabled",
 		true
 	)
+
+
+	# ==========================================
+	# DESATIVAR VERMELHO
+	# ==========================================
 
 	hitbox.set_deferred(
 		"monitoring",
@@ -1284,6 +1513,11 @@ func matar_urso() -> void:
 		"disabled",
 		true
 	)
+
+
+	# ==========================================
+	# RAYCAST
+	# ==========================================
 
 	ray_cast.enabled = false
 
@@ -1312,7 +1546,7 @@ func matar_urso() -> void:
 
 
 	# ==========================================
-	# QUEDA PARA TRÁS
+	# MORTE
 	# ==========================================
 
 	var death_tween: Tween = create_tween()
@@ -1402,7 +1636,7 @@ func matar_urso() -> void:
 
 
 	# ==========================================
-	# FICA NO CHÃO
+	# ESPERA
 	# ==========================================
 
 	await get_tree().create_timer(

@@ -1187,7 +1187,7 @@ sprite_frames = SubResource("SpriteFrames_2xmc4")
 autoplay = "default"
 
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("15_oonbl")]
-position = Vector2(527, 91)
+position = Vector2(26, 581)
 
 [node name="coins" type="TileMap" parent="." unique_id=624749532]
 position = Vector2(3268, 509)

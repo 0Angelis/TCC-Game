@@ -5,16 +5,53 @@ extends CharacterBody2D
 # MOVIMENTO
 # ==========================================
 
-var direction := -1
+var direction: int = -1
 
-const SPEED := 30.0
+const SPEED: float = 30.0
 
 
 # ==========================================
-# ESTADOS
+# CONTATO REAL
 # ==========================================
 
-var is_dead := false
+# Bem menor para não dar dano de longe.
+const CONTACT_DISTANCE_X: float = 18.0
+const CONTACT_DISTANCE_Y: float = 18.0
+
+
+# ==========================================
+# PISÃO
+# ==========================================
+
+const STOMP_DISTANCE_X: float = 24.0
+const STOMP_DISTANCE_Y: float = 18.0
+
+
+# ==========================================
+# DANO
+# ==========================================
+
+const DAMAGE_COOLDOWN: float = 0.7
+
+const KNOCKBACK_X: float = 45.0
+const KNOCKBACK_Y: float = -25.0
+
+var damage_cooldown: float = 0.0
+var stomp_cooldown: float = 0.0
+
+
+# ==========================================
+# ESTADO
+# ==========================================
+
+var is_dead: bool = false
+
+
+# ==========================================
+# PLAYER
+# ==========================================
+
+var player: Node2D = null
 
 
 # ==========================================
@@ -43,16 +80,25 @@ func _ready() -> void:
 
 	_update_ray_cast()
 
+
+	# ==========================================
+	# PLAYER
+	# ==========================================
+
+	encontrar_player()
+
+
+	# ==========================================
+	# HITBOX
+	# ==========================================
+
 	hitbox.monitoring = true
 	hitbox.monitorable = true
 
-	if not hitbox.body_entered.is_connected(
-		_on_hitbox_body_entered
-	):
 
-		hitbox.body_entered.connect(
-			_on_hitbox_body_entered
-		)
+	# ==========================================
+	# ANIMAÇÃO
+	# ==========================================
 
 	if animated_sprite.sprite_frames != null:
 
@@ -72,6 +118,20 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
+	# COOLDOWN
+	# ==========================================
+
+	if damage_cooldown > 0.0:
+
+		damage_cooldown -= delta
+
+
+	if stomp_cooldown > 0.0:
+
+		stomp_cooldown -= delta
+
+
+	# ==========================================
 	# GRAVIDADE
 	# ==========================================
 
@@ -81,14 +141,32 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# ATUALIZA RAYCAST
+	# PLAYER
+	# ==========================================
+
+	if player == null or not is_instance_valid(player):
+
+		encontrar_player()
+
+
+	# ==========================================
+	# INTERAÇÃO
+	# ==========================================
+
+	if player != null:
+
+		verificar_contato()
+
+
+	# ==========================================
+	# RAYCAST
 	# ==========================================
 
 	_update_ray_cast()
 
 
 	# ==========================================
-	# FIM DA PLATAFORMA
+	# BORDA
 	# ==========================================
 
 	if is_on_floor():
@@ -108,14 +186,19 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# COLISÃO COM PAREDE
+	# PAREDE
 	# ==========================================
 
 	for i in get_slide_collision_count():
 
-		var slide_collision := get_slide_collision(i)
+		var slide_collision: KinematicCollision2D = (
+			get_slide_collision(i)
+		)
 
-		var normal := slide_collision.get_normal()
+		var normal: Vector2 = (
+			slide_collision.get_normal()
+		)
+
 
 		if abs(normal.x) > 0.5:
 
@@ -140,7 +223,215 @@ func _physics_process(delta: float) -> void:
 
 
 # ==========================================
-# ATUALIZA RAYCAST
+# ENCONTRAR PLAYER
+# ==========================================
+
+func encontrar_player() -> void:
+
+	var players: Array[Node] = (
+		get_tree().get_nodes_in_group("player")
+	)
+
+
+	if players.size() > 0:
+
+		player = players[0] as Node2D
+
+
+# ==========================================
+# VERIFICAR CONTATO
+# ==========================================
+
+func verificar_contato() -> void:
+
+	if is_dead:
+		return
+
+
+	if player == null:
+		return
+
+
+	if not is_instance_valid(player):
+		return
+
+
+	# ==========================================
+	# DISTÂNCIA
+	# ==========================================
+
+	var distancia_x: float = abs(
+		player.global_position.x
+		- global_position.x
+	)
+
+
+	var distancia_y: float = abs(
+		player.global_position.y
+		- global_position.y
+	)
+
+
+	# ==========================================
+	# PLAYER ESTÁ ACIMA
+	# ==========================================
+
+	var player_acima: bool = (
+		player.global_position.y
+		< global_position.y
+	)
+
+
+	# ==========================================
+	# PLAYER ESTÁ CAINDO
+	# ==========================================
+
+	var player_caindo: bool = false
+
+
+	if player is CharacterBody2D:
+
+		var player_body: CharacterBody2D = (
+			player as CharacterBody2D
+		)
+
+		player_caindo = player_body.velocity.y > 0.0
+
+
+	# ==========================================
+	# PISÃO
+	# ==========================================
+
+	if (
+		player_acima
+		and player_caindo
+		and distancia_x <= STOMP_DISTANCE_X
+		and distancia_y <= STOMP_DISTANCE_Y
+	):
+
+		if stomp_cooldown <= 0.0:
+
+			pisar_no_fantasma()
+
+		return
+
+
+	# ==========================================
+	# CONTATO LATERAL
+	# ==========================================
+
+	if (
+		not player_acima
+		and distancia_x <= CONTACT_DISTANCE_X
+		and distancia_y <= CONTACT_DISTANCE_Y
+	):
+
+		dar_dano()
+
+
+# ==========================================
+# PISÃO
+# ==========================================
+
+func pisar_no_fantasma() -> void:
+
+	if is_dead:
+		return
+
+
+	stomp_cooldown = 0.5
+
+
+	print("==============================")
+	print("PLAYER PISOU NO FANTASMA!")
+	print("FANTASMA DERROTADO!")
+	print("==============================")
+
+
+	# ==========================================
+	# REBOTE
+	# ==========================================
+
+	if player is CharacterBody2D:
+
+		var player_body: CharacterBody2D = (
+			player as CharacterBody2D
+		)
+
+		player_body.velocity.y = -180.0
+
+
+	matar_fantasma()
+
+
+# ==========================================
+# DAR DANO
+# ==========================================
+
+func dar_dano() -> void:
+
+	if is_dead:
+		return
+
+
+	if player == null:
+		return
+
+
+	if not is_instance_valid(player):
+		return
+
+
+	if damage_cooldown > 0.0:
+		return
+
+
+	if not player.has_method(
+		"receber_dano_inimigo"
+	):
+
+		print(
+			"ERRO: Player não possui receber_dano_inimigo()"
+		)
+
+		return
+
+
+	# ==========================================
+	# DIREÇÃO
+	# ==========================================
+
+	var knockback_direction: float = 1.0
+
+
+	if player.global_position.x < global_position.x:
+
+		knockback_direction = -1.0
+
+
+	print("==============================")
+	print("FANTASMA ENCOSTOU!")
+	print("DANO!")
+	print("==============================")
+
+
+	# ==========================================
+	# DANO
+	# ==========================================
+
+	player.receber_dano_inimigo(
+		Vector2(
+			knockback_direction * KNOCKBACK_X,
+			KNOCKBACK_Y
+		)
+	)
+
+
+	damage_cooldown = DAMAGE_COOLDOWN
+
+
+# ==========================================
+# RAYCAST
 # ==========================================
 
 func _update_ray_cast() -> void:
@@ -150,9 +441,10 @@ func _update_ray_cast() -> void:
 
 
 	ray_cast.target_position = Vector2(
-		direction * 18.0,
+		float(direction) * 18.0,
 		24.0
 	)
+
 
 	ray_cast.force_raycast_update()
 
@@ -175,46 +467,32 @@ func virar() -> void:
 
 
 # ==========================================
-# HITBOX DA CABEÇA
+# HITBOX
 # ==========================================
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
 
+	# O sistema de dano usa a detecção
+	# de distância acima.
+
+	return
+
+
+# ==========================================
+# RECEBER DANO
+# ==========================================
+
+func hurt() -> void:
+
+	take_damage()
+
+
+func take_damage() -> void:
+
 	if is_dead:
 		return
 
-
-	if not body.is_in_group("player"):
-		return
-
-
-	# ==========================================
-	# PLAYER PRECISA ESTAR ACIMA
-	# ==========================================
-
-	if body.global_position.y >= global_position.y:
-
-		return
-
-
-	# ==========================================
-	# MORTE
-	# ==========================================
-
-	print("==============================")
-	print("PLAYER PISOU NO FANTASMA!")
-	print("FANTASMA DERROTADO!")
-	print("==============================")
-
-
-	matar_fantasma()
-
-
-	# ==========================================
-	# REBOTE DO PLAYER
-	# ==========================================
-
-	body.velocity.y = -220.0
+	return
 
 
 # ==========================================
@@ -237,8 +515,13 @@ func matar_fantasma() -> void:
 	Globals.score += 50
 
 
+	print("FANTASMA DERROTADO!")
+	print("+50 SCORE")
+	print("SCORE ATUAL: ", Globals.score)
+
+
 	# ==========================================
-	# PARA TUDO
+	# PARAR
 	# ==========================================
 
 	velocity = Vector2.ZERO
@@ -247,7 +530,7 @@ func matar_fantasma() -> void:
 
 
 	# ==========================================
-	# DESATIVA COLISÃO
+	# DESATIVAR COLISÃO
 	# ==========================================
 
 	collision.set_deferred(
@@ -257,7 +540,7 @@ func matar_fantasma() -> void:
 
 
 	# ==========================================
-	# DESATIVA HITBOX
+	# DESATIVAR HITBOX
 	# ==========================================
 
 	hitbox.set_deferred(
@@ -267,51 +550,36 @@ func matar_fantasma() -> void:
 
 
 	# ==========================================
-	# DESATIVA RAYCAST
+	# DESATIVAR RAYCAST
 	# ==========================================
 
 	ray_cast.enabled = false
 
 
 	# ==========================================
-	# MANTÉM SPRITE VISÍVEL
+	# MORTE
 	# ==========================================
 
 	animated_sprite.visible = true
 
 
-	# ==========================================
-	# MORTE
-	# ==========================================
-	# O fantasma vira de lado e cai,
-	# sem aquele giro de 360 graus.
-
-	var start_rotation := animated_sprite.rotation_degrees
+	var start_rotation: float = (
+		animated_sprite.rotation_degrees
+	)
 
 
-	# ==========================================
-	# ESCOLHE O LADO DA QUEDA
-	# ==========================================
+	var death_rotation: float = 90.0
 
-	var death_rotation := 90.0
 
 	if direction > 0:
 
 		death_rotation = -90.0
 
 
-	# ==========================================
-	# TWEEN
-	# ==========================================
-
-	var tween := create_tween()
+	var tween: Tween = create_tween()
 
 	tween.set_parallel(true)
 
-
-	# ==========================================
-	# VIRA DE LADO
-	# ==========================================
 
 	tween.tween_property(
 		animated_sprite,
@@ -325,10 +593,6 @@ func matar_fantasma() -> void:
 	)
 
 
-	# ==========================================
-	# CAI
-	# ==========================================
-
 	tween.tween_property(
 		animated_sprite,
 		"position:y",
@@ -340,10 +604,6 @@ func matar_fantasma() -> void:
 		Tween.EASE_IN
 	)
 
-
-	# ==========================================
-	# FICA LEVEMENTE MENOR
-	# ==========================================
 
 	tween.tween_property(
 		animated_sprite,
@@ -360,10 +620,6 @@ func matar_fantasma() -> void:
 	)
 
 
-	# ==========================================
-	# DESAPARECE
-	# ==========================================
-
 	tween.tween_property(
 		animated_sprite,
 		"modulate:a",
@@ -376,16 +632,8 @@ func matar_fantasma() -> void:
 	)
 
 
-	# ==========================================
-	# ESPERA
-	# ==========================================
-
 	await tween.finished
 
-
-	# ==========================================
-	# REMOVE
-	# ==========================================
 
 	queue_free()
 

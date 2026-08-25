@@ -198,10 +198,10 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_mvpqy"]
-size = Vector2(21, 18)
+size = Vector2(19, 18)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_esgq3"]
-size = Vector2(23, 19)
+size = Vector2(19, 18)
 
 [node name="player" type="CharacterBody2D" unique_id=1042794639]
 collision_mask = 22
@@ -215,7 +215,7 @@ animation = &"vitoria"
 autoplay = "idle"
 
 [node name="Collision" type="CollisionShape2D" parent="." unique_id=466159097]
-position = Vector2(-1.5, 0)
+position = Vector2(-0.5, 0)
 shape = SubResource("RectangleShape2D_mvpqy")
 
 [node name="animator" type="AnimationPlayer" parent="." unique_id=1117982809]
@@ -225,7 +225,7 @@ collision_layer = 0
 collision_mask = 4
 
 [node name="collision" type="CollisionShape2D" parent="hurtbox" unique_id=988811623]
-position = Vector2(-1.5, -0.5)
+position = Vector2(-0.5, -1)
 shape = SubResource("RectangleShape2D_esgq3")
 debug_color = Color(0.88573563, 0.2946573, 0.40368244, 0.41960785)
 
@@ -237,7 +237,7 @@ target_position = Vector2(5, 0)
 collision_mask = 4
 
 [node name="ray_left" type="RayCast2D" parent="." unique_id=284555716]
-position = Vector2(-11.5, 4)
+position = Vector2(-9, 4)
 target_position = Vector2(-5.5, 0)
 collision_mask = 4
 

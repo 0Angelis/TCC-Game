@@ -5,21 +5,37 @@ extends CharacterBody2D
 # MOVIMENTO
 # ==========================================
 
-var direction := -1
+var direction: int = -1
 
-const SPEED := 50.0
+const SPEED: float = 50.0
 
-# Tempo para evitar várias viradas seguidas
-const TURN_COOLDOWN := 0.20
 
-var turn_timer := 0.0
+# ==========================================
+# DANO NO PLAYER
+# ==========================================
+
+const DAMAGE_COOLDOWN: float = 0.7
+
+const KNOCKBACK_X: float = 70.0
+const KNOCKBACK_Y: float = -35.0
+
+var damage_cooldown: float = 0.0
+
+
+# ==========================================
+# TEMPO PARA EVITAR VÁRIAS VIRADAS
+# ==========================================
+
+const TURN_COOLDOWN: float = 0.20
+
+var turn_timer: float = 0.0
 
 
 # ==========================================
 # ESTADO
 # ==========================================
 
-var is_dead := false
+var is_dead: bool = false
 
 
 # ==========================================
@@ -40,6 +56,7 @@ var is_dead := false
 func _ready() -> void:
 
 	add_to_group("enemies")
+
 
 	# ==========================================
 	# DIREÇÃO INICIAL
@@ -77,13 +94,14 @@ func _ready() -> void:
 	hitbox.monitoring = true
 	hitbox.monitorable = true
 
+
 	if not hitbox.body_entered.is_connected(
 		_on_hitbox_body_entered
 	):
 
 		hitbox.body_entered.connect(
 			_on_hitbox_body_entered
-		)
+	)
 
 
 # ==========================================
@@ -94,6 +112,15 @@ func _physics_process(delta: float) -> void:
 
 	if is_dead:
 		return
+
+
+	# ==========================================
+	# COOLDOWN DO DANO
+	# ==========================================
+
+	if damage_cooldown > 0.0:
+
+		damage_cooldown -= delta
 
 
 	# ==========================================
@@ -147,18 +174,54 @@ func _physics_process(delta: float) -> void:
 
 	for i in get_slide_collision_count():
 
-		var slide_collision := get_slide_collision(i)
+		var slide_collision: KinematicCollision2D = (
+			get_slide_collision(i)
+		)
 
-		var collider := slide_collision.get_collider()
+		var collider: Object = (
+			slide_collision.get_collider()
+		)
 
-		var normal := slide_collision.get_normal()
+		var normal: Vector2 = (
+			slide_collision.get_normal()
+		)
 
 
 		# ==========================================
-		# COLISÃO COM OUTRO INIMIGO
+		# COLISÃO COM PLAYER
 		# ==========================================
 
 		if collider != null:
+
+			if collider.is_in_group("player"):
+
+				var player_body: Node2D = (
+					collider as Node2D
+				)
+
+
+				# ==========================================
+				# PLAYER ABAIXO/LATERAL
+				# ==========================================
+
+				if (
+					player_body.global_position.y
+					>= global_position.y
+				):
+
+					dar_dano_no_player(
+						player_body
+					)
+
+
+					virar()
+
+					break
+
+
+			# ==========================================
+			# COLISÃO COM OUTRO INIMIGO
+			# ==========================================
 
 			if collider.is_in_group("enemies"):
 
@@ -207,9 +270,10 @@ func _update_ray_cast() -> void:
 
 
 	ray_cast.target_position = Vector2(
-		direction * 18.0,
+		float(direction) * 18.0,
 		24.0
 	)
+
 
 	ray_cast.force_raycast_update()
 
@@ -258,7 +322,7 @@ func virar() -> void:
 
 
 	# ==========================================
-	# PEQUENO IMPULSO PARA A NOVA DIREÇÃO
+	# IMPULSO NA NOVA DIREÇÃO
 	# ==========================================
 
 	velocity.x = direction * SPEED
@@ -275,7 +339,7 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# SÓ REAGE AO PLAYER
+	# SÓ PLAYER
 	# ==========================================
 
 	if not body.is_in_group("player"):
@@ -284,32 +348,142 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# PLAYER PRECISA ESTAR ACIMA
+	# PLAYER ESTÁ ACIMA
 	# ==========================================
 
-	if body.global_position.y >= global_position.y:
+	if body.global_position.y < global_position.y:
+
+		# ==========================================
+		# PISÃO
+		# ==========================================
+
+		print("==============================")
+		print("PLAYER PISOU NO LARANJA!")
+		print("LARANJA DERROTADO!")
+		print("==============================")
+
+
+		matar_laranja()
+
+
+		# ==========================================
+		# REBATE PLAYER
+		# ==========================================
+
+		body.velocity.y = -200.0
 
 		return
 
 
 	# ==========================================
-	# LARANJA DERROTADO
+	# PLAYER ENCOSTOU DE LADO
 	# ==========================================
 
-	print("==============================")
-	print("PLAYER PISOU NO LARANJA!")
-	print("LARANJA DERROTADO!")
-	print("==============================")
+	dar_dano_no_player(body)
 
 
-	matar_laranja()
+# ==========================================
+# DAR DANO NO PLAYER
+# ==========================================
+
+func dar_dano_no_player(body: Node2D) -> void:
+
+	if is_dead:
+		return
+
+
+	if damage_cooldown > 0.0:
+
+		return
+
+
+	if body == null:
+
+		return
+
+
+	if not is_instance_valid(body):
+
+		return
 
 
 	# ==========================================
-	# PULO DO PLAYER
+	# PLAYER ACIMA NÃO TOMA DANO
 	# ==========================================
 
-	body.velocity.y = -200.0
+	if body.global_position.y < global_position.y:
+
+		return
+
+
+	# ==========================================
+	# PLAYER PRECISA TER TAKE_DAMAGE
+	# ==========================================
+
+	if not body.has_method("take_damage"):
+
+		print(
+			"LARANJA: Player não possui take_damage()"
+		)
+
+		return
+
+
+	# ==========================================
+	# DIREÇÃO DO KNOCKBACK
+	# ==========================================
+
+	var knockback_direction: float = 1.0
+
+
+	if body.global_position.x < global_position.x:
+
+		knockback_direction = -1.0
+
+
+	# ==========================================
+	# CAUSA DANO
+	# ==========================================
+
+	body.take_damage(
+		Vector2(
+			knockback_direction * KNOCKBACK_X,
+			KNOCKBACK_Y
+		)
+	)
+
+
+	# ==========================================
+	# COOLDOWN
+	# ==========================================
+
+	damage_cooldown = DAMAGE_COOLDOWN
+
+
+	print("LARANJA DEU DANO NO PLAYER!")
+
+
+# ==========================================
+# RECEBER DANO
+# ==========================================
+
+func hurt() -> void:
+
+	take_damage()
+
+
+func take_damage() -> void:
+
+	if is_dead:
+
+		return
+
+
+	# ==========================================
+	# O LARANJA NÃO USA DANO PRÓPRIO
+	# ==========================================
+
+	return
 
 
 # ==========================================
@@ -394,7 +568,9 @@ func matar_laranja() -> void:
 	# POSIÇÃO ORIGINAL
 	# ==========================================
 
-	var original_position := animated_sprite.position
+	var original_position: Vector2 = (
+		animated_sprite.position
+	)
 
 
 	# ==========================================
@@ -408,16 +584,17 @@ func matar_laranja() -> void:
 	# SOBE UM POUCO
 	# ==========================================
 
-	var jump_tween := create_tween()
+	var jump_tween: Tween = create_tween()
 
 	jump_tween.set_parallel(true)
+
 
 	jump_tween.tween_property(
 		animated_sprite,
 		"position",
 		original_position + Vector2(
-			0,
-			-5
+			0.0,
+			-5.0
 		),
 		0.18
 	).set_trans(
@@ -459,16 +636,17 @@ func matar_laranja() -> void:
 	# CAI
 	# ==========================================
 
-	var fall_tween := create_tween()
+	var fall_tween: Tween = create_tween()
 
 	fall_tween.set_parallel(true)
+
 
 	fall_tween.tween_property(
 		animated_sprite,
 		"position",
 		original_position + Vector2(
-			0,
-			14
+			0.0,
+			14.0
 		),
 		0.20
 	).set_trans(
@@ -476,6 +654,7 @@ func matar_laranja() -> void:
 	).set_ease(
 		Tween.EASE_IN
 	)
+
 
 	fall_tween.tween_property(
 		animated_sprite,
@@ -492,16 +671,17 @@ func matar_laranja() -> void:
 	# DESAPARECE
 	# ==========================================
 
-	var fade_tween := create_tween()
+	var fade_tween: Tween = create_tween()
 
 	fade_tween.set_parallel(true)
+
 
 	fade_tween.tween_property(
 		animated_sprite,
 		"position",
 		original_position + Vector2(
-			0,
-			18
+			0.0,
+			18.0
 		),
 		0.12
 	).set_trans(
@@ -509,6 +689,7 @@ func matar_laranja() -> void:
 	).set_ease(
 		Tween.EASE_IN
 	)
+
 
 	fade_tween.tween_property(
 		animated_sprite,
