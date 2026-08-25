@@ -13,10 +13,17 @@ const JUMP_FORCE: float = -300.0
 # KNOCKBACK DOS INIMIGOS
 # ==========================================
 
-const ENEMY_KNOCKBACK_X: float = 180.0
+const ENEMY_KNOCKBACK_X: float = 250.0
 const ENEMY_KNOCKBACK_Y: float = -150.0
 
-const SPIKE_KNOCKBACK_Y: float = -35.0
+
+# ==========================================
+# KNOCKBACK DOS ESPINHOS
+# ==========================================
+
+# ESPINHO JOGA SOMENTE PARA CIMA
+const SPIKE_KNOCKBACK_X: float = 0.0
+const SPIKE_KNOCKBACK_Y: float = -330.0
 
 
 # ==========================================
@@ -25,9 +32,9 @@ const SPIKE_KNOCKBACK_Y: float = -35.0
 
 var knockback_active: bool = false
 
-const KNOCKBACK_CONTROL_TIME: float = 0.12
+const KNOCKBACK_TIME: float = 0.22
 
-var knockback_control_timer: float = 0.0
+var knockback_timer: float = 0.0
 
 
 # ==========================================
@@ -53,6 +60,13 @@ var taking_damage: bool = false
 var can_take_damage: bool = true
 var can_move: bool = true
 var is_dead: bool = false
+
+
+# ==========================================
+# ESTADO DOS ESPINHOS
+# ==========================================
+
+var spike_contact_active: bool = false
 
 
 # ==========================================
@@ -97,9 +111,11 @@ func _ready() -> void:
 	celebrating = false
 
 	knockback_active = false
-	knockback_control_timer = 0.0
+	knockback_timer = 0.0
 
 	enemy_damage_cooldown = 0.0
+
+	spike_contact_active = false
 
 	print("PLAYER INICIADO")
 	print("VIDAS: ", Globals.player_life)
@@ -183,7 +199,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# COOLDOWN
+	# COOLDOWN DE INIMIGO
 	# ==========================================
 
 	if enemy_damage_cooldown > 0.0:
@@ -192,16 +208,24 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# TIMER KNOCKBACK
+	# KNOCKBACK
 	# ==========================================
 
-	if knockback_control_timer > 0.0:
+	if knockback_active:
 
-		knockback_control_timer -= delta
+		knockback_timer -= delta
 
-	else:
+		if knockback_timer <= 0.0:
 
-		knockback_active = false
+			knockback_active = false
+
+		else:
+
+			velocity.x = move_toward(
+				velocity.x,
+				0.0,
+				180.0 * delta
+			)
 
 
 	# ==========================================
@@ -243,7 +267,8 @@ func _physics_process(delta: float) -> void:
 	# ==========================================
 
 	if (
-		(
+		not knockback_active
+		and (
 			Input.is_key_pressed(KEY_W)
 			or Input.is_key_pressed(KEY_SPACE)
 			or Input.is_key_pressed(KEY_UP)
@@ -251,7 +276,6 @@ func _physics_process(delta: float) -> void:
 		and is_on_floor()
 		and can_move
 		and not taking_damage
-		and not knockback_active
 		and not moving_down
 	):
 
@@ -259,7 +283,7 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# MOVIMENTO
+	# MOVIMENTO NORMAL
 	# ==========================================
 
 	if not knockback_active:
@@ -284,19 +308,24 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# KNOCKBACK
+	# WARNING
 	# ==========================================
 
-	if knockback_active:
+	if showing_warning:
 
-		# Mantém o impulso horizontal,
-		# mas deixa ele diminuir naturalmente.
+		if (
+			Input.is_key_pressed(KEY_A)
+			or Input.is_key_pressed(KEY_D)
+			or Input.is_key_pressed(KEY_LEFT)
+			or Input.is_key_pressed(KEY_RIGHT)
+			or Input.is_key_pressed(KEY_W)
+			or Input.is_key_pressed(KEY_UP)
+			or Input.is_key_pressed(KEY_DOWN)
+			or Input.is_key_pressed(KEY_S)
+			or Input.is_key_pressed(KEY_SPACE)
+		):
 
-		velocity.x = move_toward(
-			velocity.x,
-			0.0,
-			120.0 * delta
-		)
+			showing_warning = false
 
 
 	# ==========================================
@@ -393,14 +422,8 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# AQUI ESTÁ A CORREÇÃO
+	# COLISÃO COM INIMIGO
 	# ==========================================
-	#
-	# O PLAYER verifica as colisões que ELE
-	# acabou de fazer.
-	#
-	# Isso detecta o collision azul do urso.
-	#
 
 	verificar_colisao_com_inimigo()
 
@@ -429,10 +452,6 @@ func verificar_colisao_com_inimigo() -> void:
 	if enemy_damage_cooldown > 0.0:
 		return
 
-
-	# ==========================================
-	# PEGAR TODAS AS COLISÕES DO PLAYER
-	# ==========================================
 
 	var collision_count: int = (
 		get_slide_collision_count()
@@ -468,18 +487,10 @@ func verificar_colisao_com_inimigo() -> void:
 		)
 
 
-		# ==========================================
-		# PRECISA SER INIMIGO
-		# ==========================================
-
 		if not other_body.is_in_group("enemies"):
 
 			continue
 
-
-		# ==========================================
-		# INIMIGO MORTO?
-		# ==========================================
 
 		var enemy_dead = (
 			other_body.get("is_dead")
@@ -491,10 +502,6 @@ func verificar_colisao_com_inimigo() -> void:
 			continue
 
 
-		# ==========================================
-		# NORMAL DA COLISÃO
-		# ==========================================
-
 		var normal: Vector2 = (
 			slide_collision.get_normal()
 		)
@@ -503,12 +510,6 @@ func verificar_colisao_com_inimigo() -> void:
 		# ==========================================
 		# PLAYER ESTÁ EM CIMA
 		# ==========================================
-		#
-		# Normal apontando para cima significa
-		# que o player bateu por cima.
-		#
-		# NÃO toma dano.
-		#
 
 		if normal.y < -0.5:
 
@@ -516,7 +517,7 @@ func verificar_colisao_com_inimigo() -> void:
 
 
 		# ==========================================
-		# PRECISA SER COLISÃO LATERAL
+		# PRECISA SER LATERAL
 		# ==========================================
 
 		if abs(normal.x) < 0.5:
@@ -524,19 +525,11 @@ func verificar_colisao_com_inimigo() -> void:
 			continue
 
 
-		# ==========================================
-		# DANO
-		# ==========================================
-
 		print("==============================")
 		print("PLAYER BATEU NO CORPO DO INIMIGO!")
 		print(
 			"Inimigo: ",
 			other_body.name
-		)
-		print(
-			"Normal: ",
-			normal
 		)
 		print("==============================")
 
@@ -575,7 +568,6 @@ func _on_hurtbox_body_entered(
 	body: Node2D
 ) -> void:
 
-	# Não usamos Hurtbox para inimigos.
 	return
 
 
@@ -589,14 +581,13 @@ func check_damage_tile() -> void:
 		return
 
 
-	if not can_take_damage:
-		return
-
-
 	if level == null:
-
 		return
 
+
+	# ==========================================
+	# POSIÇÃO DOS PÉS
+	# ==========================================
 
 	var feet_position: Vector2 = (
 		global_position
@@ -607,14 +598,23 @@ func check_damage_tile() -> void:
 	)
 
 
+	# ==========================================
+	# DETECÇÃO DOS ESPINHOS
+	# ==========================================
+
 	var positions: Array[Vector2] = [
 		feet_position,
-		feet_position + Vector2(-8.0, 0.0),
-		feet_position + Vector2(8.0, 0.0),
-		feet_position + Vector2(0.0, 8.0),
-		feet_position + Vector2(0.0, 16.0)
+		feet_position + Vector2(-5.0, 0.0),
+		feet_position + Vector2(5.0, 0.0)
 	]
 
+
+	var on_spike: bool = false
+
+
+	# ==========================================
+	# PROCURA O ESPINHO
+	# ==========================================
 
 	for layer_index in range(
 		level.get_layers_count()
@@ -645,7 +645,6 @@ func check_damage_tile() -> void:
 
 
 			if tile_data == null:
-
 				continue
 
 
@@ -658,20 +657,69 @@ func check_damage_tile() -> void:
 
 			if damage == true:
 
-				print(
-					"ESPINHO DETECTADO!"
+				on_spike = true
+
+				break
+
+
+		if on_spike:
+			break
+
+
+	# ==========================================
+	# SAIU DOS ESPINHOS
+	# ==========================================
+
+	if not on_spike:
+
+		if spike_contact_active:
+
+			print("SAIU DOS ESPINHOS!")
+
+		spike_contact_active = false
+
+		return
+
+
+	# ==========================================
+	# ESTÁ NOS ESPINHOS
+	# ==========================================
+
+	if not spike_contact_active:
+
+		spike_contact_active = true
+
+		print("ENTROU NO ESPINHO!")
+
+
+		# ==========================================
+		# PRIMEIRO DANO
+		# ==========================================
+
+		if can_take_damage:
+
+			# ESPINHO JOGA SOMENTE PARA CIMA
+
+			take_damage(
+				Vector2(
+					0.0,
+					SPIKE_KNOCKBACK_Y
 				)
+			)
 
 
-				take_damage(
-					Vector2(
-						0.0,
-						SPIKE_KNOCKBACK_Y
-					)
-				)
+	# ==========================================
+	# KNOCKBACK CONTÍNUO
+	# ==========================================
 
+	# Enquanto estiver no espinho,
+	# continua sendo jogado para cima.
 
-				return
+	velocity.x = 0.0
+	velocity.y = SPIKE_KNOCKBACK_Y
+
+	knockback_active = true
+	knockback_timer = KNOCKBACK_TIME
 
 
 # ==========================================
@@ -695,7 +743,6 @@ func take_damage(
 	# ==========================================
 
 	can_take_damage = false
-
 	taking_damage = true
 
 	showing_warning = false
@@ -740,7 +787,6 @@ func take_damage(
 
 	animation.play("hurt")
 
-
 	animation.modulate = Color(
 		1.0,
 		0.55,
@@ -755,13 +801,11 @@ func take_damage(
 
 	if knockback_force != Vector2.ZERO:
 
-		velocity = knockback_force
+		velocity.x = knockback_force.x
+		velocity.y = knockback_force.y
 
 		knockback_active = true
-
-		knockback_control_timer = (
-			KNOCKBACK_CONTROL_TIME
-		)
+		knockback_timer = KNOCKBACK_TIME
 
 
 	# ==========================================
@@ -821,7 +865,9 @@ func receber_dano_inimigo(
 	print("==============================")
 
 
-	take_damage(knockback)
+	take_damage(
+		knockback
+	)
 
 
 	print("==============================")
@@ -852,6 +898,25 @@ func play_warning() -> void:
 
 	showing_warning = true
 
+	velocity.x = 0.0
+
+
+	# ==========================================
+	# MANTÉM A DIREÇÃO ATUAL
+	# ==========================================
+	#
+	# NÃO usamos:
+	#
+	# animation.flip_h = !animation.flip_h
+	#
+	# porque isso faria o pinguim inverter
+	# o lado toda vez que o warning fosse ativado.
+	#
+	# O pinguim simplesmente mantém o lado
+	# para o qual já estava olhando.
+
+	animation.stop()
+
 	animation.play("warning")
 
 
@@ -875,6 +940,50 @@ func stop_warning() -> void:
 
 
 	if celebrating:
+		return
+
+
+	showing_warning = false
+
+
+	# ==========================================
+	# VOLTA PARA ANIMAÇÃO NORMAL
+	# ==========================================
+
+	if not is_on_floor():
+
+		if velocity.y > 0.0:
+
+			animation.play("falling")
+
+		else:
+
+			animation.play("jump")
+
+
+	else:
+
+		if abs(velocity.x) > 1.0:
+
+			animation.play("run")
+
+		else:
+
+			animation.play("idle")
+
+
+	print(
+		"WARNING ENCERRADO!"
+	)
+
+
+# ==========================================
+# WARNING CANCELADO POR MOVIMENTO
+# ==========================================
+
+func cancelar_warning_por_movimento() -> void:
+
+	if not showing_warning:
 		return
 
 
@@ -983,7 +1092,9 @@ func die() -> void:
 	velocity = Vector2.ZERO
 
 	knockback_active = false
-	knockback_control_timer = 0.0
+	knockback_timer = 0.0
+
+	spike_contact_active = false
 
 
 	# ==========================================
