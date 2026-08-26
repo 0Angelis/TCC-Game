@@ -54,6 +54,318 @@ const VICTORY_SCORE: int = 1500
 
 
 # =========================================================
+# CRIA TIMER — CÓPIA VISUAL DO STROOP
+# =========================================================
+
+func _create_timer_ui() -> void:
+
+	timer_panel = Panel.new()
+
+	timer_panel.name = "TimerPanel"
+
+	timer_panel.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	timer_panel.custom_minimum_size = Vector2(
+		145,
+		62
+	)
+
+	timer_panel.size = Vector2(
+		145,
+		62
+	)
+
+	timer_panel.set_anchors_preset(
+		Control.PRESET_TOP_RIGHT
+	)
+
+	timer_panel.position = Vector2(
+		-165,
+		28
+	)
+
+
+	# =====================================================
+	# FUNDO DO TIMER
+	# =====================================================
+
+	var panel_style := StyleBoxFlat.new()
+
+	panel_style.bg_color = Color(
+		"#211A2B"
+	)
+
+	panel_style.border_width_left = 2
+	panel_style.border_width_top = 2
+	panel_style.border_width_right = 2
+	panel_style.border_width_bottom = 2
+
+	panel_style.border_color = PURPLE
+
+	panel_style.corner_radius_top_left = 12
+	panel_style.corner_radius_top_right = 12
+	panel_style.corner_radius_bottom_left = 12
+	panel_style.corner_radius_bottom_right = 12
+
+	panel_style.shadow_color = Color(
+		0,
+		0,
+		0,
+		0.40
+	)
+
+	panel_style.shadow_size = 6
+
+	panel_style.shadow_offset = Vector2(
+		0,
+		3
+	)
+
+
+	timer_panel.add_theme_stylebox_override(
+		"panel",
+		panel_style
+	)
+
+
+	# =====================================================
+	# ÍCONE
+	# =====================================================
+
+	timer_icon_label = Label.new()
+
+	timer_icon_label.text = "⏱"
+
+	timer_icon_label.position = Vector2(
+		12,
+		15
+	)
+
+	timer_icon_label.size = Vector2(
+		35,
+		30
+	)
+
+	timer_icon_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	timer_icon_label.add_theme_font_size_override(
+		"font_size",
+		24
+	)
+
+	timer_icon_label.add_theme_color_override(
+		"font_color",
+		PURPLE
+	)
+
+	timer_icon_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	timer_icon_label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+
+	timer_panel.add_child(
+		timer_icon_label
+	)
+
+
+	# =====================================================
+	# NÚMERO
+	# =====================================================
+
+	timer_label = Label.new()
+
+	timer_label.text = "15"
+
+	timer_label.position = Vector2(
+		50,
+		8
+	)
+
+	timer_label.size = Vector2(
+		82,
+		45
+	)
+
+	timer_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	timer_label.add_theme_font_size_override(
+		"font_size",
+		32
+	)
+
+	timer_label.add_theme_color_override(
+		"font_color",
+		PURPLE
+	)
+
+	timer_label.add_theme_color_override(
+		"font_outline_color",
+		Color.BLACK
+	)
+
+	timer_label.add_theme_constant_override(
+		"outline_size",
+		4
+	)
+
+	timer_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	timer_label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+
+	timer_panel.add_child(
+		timer_label
+	)
+
+	add_child(
+		timer_panel
+	)
+
+	_update_timer_ui()
+
+
+# =========================================================
+# ATUALIZA TIMER — MESMO DO STROOP
+# =========================================================
+
+func _update_timer_ui() -> void:
+
+	if timer_label == null:
+
+		return
+
+
+	var seconds := int(
+		ceil(time_left)
+	)
+
+
+	timer_label.text = str(
+		seconds
+	)
+
+
+	var timer_color := PURPLE
+
+
+	if time_left <= 10.0:
+
+		timer_color = PURPLE_LIGHT
+
+
+	if time_left <= 5.0:
+
+		timer_color = ERROR
+
+
+	timer_label.add_theme_color_override(
+		"font_color",
+		timer_color
+	)
+
+
+	if timer_icon_label != null:
+
+		timer_icon_label.add_theme_color_override(
+		"font_color",
+		timer_color
+	)
+
+
+	if time_left <= 5.0 and time_left > 0.0:
+
+		_start_timer_pulse()
+
+	else:
+
+		_stop_timer_pulse()
+
+
+# =========================================================
+# PULSO DO TIMER — MESMO DO STROOP
+# =========================================================
+
+func _start_timer_pulse() -> void:
+
+	if timer_panel == null:
+
+		return
+
+
+	if timer_pulse_tween != null:
+
+		if timer_pulse_tween.is_running():
+
+			return
+
+
+	timer_pulse_tween = create_tween()
+
+	timer_pulse_tween.set_loops()
+
+
+	timer_pulse_tween.tween_property(
+		timer_panel,
+		"scale",
+		Vector2(
+			1.05,
+			1.05
+		),
+		0.18
+	).set_trans(
+		Tween.TRANS_SINE
+	)
+
+
+	timer_pulse_tween.tween_property(
+		timer_panel,
+		"scale",
+		Vector2(
+			1.0,
+			1.0
+		),
+		0.18
+	).set_trans(
+		Tween.TRANS_SINE
+	)
+
+
+# =========================================================
+# PARA PULSO
+# =========================================================
+
+func _stop_timer_pulse() -> void:
+
+	if timer_pulse_tween != null:
+
+		timer_pulse_tween.kill()
+
+		timer_pulse_tween = null
+
+
+	if timer_panel != null:
+
+		timer_panel.scale = Vector2(
+		1.0,
+		1.0
+	)
+
+
+# =========================================================
 # GENIUS
 # =========================================================
 
@@ -200,6 +512,16 @@ var timer_running: bool = false
 
 
 # =========================================================
+# HUD TIMER — MESMO DO STROOP
+# =========================================================
+
+var timer_panel: Panel = null
+var timer_label: Label = null
+var timer_icon_label: Label = null
+var timer_pulse_tween: Tween = null
+
+
+# =========================================================
 # STATUS
 # =========================================================
 
@@ -308,11 +630,24 @@ func _ready() -> void:
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
+	# =====================================================
+	# TIMER INICIAL
+	# Evita que o Pause Menu mostre 0 antes do desafio começar.
+	# =====================================================
+
+	time_left = INITIAL_TIME
+
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
 	set_process(true)
 
 	set_process_input(true)
+
+	# =====================================================
+	# TIMER — EXATAMENTE COMO NO STROOP
+	# =====================================================
+
+	_create_timer_ui()
 
 
 	# =====================================================
@@ -547,12 +882,35 @@ func _show_game_visuals_after_tutorial() -> void:
 func _process(delta: float) -> void:
 
 	# =====================================================
+	# PAUSE
+	# O mini-game NÃO pode receber mouse enquanto o menu
+	# de pause estiver aberto.
+	# =====================================================
+
+	if get_tree().paused:
+
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hovered_button = -1
+		flashing_button = -1
+
+		queue_redraw()
+
+		return
+
+	else:
+
+		mouse_filter = Control.MOUSE_FILTER_STOP
+
+
+	# =====================================================
 	# TIMER
 	# =====================================================
 
 	if timer_running and player_turn:
 
 		time_left -= delta
+
+		_update_timer_ui()
 
 
 		if time_left <= 0.0:
@@ -618,6 +976,18 @@ func _process(delta: float) -> void:
 # =========================================================
 
 func _input(event: InputEvent) -> void:
+
+	# =====================================================
+	# PAUSE
+	# Enquanto o jogo estiver pausado, este mini-game não
+	# processa teclado nem mouse. O menu de pause fica livre
+	# para receber os cliques.
+	# =====================================================
+
+	if get_tree().paused:
+
+		return
+
 
 	# =====================================================
 	# TUTORIAL ABERTO:
@@ -933,6 +1303,12 @@ func start_game() -> void:
 	timer_running = false
 
 	time_left = INITIAL_TIME
+
+	if timer_panel != null:
+		timer_panel.show()
+		timer_panel.scale = Vector2(1.0, 1.0)
+
+	_update_timer_ui()
 
 	status_text = "OBSERVE A SEQUÊNCIA"
 
@@ -1359,6 +1735,11 @@ func time_finished() -> void:
 
 	flashing_button = -1
 
+	_stop_timer_pulse()
+
+	if timer_panel != null:
+		timer_panel.hide()
+
 
 	status_text = "TEMPO ESGOTADO!"
 
@@ -1626,123 +2007,6 @@ func draw_top_hud() -> void:
 		),
 		16,
 		status_color
-	)
-
-
-	# =====================================================
-	# TIMER - MESMO ESTILO DO OUTRO DESAFIO
-	# ÍCONE À ESQUERDA + NÚMERO À DIREITA
-	# =====================================================
-
-	var timer_width: float = 145.0
-	var timer_height: float = 62.0
-
-	var timer_rect: Rect2 = Rect2(
-		width - timer_width - 28,
-		28,
-		timer_width,
-		timer_height
-	)
-
-
-	draw_panel(
-		timer_rect
-	)
-
-
-	# =====================================================
-	# RELÓGIO
-	# =====================================================
-
-	var clock_center: Vector2 = Vector2(
-		timer_rect.position.x + 26,
-		timer_rect.position.y + 31
-	)
-
-
-	var clock_color: Color = PURPLE
-
-	if time_left <= 10.0 and player_turn:
-		clock_color = PURPLE_LIGHT
-
-	if time_left <= 5.0 and player_turn:
-		clock_color = ERROR
-
-
-	# Corpo do relógio
-	draw_circle(
-		clock_center,
-		13.0,
-		Color("#171226")
-	)
-
-	draw_circle(
-		clock_center,
-		11.0,
-		clock_color
-	)
-
-	draw_circle(
-		clock_center,
-		8.0,
-		Color("#171226")
-	)
-
-
-	# Ponteiros
-	draw_line(
-		clock_center,
-		clock_center + Vector2(0, -6.0),
-		clock_color,
-		2.0,
-		true
-	)
-
-	draw_line(
-		clock_center,
-		clock_center + Vector2(5.0, 2.0),
-		clock_color,
-		2.0,
-		true
-	)
-
-	draw_circle(
-		clock_center,
-		2.0,
-		clock_color
-	)
-
-
-	# =====================================================
-	# TEMPO
-	# =====================================================
-
-	var seconds: int = int(
-		ceil(
-			max(
-				time_left,
-				0.0
-			)
-		)
-	)
-
-
-	var time_string: String
-
-	if seconds < 10:
-		time_string = "00:0" + str(seconds)
-	else:
-		time_string = "00:" + str(seconds)
-
-
-	draw_text_center(
-		time_string,
-		Vector2(
-			timer_rect.position.x + 96,
-			timer_rect.position.y + 39
-		),
-		30,
-		clock_color
 	)
 
 
@@ -3533,6 +3797,8 @@ func close_result_screen() -> void:
 
 
 	get_tree().paused = false
+
+	mouse_filter = Control.MOUSE_FILTER_STOP
 
 
 	if is_instance_valid(
