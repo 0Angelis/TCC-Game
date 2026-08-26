@@ -554,7 +554,7 @@ func get_required_fragments() -> int:
 			return 3
 
 		3:
-			return 5
+			return 3
 
 
 	return 0

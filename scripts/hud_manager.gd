@@ -158,7 +158,7 @@ func get_required_fragment_count() -> int:
 		"world_03.tscn"
 	):
 
-		return 5
+		return 3
 
 
 	# ==========================================

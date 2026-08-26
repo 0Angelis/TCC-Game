@@ -1478,7 +1478,7 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("30_yplb5")
 theme_override_font_sizes/font_size = 40
-text = "0/5"
+text = "0/3"
 
 [node name="MemoryTrigger" type="Area2D" parent="." unique_id=966218799]
 position = Vector2(-2, 0)

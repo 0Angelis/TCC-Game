@@ -5,3 +5,6 @@ res://shaders/transition.gdshader
 res://frag/frag_atencao.tres
 res://frag/frag_memoria.tres
 res://frag/frag_raciocinio.tres
+res://scripts/goal.gd
+res://scripts/hud_manager.gd
+res://scripts/memory_trigger.gd

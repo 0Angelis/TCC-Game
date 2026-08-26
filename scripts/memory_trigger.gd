@@ -9,7 +9,6 @@ const MEMORY_SCENE = preload(
 	"res://scenes/memory_game.tscn"
 )
 
-
 # =========================================================
 # WORLD 03
 # =========================================================
@@ -560,7 +559,7 @@ func _on_memory_completed() -> void:
 
 
 	# =====================================================
-	# MARCA PROGRESSO
+	# MARCA PROGRESSO + FRAGMENTO DE MEMÓRIA
 	# =====================================================
 
 	var challenge_number: int = (
@@ -571,12 +570,30 @@ func _on_memory_completed() -> void:
 
 	if world != null:
 
+		# Guarda qual desafio já foi concluído.
 		world.set_meta(
 			"memory_progress",
 			max(
 				_get_memory_progress(),
 				challenge_number
 			)
+		)
+
+		# =================================================
+		# MUNDO 03
+		# Cada desafio concluído libera 1 fragmento.
+		# Máximo de 3 fragmentos.
+		# =================================================
+
+		var novos_fragmentos: int = clamp(
+			challenge_number,
+			0,
+			3
+		)
+
+		Globals.memoria_fragments = max(
+			Globals.memoria_fragments,
+			novos_fragmentos
 		)
 
 
