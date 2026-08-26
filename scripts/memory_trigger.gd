@@ -61,6 +61,56 @@ var memory_instance: Control = null
 
 var transition: Node = null
 
+# =========================================================
+# QUAL DOS 3 DESAFIOS É ESTE?
+# =========================================================
+
+func _get_challenge_number() -> int:
+
+	match name:
+
+		"MemoryTrigger":
+			return 1
+
+		"MemoryTrigger2":
+			return 2
+
+		"MemoryTrigger3":
+			return 3
+
+	return 1
+
+
+func _get_memory_progress() -> int:
+
+	var world: Node = get_tree().current_scene
+
+	if world == null:
+		return 0
+
+	if not world.has_meta("memory_progress"):
+		return 0
+
+	return int(
+		world.get_meta(
+			"memory_progress"
+		)
+	)
+
+
+func _is_unlocked() -> bool:
+
+	var challenge_number: int = (
+		_get_challenge_number()
+	)
+
+	if challenge_number == 1:
+		return true
+
+	return _get_memory_progress() >= (
+		challenge_number - 1
+	)
+
 
 # =========================================================
 # READY
@@ -91,6 +141,12 @@ func _ready() -> void:
 			true,
 			false
 		)
+
+		if transition != null:
+
+			# O Memory Game pausa a árvore na tela final.
+			# A transição precisa continuar rodando mesmo pausada.
+			transition.process_mode = Node.PROCESS_MODE_ALWAYS
 
 
 	# =====================================================
@@ -199,9 +255,14 @@ func _on_body_entered(
 		not challenge_open
 		and not challenge_completed
 		and not transition_busy
+		and _is_unlocked()
 	):
 
 		interaction_label.show()
+
+	else:
+
+		interaction_label.hide()
 
 
 # =========================================================
@@ -250,6 +311,11 @@ func _unhandled_input(
 
 
 	if transition_busy:
+
+		return
+
+
+	if not _is_unlocked():
 
 		return
 
@@ -342,9 +408,32 @@ func _open_memory() -> void:
 		return
 
 
-	challenge_open = true
+	if not _is_unlocked():
 
+		return
+
+
+	challenge_open = true
 	transition_busy = true
+
+
+	# =====================================================
+	# COBRE A TELA
+	# EXATAMENTE COMO NO STROOP
+	# =====================================================
+
+	if transition != null:
+
+		await _cover_screen()
+
+
+	# =====================================================
+	# PEQUENA ESPERA
+	# =====================================================
+
+	await get_tree().create_timer(
+		0.25
+	).timeout
 
 
 	# =====================================================
@@ -370,11 +459,17 @@ func _open_memory() -> void:
 
 
 	# =====================================================
-	# INSTANCIA
+	# INSTANCIA MEMORY
 	# =====================================================
 
 	memory_instance = (
 		MEMORY_SCENE.instantiate()
+	)
+
+
+	memory_instance.set(
+		"challenge_type",
+		_get_challenge_number()
 	)
 
 
@@ -410,33 +505,33 @@ func _open_memory() -> void:
 
 
 	# =====================================================
-	# VITÓRIA
+	# CONECTA FINAL
 	# =====================================================
 
 	if memory_instance.has_signal(
 		"challenge_completed"
 	):
 
-		memory_instance.challenge_completed.connect(
+		if not memory_instance.challenge_completed.is_connected(
 			_on_memory_completed
+		):
+
+			memory_instance.challenge_completed.connect(
+				_on_memory_completed
 		)
 
 
 	# =====================================================
-	# DERROTA
+	# REVELA MEMORY
+	# EXATAMENTE COMO NO STROOP
 	# =====================================================
 
-	if memory_instance.has_signal(
-		"challenge_failed"
-	):
+	if transition != null:
 
-		memory_instance.challenge_failed.connect(
-			_on_memory_failed
-		)
+		await _reveal_screen()
 
 
 	transition_busy = false
-
 
 # =========================================================
 # DESAFIO CONCLUÍDO
@@ -455,22 +550,34 @@ func _on_memory_completed() -> void:
 
 
 	# =====================================================
-	# ESPERA O JOGADOR CLICAR CONTINUAR
-	# =====================================================
-	#
-	# O signal acontece quando ele aperta CONTINUAR.
-	#
-	# AGORA SIM entra o efeito retrô.
-	#
-
-
-	# =====================================================
-	# EFEITO RETRÔ
+	# COBRE A TELA
+	# EXATAMENTE COMO NO STROOP
 	# =====================================================
 
 	if transition != null:
 
 		await _cover_screen()
+
+
+	# =====================================================
+	# MARCA PROGRESSO
+	# =====================================================
+
+	var challenge_number: int = (
+		_get_challenge_number()
+	)
+
+	var world: Node = get_tree().current_scene
+
+	if world != null:
+
+		world.set_meta(
+			"memory_progress",
+			max(
+				_get_memory_progress(),
+				challenge_number
+			)
+		)
 
 
 	# =====================================================
@@ -488,108 +595,41 @@ func _on_memory_completed() -> void:
 
 
 	# =====================================================
-	# ESTADO
+	# ESTADO DO DESAFIO
 	# =====================================================
 
 	challenge_open = false
-
 	challenge_completed = true
 
 
 	# =====================================================
-	# PLAYER
+	# DEVOLVE MOVIMENTO
 	# =====================================================
 
 	if player == null:
 
-		player = (
-			get_tree()
-			.get_first_node_in_group(
-				"player"
-			)
+		player = get_tree().get_first_node_in_group(
+			"player"
 		)
 
 
 	if player != null:
 
-		if player.get(
-			"can_move"
-		) != null:
+		if player.get("can_move") != null:
 
 			player.set(
 				"can_move",
 				true
 			)
 
-
-		if player.get(
-			"velocity"
-		) != null:
+		if player.get("velocity") != null:
 
 			player.velocity = Vector2.ZERO
 
 
 	# =====================================================
-	# WORLD 03
-	# =====================================================
-
-	var current_scene: Node = (
-		get_tree().current_scene
-	)
-
-
-	if current_scene != null:
-
-		if current_scene.scene_file_path == WORLD_03_SCENE:
-
-			if transition != null:
-
-				await _reveal_screen()
-
-
-			transition_busy = false
-
-			return
-
-
-	# =====================================================
-	# CASO PRECISE RECARREGAR
-	# =====================================================
-
-	await get_tree().change_scene_to_file(
-		WORLD_03_SCENE
-	)
-
-
-# =========================================================
-# DERROTA
-# =========================================================
-
-func _on_memory_failed() -> void:
-
-	if transition_busy:
-
-		return
-
-
-	transition_busy = true
-
-
-	# =====================================================
-	# EFEITO RETRÔ
-	# =====================================================
-
-	if transition != null:
-
-		await _cover_screen()
-
-
-	# =====================================================
-	# AQUI NÃO FECHAMOS O MEMORY.
-	#
-	# A TELA DE "VOCÊ PERDEU" CONTINUA ABERTA.
-	# O efeito retrô acontece como encerramento visual.
-	#
+	# REVELA WORLD 03
+	# EXATAMENTE COMO NO STROOP
 	# =====================================================
 
 	if transition != null:
@@ -598,6 +638,17 @@ func _on_memory_failed() -> void:
 
 
 	transition_busy = false
+
+
+# =========================================================
+# DERROTA
+# =========================================================
+
+func _on_memory_failed() -> void:
+
+	# Mantido somente para compatibilidade.
+	# A tela de derrota/retry é controlada pelo Memory Game.
+	return
 
 
 # =========================================================
@@ -611,30 +662,11 @@ func _cover_screen() -> void:
 		return
 
 
-	if not is_instance_valid(
-		transition
-	):
-
-		return
-
-
-	var color_rect = transition.get(
-		"color_rect"
-	)
-
-
-	if color_rect == null:
-
-		return
-
-
-	var tween: Tween = (
-		transition.create_tween()
-	)
+	var tween = transition.create_tween()
 
 
 	tween.tween_property(
-		color_rect,
+		transition.color_rect,
 		"threshold",
 		1.0,
 		0.5
@@ -649,7 +681,7 @@ func _cover_screen() -> void:
 
 
 # =========================================================
-# EFEITO RETRÔ - ABRIR
+# REVELAR TELA
 # =========================================================
 
 func _reveal_screen() -> void:
@@ -659,30 +691,11 @@ func _reveal_screen() -> void:
 		return
 
 
-	if not is_instance_valid(
-		transition
-	):
-
-		return
-
-
-	var color_rect = transition.get(
-		"color_rect"
-	)
-
-
-	if color_rect == null:
-
-		return
-
-
-	var tween: Tween = (
-		transition.create_tween()
-	)
+	var tween = transition.create_tween()
 
 
 	tween.tween_property(
-		color_rect,
+		transition.color_rect,
 		"threshold",
 		0.0,
 		0.5

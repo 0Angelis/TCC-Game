@@ -244,6 +244,15 @@ func _create_timer_ui() -> void:
 
 func _update_timer_ui() -> void:
 
+	if challenge_type == 3:
+
+		if timer_panel != null:
+
+			timer_panel.hide()
+
+		return
+
+
 	if timer_label == null:
 
 		return
@@ -460,6 +469,17 @@ var tutorial_button: Button = null
 
 var tutorial_finished: bool = false
 
+# =========================================================
+# TIPO DO DESAFIO
+# 1 = memoriza a primeira sequência
+# 2 = nova sequência em ordem diferente
+# 3 = lembra a sequência do desafio 1, sem timer
+# =========================================================
+
+var challenge_type: int = 1
+var planned_sequence: Array[int] = []
+var tutorial_hint_label: Label = null
+
 var tutorial_dim_overlay: ColorRect = null
 
 # Mantido apenas por compatibilidade; o jogo NÃO é escondido durante o tutorial.
@@ -471,6 +491,7 @@ var game_visual_nodes: Array[CanvasItem] = []
 # =========================================================
 
 var sequence: Array[int] = []
+var color_pool: Array[int] = []
 
 var player_index: int = 0
 
@@ -623,10 +644,513 @@ func _apply_final_retro_font(control: Control) -> void:
 
 
 # =========================================================
+# POOL DE CORES
+# Garante que as 4 cores apareçam antes de repetir.
+# =========================================================
+
+func _reset_color_pool() -> void:
+
+	color_pool.clear()
+
+	for color_index: int in range(4):
+
+		color_pool.append(
+			color_index
+		)
+
+	color_pool.shuffle()
+
+
+func _get_next_random_color() -> int:
+
+	if color_pool.is_empty():
+
+		_reset_color_pool()
+
+	return color_pool.pop_back()
+
+
+# =========================================================
+# CONFIGURAÇÃO DOS 3 DESAFIOS
+# =========================================================
+
+func _get_world_scene() -> Node:
+	return get_tree().current_scene
+
+
+func _get_first_sequence() -> Array[int]:
+
+	# Primeiro tenta Globals para manter a memória mesmo quando
+	# a cena do World 03 for recarregada.
+	if "memory_first_sequence" in Globals:
+
+		var global_saved: Variant = (
+			Globals.memory_first_sequence
+		)
+
+		if global_saved is Array and not global_saved.is_empty():
+
+			var global_result: Array[int] = []
+
+			for value: Variant in global_saved:
+
+				if value is int:
+
+					global_result.append(value)
+
+			if not global_result.is_empty():
+
+				return global_result
+
+
+	var world: Node = _get_world_scene()
+
+	if world == null:
+
+		return []
+
+
+	if not world.has_meta("memory_first_sequence"):
+
+		return []
+
+
+	var saved: Variant = world.get_meta(
+		"memory_first_sequence"
+	)
+
+	var result: Array[int] = []
+
+	if saved is Array:
+
+		for value: Variant in saved:
+
+			if value is int:
+
+				result.append(value)
+
+	return result
+
+
+func _prepare_second_sequence() -> void:
+
+	planned_sequence.clear()
+
+	var first_sequence: Array[int] = (
+		_get_first_sequence()
+	)
+
+	if first_sequence.is_empty():
+
+		return
+
+
+	# Cria uma ordem nova de verdade, tentando evitar repetir
+	# a mesma posição da sequência do Desafio 1.
+	var attempts: int = 0
+
+	while attempts < 40:
+
+		var candidate: Array[int] = (
+			first_sequence.duplicate()
+		)
+
+		candidate.shuffle()
+
+		var same_positions: int = 0
+
+		for i: int in range(
+			min(
+				candidate.size(),
+				first_sequence.size()
+			)
+		):
+
+			if candidate[i] == first_sequence[i]:
+
+				same_positions += 1
+
+
+		if (
+			candidate != first_sequence
+			and same_positions <= max(
+				0,
+				first_sequence.size() / 3
+			)
+		):
+
+			planned_sequence = candidate
+
+			return
+
+
+		attempts += 1
+
+
+	# Fallback: ainda garante que a ordem inteira não seja igual.
+	planned_sequence = first_sequence.duplicate()
+	planned_sequence.shuffle()
+
+	if (
+		planned_sequence == first_sequence
+		and planned_sequence.size() >= 2
+	):
+
+		planned_sequence.push_front(
+			planned_sequence.pop_at(1)
+		)
+
+
+func _setup_challenge_mode() -> void:
+
+	planned_sequence.clear()
+
+	# ---------------------------------------------------------
+	# DESAFIO 1
+	# ---------------------------------------------------------
+
+	if challenge_type == 1:
+
+		sequence.clear()
+
+		return
+
+
+	# ---------------------------------------------------------
+	# DESAFIO 2
+	# ---------------------------------------------------------
+
+	if challenge_type == 2:
+
+		sequence.clear()
+
+		_prepare_second_sequence()
+
+		return
+
+
+	# ---------------------------------------------------------
+	# DESAFIO 3
+	# ---------------------------------------------------------
+
+	if challenge_type == 3:
+
+		var first_sequence: Array[int] = (
+			_get_first_sequence()
+		)
+
+		if first_sequence.is_empty():
+
+			sequence.clear()
+
+			return
+
+		# Guarda exatamente a sequência do Desafio 1.
+		sequence = first_sequence.duplicate()
+
+
+func _should_show_tutorial() -> bool:
+
+	# Somente o primeiro desafio usa a tela completa de COMO JOGAR.
+	return challenge_type == 1
+
+
+func _get_tutorial_hint() -> String:
+
+	match challenge_type:
+
+		1:
+			return (
+				"MEMORIZE BEM A ORDEM DAS CORES. "
+				+ "VOCÊ VAI PRECISAR DELA MAIS TARDE."
+			)
+
+		2:
+			return (
+				"NOVA SEQUÊNCIA. "
+				+ "A ORDEM DAS CORES SERÁ DIFERENTE."
+			)
+
+		3:
+			return (
+				"LEMBRE DA ORDEM DAS CORES DO DESAFIO 1. "
+				+ "ESSA MESMA SEQUÊNCIA É A QUE VOCÊ DEVE REPETIR AGORA. "
+				+ "NENHUMA COR SERÁ MOSTRADA."
+			)
+
+	return ""
+
+
+# =========================================================
+# INTRO DOS DESAFIOS 2 E 3
+# Sem tutorial de COMO JOGAR.
+# =========================================================
+
+func _create_challenge_intro() -> void:
+
+	var layer: CanvasLayer = CanvasLayer.new()
+
+	layer.name = "ChallengeIntroLayer"
+
+	layer.layer = 500
+
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	add_child(layer)
+
+
+	var overlay: ColorRect = ColorRect.new()
+
+	overlay.set_anchors_and_offsets_preset(
+		Control.PRESET_FULL_RECT
+	)
+
+	overlay.color = Color(
+		0.035,
+		0.02,
+		0.08,
+		0.90
+	)
+
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	layer.add_child(overlay)
+
+
+	var panel: Panel = Panel.new()
+
+	panel.position = Vector2(
+		size.x / 2.0 - 360.0,
+		size.y / 2.0 - 205.0
+	)
+
+	panel.size = Vector2(
+		720.0,
+		410.0
+	)
+
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+
+	style.bg_color = Color("#151025")
+
+	style.border_color = PURPLE
+
+	style.border_width_left = 2
+	style.border_width_right = 2
+	style.border_width_top = 2
+	style.border_width_bottom = 2
+
+	style.corner_radius_top_left = 10
+	style.corner_radius_top_right = 10
+	style.corner_radius_bottom_left = 10
+	style.corner_radius_bottom_right = 10
+
+	panel.add_theme_stylebox_override(
+		"panel",
+		style
+	)
+
+	layer.add_child(panel)
+
+
+	var title: Label = Label.new()
+
+	title.position = Vector2(
+		40,
+		35
+	)
+
+	title.size = Vector2(
+		640,
+		70
+	)
+
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+	title.add_theme_font_size_override(
+		"font_size",
+		30
+	)
+
+	title.add_theme_color_override(
+		"font_color",
+		WHITE
+	)
+
+	if challenge_type == 2:
+
+		title.text = "DESAFIO 2"
+
+	else:
+
+		title.text = "DESAFIO 3"
+
+
+	_apply_final_retro_font(
+		title
+	)
+
+	panel.add_child(title)
+
+
+	var subtitle: Label = Label.new()
+
+	subtitle.position = Vector2(
+		50,
+		115
+	)
+
+	subtitle.size = Vector2(
+		620,
+		115
+	)
+
+	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	subtitle.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+	subtitle.add_theme_font_size_override(
+		"font_size",
+		18
+	)
+
+	subtitle.add_theme_color_override(
+		"font_color",
+		PURPLE_LIGHT
+	)
+
+	if challenge_type == 2:
+
+		subtitle.text = (
+			"NOVA SEQUÊNCIA\n"
+			+ "A ordem das cores será diferente.\n"
+			+ "Observe e repita com atenção."
+		)
+
+	else:
+
+		subtitle.text = (
+			"LEMBRE-SE DA SEQUÊNCIA DO DESAFIO 1.\n"
+			+ "Ela será a mesma sequência.\n"
+			+ "Desta vez, nenhuma cor será mostrada."
+		)
+
+
+	_apply_final_retro_font(
+		title
+	)
+
+	panel.add_child(subtitle)
+
+
+	var button: Button = Button.new()
+
+	button.name = "StartChallengeButton"
+
+	button.text = "COMEÇAR"
+
+	button.position = Vector2(
+		180,
+		300
+	)
+
+	button.size = Vector2(
+		360,
+		62
+	)
+
+	button.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	button.mouse_default_cursor_shape = (
+		Control.CURSOR_POINTING_HAND
+	)
+
+	var normal_style: StyleBoxFlat = StyleBoxFlat.new()
+
+	normal_style.bg_color = Color("#25203A")
+
+	normal_style.border_color = PURPLE
+
+	normal_style.border_width_left = 2
+	normal_style.border_width_right = 2
+	normal_style.border_width_top = 2
+	normal_style.border_width_bottom = 2
+
+	normal_style.corner_radius_top_left = 8
+	normal_style.corner_radius_top_right = 8
+	normal_style.corner_radius_bottom_left = 8
+	normal_style.corner_radius_bottom_right = 8
+
+
+	var hover_style: StyleBoxFlat = normal_style.duplicate()
+
+	hover_style.bg_color = Color("#332A4D")
+
+	hover_style.border_color = PURPLE_LIGHT
+
+
+	button.add_theme_stylebox_override(
+		"normal",
+		normal_style
+	)
+
+	button.add_theme_stylebox_override(
+		"hover",
+		hover_style
+	)
+
+	button.add_theme_font_size_override(
+		"font_size",
+		20
+	)
+
+	button.add_theme_color_override(
+		"font_color",
+		WHITE
+	)
+
+	_apply_final_retro_font(
+		button
+	)
+
+	button.pressed.connect(
+		func() -> void:
+
+			layer.queue_free()
+
+			tutorial_finished = true
+
+			if timer_panel != null:
+
+				if challenge_type == 3:
+
+					timer_panel.hide()
+
+				else:
+
+					timer_panel.show()
+
+			start_game()
+	)
+
+	panel.add_child(button)
+
+
+# =========================================================
 # READY
 # =========================================================
 
 func _ready() -> void:
+
+	# Semente nova a cada execução para as sequências não ficarem
+	# repetindo o mesmo padrão.
+	randomize()
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
@@ -648,6 +1172,11 @@ func _ready() -> void:
 	# =====================================================
 
 	_create_timer_ui()
+
+	# Nunca mostrar timer por trás das telas de entrada.
+	if timer_panel != null:
+
+		timer_panel.hide()
 
 
 	# =====================================================
@@ -717,7 +1246,7 @@ func _ready() -> void:
 	else:
 
 		tutorial.visible = true
-		tutorial.z_index = 1000
+		tutorial.z_index = 10000
 		tutorial.mouse_filter = Control.MOUSE_FILTER_STOP
 		tutorial.process_mode = Node.PROCESS_MODE_ALWAYS
 
@@ -764,8 +1293,9 @@ func _ready() -> void:
 
 			tutorial_button.text = "COMEÇAR"
 			tutorial_button.visible = true
-			tutorial_button.z_index = 10
+			tutorial_button.z_index = 10001
 			tutorial_button.focus_mode = Control.FOCUS_NONE
+			tutorial_button.process_mode = Node.PROCESS_MODE_ALWAYS
 			tutorial_button.mouse_filter = Control.MOUSE_FILTER_STOP
 			tutorial_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 			tutorial_button.add_theme_font_size_override("font_size", 20)
@@ -779,11 +1309,73 @@ func _ready() -> void:
 
 				tutorial_button.pressed.connect(_on_tutorial_continue)
 
+			if not tutorial_button.gui_input.is_connected(
+				_on_tutorial_button_gui_input
+			):
+
+				tutorial_button.gui_input.connect(
+					_on_tutorial_button_gui_input
+				)
+
+
+		# -----------------------------------------------------
+		# AVISO ESPECÍFICO DO DESAFIO
+		# -----------------------------------------------------
+
+		tutorial_hint_label = Label.new()
+
+		tutorial_hint_label.name = "ChallengeHint"
+
+		tutorial_hint_label.text = _get_tutorial_hint()
+
+		tutorial_hint_label.anchor_left = 0.5
+		tutorial_hint_label.anchor_right = 0.5
+		tutorial_hint_label.anchor_top = 0.5
+		tutorial_hint_label.anchor_bottom = 0.5
+
+		tutorial_hint_label.offset_left = -300
+		tutorial_hint_label.offset_right = 300
+		tutorial_hint_label.offset_top = 265
+		tutorial_hint_label.offset_bottom = 305
+
+		tutorial_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		tutorial_hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+
+		tutorial_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+		tutorial_hint_label.add_theme_font_size_override(
+			"font_size",
+			15
+		)
+
+		tutorial_hint_label.add_theme_color_override(
+			"font_color",
+			PURPLE_LIGHT
+		)
+
+		tutorial_hint_label.add_theme_color_override(
+			"font_outline_color",
+			Color.BLACK
+		)
+
+		tutorial_hint_label.add_theme_constant_override(
+			"outline_size",
+			3
+		)
+
+		tutorial_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tutorial_hint_label.z_index = 15
+
+		tutorial.add_child(tutorial_hint_label)
+
 
 	# =====================================================
 	# ESCURECE O JOGO ATRÁS DO TUTORIAL
+	# Somente o Desafio 1 usa o tutorial original.
 	# =====================================================
-	_create_tutorial_dim_overlay()
+	if challenge_type == 1:
+
+		_create_tutorial_dim_overlay()
 
 
 	# =====================================================
@@ -793,6 +1385,7 @@ func _ready() -> void:
 	current_round = 0
 
 	sequence.clear()
+	planned_sequence.clear()
 
 	player_index = 0
 
@@ -824,10 +1417,48 @@ func _ready() -> void:
 
 
 	# =====================================================
-	# COMEÇA
+	# PREPARA A LÓGICA DO DESAFIO
 	# =====================================================
 
+	_setup_challenge_mode()
+
+
+	# =====================================================
+	# INÍCIO
+	# =====================================================
+	# Enquanto a tela inicial estiver aberta, o Memory Game
+	# não desenha HUD, timer, status ou roda.
 	tutorial_finished = false
+
+	if challenge_type == 1:
+
+		# Desafio 1 usa o tutorial original da cena.
+		if tutorial != null:
+
+			tutorial.visible = true
+
+			tutorial.z_index = 10000
+
+			tutorial.mouse_filter = (
+				Control.MOUSE_FILTER_STOP
+			)
+
+		if tutorial_dim_overlay != null:
+
+			tutorial_dim_overlay.show()
+
+	else:
+
+		# Desafios 2 e 3 usam apenas a intro própria.
+		if tutorial != null:
+
+			tutorial.visible = false
+
+		if tutorial_dim_overlay != null:
+
+			tutorial_dim_overlay.hide()
+
+		_create_challenge_intro()
 
 
 
@@ -849,7 +1480,7 @@ func _create_tutorial_dim_overlay() -> void:
 	)
 	tutorial_dim_overlay.color = Color(0.0, 0.0, 0.0, 0.58)
 	tutorial_dim_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	tutorial_dim_overlay.z_index = 900
+	tutorial_dim_overlay.z_index = 9990
 	tutorial_dim_overlay.process_mode = Node.PROCESS_MODE_ALWAYS
 
 	add_child(tutorial_dim_overlay)
@@ -1166,6 +1797,26 @@ func _input(event: InputEvent) -> void:
 # CONTINUAR TUTORIAL
 # =========================================================
 
+func _on_tutorial_button_gui_input(
+	event: InputEvent
+) -> void:
+
+	if event is InputEventMouseButton:
+
+		var mouse_event: InputEventMouseButton = (
+			event as InputEventMouseButton
+		)
+
+		if (
+			mouse_event.button_index == MOUSE_BUTTON_LEFT
+			and mouse_event.pressed
+		):
+
+			_on_tutorial_continue()
+
+			get_viewport().set_input_as_handled()
+
+
 func _on_tutorial_continue() -> void:
 
 	if tutorial_finished:
@@ -1194,6 +1845,16 @@ func _on_tutorial_continue() -> void:
 	if background != null:
 
 		background.visible = true
+
+	if timer_panel != null:
+
+		if challenge_type == 3:
+
+			timer_panel.hide()
+
+		else:
+
+			timer_panel.show()
 
 	queue_redraw()
 
@@ -1288,6 +1949,8 @@ func start_game() -> void:
 
 	sequence.clear()
 
+	_reset_color_pool()
+
 	player_index = 0
 
 	total_errors = 0
@@ -1305,7 +1968,12 @@ func start_game() -> void:
 	time_left = INITIAL_TIME
 
 	if timer_panel != null:
-		timer_panel.show()
+
+		if challenge_type == 3:
+			timer_panel.hide()
+		else:
+			timer_panel.show()
+
 		timer_panel.scale = Vector2(1.0, 1.0)
 
 	_update_timer_ui()
@@ -1317,6 +1985,47 @@ func start_game() -> void:
 	hovered_button = -1
 
 	flashing_button = -1
+
+
+	# =====================================================
+	# DESAFIO 3 — RECORDAÇÃO PURA
+	# Não mostra sequência.
+	# Não usa timer.
+	# Não usa status de rodada.
+	# =====================================================
+
+	if challenge_type == 3:
+
+		sequence = _get_first_sequence().duplicate()
+
+		if sequence.is_empty():
+
+			status_text = "CONCLUA O DESAFIO 1 PRIMEIRO"
+
+			status_color = ERROR
+
+			game_started = false
+			player_turn = false
+
+			queue_redraw()
+
+			return
+
+		showing_sequence = false
+		player_turn = true
+		timer_running = false
+		player_index = 0
+		hovered_button = -1
+
+		status_text = (
+			"LEMBRE A SEQUÊNCIA DO DESAFIO 1"
+		)
+
+		status_color = PURPLE_LIGHT
+
+		queue_redraw()
+
+		return
 
 
 	next_round()
@@ -1373,12 +2082,17 @@ func next_round() -> void:
 	# ADICIONA COR
 	# =====================================================
 
-	sequence.append(
-		randi_range(
-			0,
-			3
+	if challenge_type == 2 and planned_sequence.size() >= current_round:
+
+		sequence.append(
+			planned_sequence[current_round - 1]
 		)
-	)
+
+	else:
+
+		sequence.append(
+			_get_next_random_color()
+		)
 
 
 	queue_redraw()
@@ -1408,7 +2122,9 @@ func next_round() -> void:
 
 	player_turn = true
 
-	timer_running = true
+	timer_running = (
+		challenge_type != 3
+	)
 
 	player_index = 0
 
@@ -1539,6 +2255,78 @@ func player_selected_color(
 	flash_progress = 0.16
 
 	queue_redraw()
+
+
+	# =====================================================
+	# DESAFIO 3 — ERRO NÃO MOSTRA SEQUÊNCIA
+	# O jogador tenta de memória quantas vezes quiser.
+	# =====================================================
+
+	if challenge_type == 3:
+
+		if color_index == sequence[player_index]:
+
+			player_index += 1
+
+			# Feedback mais claro para o jogador.
+			if player_index < sequence.size():
+
+				status_text = (
+					"✓ CORRETO!\n"
+					+ "POSIÇÃO "
+					+ str(player_index)
+					+ " DE "
+					+ str(sequence.size())
+					+ "  •  CONTINUE A SEQUÊNCIA"
+				)
+
+			else:
+
+				status_text = (
+					"✓ CORRETO!\n"
+					+ "ÚLTIMA POSIÇÃO!  •  SEQUÊNCIA COMPLETA"
+				)
+
+			status_color = SUCCESS
+
+			queue_redraw()
+
+			if player_index >= sequence.size():
+
+				player_turn = false
+				hovered_button = -1
+
+				# win_game() marca game_finished e abre a tela de vitória.
+				win_game()
+
+			return
+
+		else:
+
+			total_errors += 1
+			player_index = 0
+
+			status_text = (
+				"ERRO! VOLTE AO INÍCIO DA SEQUÊNCIA"
+			)
+
+			status_color = ERROR
+
+			queue_redraw()
+
+			await get_tree().create_timer(
+				0.55
+			).timeout
+
+			status_text = (
+				"LEMBRE A SEQUÊNCIA DO DESAFIO 1"
+			)
+
+			status_color = PURPLE_LIGHT
+
+			queue_redraw()
+
+			return
 
 
 	# =====================================================
@@ -1796,6 +2584,25 @@ func win_game() -> void:
 
 	Globals.score += VICTORY_SCORE
 
+	# O DESAFIO 1 é a fonte da memória usada pelo DESAFIO 3.
+	if challenge_type == 1:
+
+		var world: Node = get_tree().current_scene
+
+		if world != null:
+
+			world.set_meta(
+				"memory_first_sequence",
+				sequence.duplicate()
+			)
+
+		# Também guarda em Globals quando existir.
+		if "memory_first_sequence" in Globals:
+
+			Globals.memory_first_sequence = (
+				sequence.duplicate()
+			)
+
 
 	status_text = "MEMÓRIA RECUPERADA!"
 
@@ -1816,15 +2623,14 @@ func win_game() -> void:
 
 
 	# =====================================================
-	# AVISA QUE GANHOU
+	# IMPORTANTE
 	# =====================================================
-
-	await get_tree().create_timer(
-		0.10
-	).timeout
-
-
-	challenge_completed.emit()
+	# NÃO emite challenge_completed aqui.
+	#
+	# A tela final precisa continuar aberta para o jogador
+	# clicar em CONTINUAR. O signal é emitido somente em
+	# continue_after_success().
+	# =====================================================
 
 
 # =========================================================
@@ -1933,52 +2739,54 @@ func draw_top_hud() -> void:
 	# =====================================================
 	# RODADA
 	# =====================================================
+	# O terceiro desafio não mostra número de rodada.
 
-	var round_rect: Rect2 = Rect2(
-		32,
-		28,
-		215,
-		104
-	)
+	if challenge_type != 3:
 
-
-	draw_panel(
-		round_rect
-	)
+		var round_rect: Rect2 = Rect2(
+			32,
+			28,
+			215,
+			104
+		)
 
 
-	draw_text_center(
-		"RODADA",
-		Vector2(
-			139.5,
-			61
-		),
-		18,
-		PURPLE_LIGHT
-	)
+		draw_panel(
+			round_rect
+		)
 
 
-	draw_text_center(
-		str(current_round)
-		+ " / "
-		+ str(TOTAL_ROUNDS),
-		Vector2(
-			139.5,
-			108
-		),
-		30,
-		WHITE
-	)
+		draw_text_center(
+			"RODADA",
+			Vector2(
+				139.5,
+				61
+			),
+			18,
+			PURPLE_LIGHT
+		)
 
+
+		draw_text_center(
+			str(current_round)
+			+ " / "
+			+ str(TOTAL_ROUNDS),
+			Vector2(
+				139.5,
+				108
+			),
+			30,
+			WHITE
+		)
 
 	# =====================================================
 	# TÍTULO
 	# =====================================================
 
 	var title_rect: Rect2 = Rect2(
-		350,
+		350 if challenge_type != 3 else 250,
 		22,
-		width - 700,
+		width - 700 if challenge_type != 3 else width - 500,
 		108
 	)
 
@@ -2404,6 +3212,11 @@ func draw_number_tag(
 
 func draw_status_panel() -> void:
 
+	# No terceiro desafio, não mostramos o painel/status de rodada.
+	if challenge_type == 3:
+
+		return
+
 	var width: float = size.x
 
 	var height: float = size.y
@@ -2470,12 +3283,13 @@ func draw_status_panel() -> void:
 	):
 
 		var completed: bool = (
-			i < current_round - 1
+			i < current_round
 		)
 
 
 		var current: bool = (
-			i == current_round - 1
+			not game_finished
+		and i == current_round - 1
 		)
 
 
@@ -2772,6 +3586,114 @@ func draw_text_center(
 # TELA FINAL
 # =========================================================
 
+func _format_sequence_for_display(
+	values: Array[int]
+) -> String:
+
+	var names: Array[String] = [
+		"VERMELHO",
+		"AZUL",
+		"VERDE",
+		"AMARELO"
+	]
+
+	var result: String = ""
+
+	for i: int in range(values.size()):
+
+		if i > 0:
+
+			result += "  →  "
+
+		var index: int = values[i]
+
+		if index >= 0 and index < names.size():
+
+			result += str(index + 1)
+			result += " "
+			result += names[index]
+
+		else:
+
+			result += "?"
+
+
+	return result
+
+
+func _create_final_sequence_label(
+	parent: Control,
+	panel_width: float
+) -> Label:
+
+	var sequence_label: Label = Label.new()
+
+	sequence_label.name = "MemorySequence"
+
+	sequence_label.text = (
+		"ORDEM DA SEQUÊNCIA\n"
+		+ _format_sequence_for_display(
+			sequence
+		)
+	)
+
+	sequence_label.position = Vector2(
+		25,
+		125
+	)
+
+	sequence_label.size = Vector2(
+		panel_width - 50,
+		48
+	)
+
+	sequence_label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	sequence_label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+	sequence_label.autowrap_mode = (
+		TextServer.AUTOWRAP_WORD_SMART
+	)
+
+	sequence_label.add_theme_font_size_override(
+		"font_size",
+		9
+	)
+
+	sequence_label.add_theme_color_override(
+		"font_color",
+		RETRO_MAGENTA
+	)
+
+	sequence_label.add_theme_color_override(
+		"font_outline_color",
+		RETRO_BLACK
+	)
+
+	sequence_label.add_theme_constant_override(
+		"outline_size",
+		2
+	)
+
+	sequence_label.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
+	)
+
+	_apply_final_retro_font(
+		sequence_label
+	)
+
+	parent.add_child(
+		sequence_label
+	)
+
+	return sequence_label
+
+
 func show_final_screen(
 	success: bool
 ) -> void:
@@ -2800,10 +3722,15 @@ func show_final_screen(
 
 
 	# =====================================================
-	# PAUSA DO JOGO
+	# TELA FINAL
 	# =====================================================
-
-	get_tree().paused = true
+	#
+	# NÃO pausamos a SceneTree aqui.
+	# A própria tela final bloqueia o mouse e o jogo já está
+	# com timer/player desativados. Isso mantém os botões
+	# CONTINUAR / TENTAR NOVAMENTE sempre clicáveis e evita
+	# travamentos na transição.
+	# =====================================================
 
 
 	# =====================================================
@@ -2908,11 +3835,11 @@ func show_final_screen(
 
 	final_panel.offset_left = -330
 
-	final_panel.offset_top = -190
+	final_panel.offset_top = -175
 
 	final_panel.offset_right = 330
 
-	final_panel.offset_bottom = 190
+	final_panel.offset_bottom = 175
 
 	final_panel.mouse_filter = (
 		Control.MOUSE_FILTER_STOP
@@ -2975,34 +3902,6 @@ func show_final_screen(
 
 	final_overlay.add_child(
 		final_panel
-	)
-
-
-	# =====================================================
-	# LINHA
-	# =====================================================
-
-	var top_line: ColorRect = ColorRect.new()
-
-	top_line.position = Vector2(
-		28,
-		18
-	)
-
-	top_line.size = Vector2(
-		604,
-		2
-	)
-
-	top_line.color = RETRO_MAGENTA
-
-	top_line.mouse_filter = (
-		Control.MOUSE_FILTER_IGNORE
-	)
-
-
-	final_panel.add_child(
-		top_line
 	)
 
 
@@ -3104,7 +4003,9 @@ func show_final_screen(
 	if success:
 
 		title_label.text = (
-			"✦  DESAFIO 1 CONCLUÍDO!  ✦"
+			"✦  DESAFIO "
+			+ str(challenge_type)
+			+ " CONCLUÍDO!  ✦"
 		)
 
 	else:
@@ -3116,12 +4017,12 @@ func show_final_screen(
 
 	title_label.position = Vector2(
 		20,
-		62
+		30
 	)
 
 	title_label.size = Vector2(
 		620,
-		52
+		58
 	)
 
 	title_label.horizontal_alignment = (
@@ -3172,18 +4073,35 @@ func show_final_screen(
 
 	var stage_label: Label = Label.new()
 
-	stage_label.text = (
-		"DESAFIO DE MEMÓRIA  •  5 RODADAS"
-	)
+	if challenge_type == 3:
+
+		stage_label.text = (
+			"DESAFIO DE MEMÓRIA  •  RECORDAÇÃO"
+		)
+
+	elif success and challenge_type == 1:
+
+		stage_label.text = (
+			"DESAFIO DE MEMÓRIA  •  5 RODADAS"
+			+ "\n"
+			+ "LEMBRE-SE: A ORDEM DAS CORES SERÁ IMPORTANTE MAIS TARDE."
+		)
+
+	else:
+
+		stage_label.text = (
+			"DESAFIO DE MEMÓRIA  •  5 RODADAS"
+		)
+
 
 	stage_label.position = Vector2(
 		40,
-		108
+		88
 	)
 
 	stage_label.size = Vector2(
 		580,
-		30
+		42 if success and challenge_type == 1 else 28
 	)
 
 	stage_label.horizontal_alignment = (
@@ -3196,7 +4114,7 @@ func show_final_screen(
 
 	stage_label.add_theme_font_size_override(
 		"font_size",
-		13
+		11 if success and challenge_type == 1 else 13
 	)
 
 	stage_label.add_theme_color_override(
@@ -3229,6 +4147,18 @@ func show_final_screen(
 
 
 	# =====================================================
+	# ORDEM DA SEQUÊNCIA
+	# Aparece em TODAS as telas de vitória.
+	# =====================================================
+
+	if success:
+
+		_create_final_sequence_label(
+			final_panel,
+			660.0
+		)
+
+	# =====================================================
 	# ERROS
 	# Fica acima do SCORE na vitória.
 	# Na derrota continua aparecendo normalmente.
@@ -3237,13 +4167,13 @@ func show_final_screen(
 	var error_label: Label = Label.new()
 
 	error_label.text = (
-		"ERROS COMETIDOS      "
+		"ERROS  "
 		+ str(total_errors)
 	)
 
 	error_label.position = Vector2(
 		40,
-		145
+		212 if success else 155
 	)
 
 	error_label.size = Vector2(
@@ -3261,7 +4191,7 @@ func show_final_screen(
 
 	error_label.add_theme_font_size_override(
 		"font_size",
-		22
+		20
 	)
 
 	error_label.add_theme_color_override(
@@ -3308,7 +4238,7 @@ func show_final_screen(
 
 		score_label.position = Vector2(
 			40,
-			205
+			262
 		)
 
 		score_label.size = Vector2(
@@ -3326,7 +4256,7 @@ func show_final_screen(
 
 		score_label.add_theme_font_size_override(
 			"font_size",
-			20
+			17
 		)
 
 		score_label.add_theme_color_override(
@@ -3379,7 +4309,10 @@ func show_final_screen(
 
 	message_label.position = Vector2(
 		40,
-		250
+		275
+	) if not success else Vector2(
+		40,
+		345
 	)
 
 	message_label.size = Vector2(
@@ -3397,7 +4330,7 @@ func show_final_screen(
 
 	message_label.add_theme_font_size_override(
 		"font_size",
-		16
+		13
 	)
 
 	message_label.add_theme_color_override(
@@ -3432,30 +4365,6 @@ func show_final_screen(
 	# LINHA INFERIOR
 	# =====================================================
 
-	var bottom_line: ColorRect = ColorRect.new()
-
-	bottom_line.position = Vector2(
-		28,
-		276
-	)
-
-	bottom_line.size = Vector2(
-		604,
-		2
-	)
-
-	bottom_line.color = RETRO_PURPLE
-
-	bottom_line.mouse_filter = (
-		Control.MOUSE_FILTER_IGNORE
-	)
-
-
-	final_panel.add_child(
-		bottom_line
-	)
-
-
 	# =====================================================
 	# BOTÃO
 	# =====================================================
@@ -3482,7 +4391,7 @@ func show_final_screen(
 
 	final_button.position = Vector2(
 		175,
-		300
+		285
 	)
 
 	final_button.size = Vector2(
@@ -3795,7 +4704,7 @@ func close_result_screen() -> void:
 
 	result_screen_active = false
 
-
+	# Segurança: o Memory Game nunca deve deixar a SceneTree pausada.
 	get_tree().paused = false
 
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -3850,6 +4759,10 @@ func restart_game() -> void:
 	timer_running = false
 
 	time_left = INITIAL_TIME
+
+	planned_sequence.clear()
+
+	_setup_challenge_mode()
 
 	status_text = "PREPARE-SE"
 
