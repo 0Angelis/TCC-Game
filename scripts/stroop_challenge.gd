@@ -2871,6 +2871,19 @@ func _award_attention_fragment() -> void:
 
 func _complete_challenge() -> void:
 
+	# =====================================================
+	# RECOMPENSA DE SCORE
+	# Cada desafio concluído vale 1500 pontos.
+	# =====================================================
+
+	Globals.score += 1500
+
+	print(
+		"SCORE +1500 | SCORE ATUAL: ",
+		Globals.score
+	)
+
+
 	_award_attention_fragment()
 
 
@@ -3346,19 +3359,20 @@ func _show_final_screen(
 	)
 
 	# =====================================================
-	# FRAGMENTO / ERROS
+	# ERROS
+	# Fica acima do SCORE na tela de vitória.
 	# =====================================================
 
 	final_error_label = Label.new()
 
 	final_error_label.text = (
-		"ERROS      "
+		"ERROS  "
 		+ str(error_count)
 	)
 
 	final_error_label.position = Vector2(
 		40,
-		196
+		190
 	)
 
 	final_error_label.size = Vector2(
@@ -3402,6 +3416,68 @@ func _show_final_screen(
 		final_error_label
 	)
 
+
+	# =====================================================
+	# SCORE
+	# Só aparece na vitória.
+	# Na derrota não mostra SCORE.
+	# =====================================================
+
+	if success:
+
+		var score_label := Label.new()
+
+		score_label.text = (
+			"SCORE  +1500"
+		)
+
+		score_label.position = Vector2(
+			40,
+			232
+		)
+
+		score_label.size = Vector2(
+			580,
+			42
+		)
+
+		score_label.horizontal_alignment = (
+			HORIZONTAL_ALIGNMENT_CENTER
+		)
+
+		score_label.vertical_alignment = (
+			VERTICAL_ALIGNMENT_CENTER
+		)
+
+		score_label.add_theme_font_size_override(
+			"font_size",
+			20
+		)
+
+		score_label.add_theme_color_override(
+			"font_color",
+			RETRO_GOLD
+		)
+
+		score_label.add_theme_color_override(
+			"font_outline_color",
+			RETRO_BLACK
+		)
+
+		score_label.add_theme_constant_override(
+			"outline_size",
+			3
+		)
+
+		score_label.mouse_filter = (
+			Control.MOUSE_FILTER_IGNORE
+		)
+
+		final_panel.add_child(
+			score_label
+		)
+
+
 	# =====================================================
 	# MENSAGEM DO FRAGMENTO
 	# =====================================================
@@ -3422,7 +3498,7 @@ func _show_final_screen(
 
 	fragment_info_label.position = Vector2(
 		40,
-		246
+		268
 	)
 
 	fragment_info_label.size = Vector2(
@@ -3474,7 +3550,7 @@ func _show_final_screen(
 
 	bottom_line.position = Vector2(
 		28,
-		276
+		300
 	)
 
 	bottom_line.size = Vector2(
@@ -3516,7 +3592,7 @@ func _show_final_screen(
 
 	final_enter_button.position = Vector2(
 		175,
-		300
+		315
 	)
 
 	final_enter_button.size = Vector2(

@@ -1331,7 +1331,7 @@ position_smoothing_enabled = true
 position = Vector2(487, 347)
 
 [node name="warning_sign" type="Node2D" parent="warning" unique_id=1771737388]
-position = Vector2(-289, 126)
+position = Vector2(-289, 121)
 script = ExtResource("32_h8mkt")
 dialog_texts = Array[String](["Espera... onde eu estou?", "O portal me trouxe até aqui...", "Esse lugar é completamente diferente do meu lar.", "Parece que cada portal está me levando para um lugar ainda mais distante.", "Mas, se o portal me trouxe até aqui, deve existir um motivo."])
 

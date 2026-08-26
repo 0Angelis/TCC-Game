@@ -1354,7 +1354,7 @@ text = "0/5"
 position = Vector2(487, 346)
 
 [node name="warning_sign2" type="Node2D" parent="warning" unique_id=1454553200]
-position = Vector2(-375, 475)
+position = Vector2(-375, 473)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Onde eu estou...?", "Como eu volto pra casa?", "Talvez esses caminhos tenham alguma pista..."])
 
