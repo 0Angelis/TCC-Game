@@ -867,14 +867,14 @@ func _get_tutorial_hint() -> String:
 
 		2:
 			return (
-				"NOVA SEQUÊNCIA. "
+				"NOVA SEQUÊNCIA.\n"
 				+ "A ORDEM DAS CORES SERÁ DIFERENTE."
 			)
 
 		3:
 			return (
-				"LEMBRE DA ORDEM DAS CORES DO DESAFIO 1. "
-				+ "ESSA MESMA SEQUÊNCIA É A QUE VOCÊ DEVE REPETIR AGORA. "
+				"LEMBRE DA ORDEM DAS CORES DO DESAFIO 1.\n"
+				+ "ESSA MESMA SEQUÊNCIA É A QUE VOCÊ DEVE REPETIR AGORA.\n"
 				+ "NENHUMA COR SERÁ MOSTRADA."
 			)
 
@@ -886,7 +886,34 @@ func _get_tutorial_hint() -> String:
 # Sem tutorial de COMO JOGAR.
 # =========================================================
 
+func _start_challenge_intro() -> void:
+
+	if tutorial_finished:
+		return
+
+	tutorial_finished = true
+
+	var intro_layer: CanvasLayer = get_node_or_null(
+		"ChallengeIntroLayer"
+	) as CanvasLayer
+
+	if intro_layer != null:
+		intro_layer.queue_free()
+
+	if timer_panel != null:
+		if challenge_type == 3:
+			timer_panel.hide()
+		else:
+			timer_panel.show()
+
+	start_game()
+
+
 func _create_challenge_intro() -> void:
+
+	# Busca a mesma fonte retrô usada nas telas de vitória/derrota
+	# ANTES de criar os elementos da introdução dos desafios 2 e 3.
+	_get_final_retro_font()
 
 	var layer: CanvasLayer = CanvasLayer.new()
 
@@ -1043,7 +1070,7 @@ func _create_challenge_intro() -> void:
 
 
 	_apply_final_retro_font(
-		title
+		subtitle
 	)
 
 	panel.add_child(subtitle)
@@ -1120,23 +1147,7 @@ func _create_challenge_intro() -> void:
 	)
 
 	button.pressed.connect(
-		func() -> void:
-
-			layer.queue_free()
-
-			tutorial_finished = true
-
-			if timer_panel != null:
-
-				if challenge_type == 3:
-
-					timer_panel.hide()
-
-				else:
-
-					timer_panel.show()
-
-			start_game()
+		_start_challenge_intro
 	)
 
 	panel.add_child(button)
@@ -1621,11 +1632,29 @@ func _input(event: InputEvent) -> void:
 
 
 	# =====================================================
-	# TUTORIAL ABERTO:
-	# somente ENTER/ENTER DO TECLADO NUMÉRICO inicia.
-	# 1-4 e mouse não afetam o mini-game enquanto a tela
-	# de tutorial estiver aberta.
-	# O clique do botão continua funcionando normalmente.
+	# TELAS INICIAIS DOS DESAFIOS 2 E 3
+	# ENTER também inicia a partir dessa tela.
+	# =====================================================
+	if not tutorial_finished and challenge_type != 1:
+
+		if event is InputEventKey:
+
+			var intro_key: InputEventKey = event as InputEventKey
+
+			if intro_key.pressed and not intro_key.echo:
+
+				if (
+					intro_key.keycode == KEY_ENTER
+					or intro_key.keycode == KEY_KP_ENTER
+				):
+
+					_start_challenge_intro()
+					get_viewport().set_input_as_handled()
+
+		return
+
+	# =====================================================
+	# TUTORIAL DO DESAFIO 1
 	# =====================================================
 	if not tutorial_finished:
 
@@ -2272,7 +2301,7 @@ func player_selected_color(
 			if player_index < sequence.size():
 
 				status_text = (
-					"✓ CORRETO!\n"
+					"CORRETO! \n"
 					+ "POSIÇÃO "
 					+ str(player_index)
 					+ " DE "
@@ -2927,7 +2956,7 @@ func draw_memory_wheel(
 
 
 	draw_text_center(
-		"SUA VEZ",
+		"ZERO",
 		center + Vector2(
 			0,
 			36
@@ -3661,7 +3690,7 @@ func _create_final_sequence_label(
 
 	sequence_label.add_theme_font_size_override(
 		"font_size",
-		9
+		10
 	)
 
 	sequence_label.add_theme_color_override(
@@ -3835,11 +3864,11 @@ func show_final_screen(
 
 	final_panel.offset_left = -330
 
-	final_panel.offset_top = -175
+	final_panel.offset_top = -200
 
 	final_panel.offset_right = 330
 
-	final_panel.offset_bottom = 175
+	final_panel.offset_bottom = 200
 
 	final_panel.mouse_filter = (
 		Control.MOUSE_FILTER_STOP
@@ -4173,12 +4202,12 @@ func show_final_screen(
 
 	error_label.position = Vector2(
 		40,
-		212 if success else 155
+		190 if success else 145
 	)
 
 	error_label.size = Vector2(
 		580,
-		70
+		40
 	)
 
 	error_label.horizontal_alignment = (
@@ -4238,12 +4267,12 @@ func show_final_screen(
 
 		score_label.position = Vector2(
 			40,
-			262
+			232
 		)
 
 		score_label.size = Vector2(
 			580,
-			42
+			36
 		)
 
 		score_label.horizontal_alignment = (
@@ -4309,10 +4338,10 @@ func show_final_screen(
 
 	message_label.position = Vector2(
 		40,
-		275
+		205
 	) if not success else Vector2(
 		40,
-		345
+		270
 	)
 
 	message_label.size = Vector2(
@@ -4391,7 +4420,7 @@ func show_final_screen(
 
 	final_button.position = Vector2(
 		175,
-		285
+		325 if success else 265
 	)
 
 	final_button.size = Vector2(
