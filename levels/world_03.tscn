@@ -1485,7 +1485,7 @@ position = Vector2(-2, 0)
 script = ExtResource("34_hfeof")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="MemoryTrigger" unique_id=73237150]
-position = Vector2(110, 581)
+position = Vector2(648, 96)
 shape = SubResource("CircleShape2D_sob1t")
 
 [node name="Desafio" type="AnimatedSprite2D" parent="MemoryTrigger/CollisionShape2D" unique_id=1101889533]
@@ -1504,7 +1504,7 @@ position = Vector2(-4, 0)
 script = ExtResource("34_hfeof")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="MemoryTrigger2" unique_id=1738619861]
-position = Vector2(148, 579)
+position = Vector2(1474, 224)
 shape = SubResource("CircleShape2D_sob1t")
 
 [node name="Desafio" type="AnimatedSprite2D" parent="MemoryTrigger2/CollisionShape2D" unique_id=698630424]
@@ -1523,7 +1523,7 @@ position = Vector2(-6, 0)
 script = ExtResource("34_hfeof")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="MemoryTrigger3" unique_id=884533822]
-position = Vector2(256, 581)
+position = Vector2(2660, 368)
 shape = SubResource("CircleShape2D_sob1t")
 
 [node name="Desafio" type="AnimatedSprite2D" parent="MemoryTrigger3/CollisionShape2D" unique_id=1395417280]
@@ -1640,7 +1640,7 @@ tipo_fragmento = "Memoria"
 position = Vector2(1096, 504)
 
 [node name="goal" parent="." unique_id=1383269650 instance=ExtResource("24_rja6n")]
-position = Vector2(2409, 1094)
+position = Vector2(3054, 752)
 next_level = "res://levels/world_02.tscn"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
