@@ -458,6 +458,10 @@ const RETRO_BLACK: Color = Color("#0A0610")
 
 var background: CanvasItem = null
 
+var background_1: CanvasItem = null
+var background_2: CanvasItem = null
+var background_3: CanvasItem = null
+
 var old_ui: Control = null
 
 var tutorial: Control = null
@@ -882,6 +886,65 @@ func _get_tutorial_hint() -> String:
 
 
 # =========================================================
+# BACKGROUND DO DESAFIO ATUAL
+# =========================================================
+
+func _setup_challenge_background() -> void:
+
+	# Procura os três backgrounds existentes na cena.
+	background_1 = find_child(
+		"BG 1",
+		true,
+		false
+	) as CanvasItem
+
+	background_2 = find_child(
+		"BG 2",
+		true,
+		false
+	) as CanvasItem
+
+	background_3 = find_child(
+		"BG 3",
+		true,
+		false
+	) as CanvasItem
+
+	# Esconde todos primeiro para evitar sobreposição.
+	if background_1 != null:
+		background_1.visible = false
+		background_1.z_index = -20
+
+	if background_2 != null:
+		background_2.visible = false
+		background_2.z_index = -20
+
+	if background_3 != null:
+		background_3.visible = false
+		background_3.z_index = -20
+
+	# Seleciona apenas o BG correspondente ao desafio.
+	match challenge_type:
+
+		1:
+			background = background_1
+
+		2:
+			background = background_2
+
+		3:
+			background = background_3
+
+		_:
+			background = background_1
+
+	# Ativa somente o escolhido.
+	if background != null:
+		background.visible = true
+		background.z_index = -20
+
+
+# =========================================================
 # INTRO DOS DESAFIOS 2 E 3
 # Sem tutorial de COMO JOGAR.
 # =========================================================
@@ -1200,32 +1263,13 @@ func _ready() -> void:
 
 
 	# =====================================================
-	# BACKGROUND
+	# BACKGROUNDS DOS 3 DESAFIOS
+	# Desafio 1 = BG 1
+	# Desafio 2 = BG 2
+	# Desafio 3 = BG 3
 	# =====================================================
 
-	background = find_child(
-		"BG 1",
-		true,
-		false
-	) as CanvasItem
-
-
-	if background == null:
-
-		background = find_child(
-			"BG",
-			true,
-			false
-		) as CanvasItem
-
-
-	if background != null:
-
-		# O BG continua visível. Ele será apenas escurecido
-		# por uma camada por cima enquanto o tutorial estiver aberto.
-		background.visible = true
-
-		background.z_index = -20
+	_setup_challenge_background()
 
 
 	# =====================================================

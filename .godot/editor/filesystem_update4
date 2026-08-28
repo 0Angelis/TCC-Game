@@ -4,3 +4,7 @@ res://shaders/transition.gdshader
 res://frag/frag_atencao.tres
 res://frag/frag_memoria.tres
 res://frag/frag_raciocinio.tres
+res://scenes/memory_game.tscn
+res://scripts/memory_game.gd
+res://actors/brabao.tscn
+res://scripts/brabao.gd
