@@ -42,6 +42,12 @@ var attack_damage_cooldown: float = 0.0
 const STOMP_VERTICAL_DISTANCE: float = 24.0
 const STOMP_HORIZONTAL_DISTANCE: float = 28.0
 
+# Força do pulo depois de pisar no urso
+const STOMP_BOUNCE_FORCE: float = -220.0
+
+# Pequeno empurrão lateral depois do pisão
+const STOMP_BOUNCE_X: float = 35.0
+
 # Impede vários pisões enquanto o player
 # continua sobre a cabeça.
 var player_on_head: bool = false
@@ -515,11 +521,24 @@ func verificar_colisao_corpo() -> void:
 		)
 
 
-		# Player por cima = não dá dano
+		# ==========================================
+		# PLAYER POR CIMA
+		# ==========================================
+		#
+		# Se o jogador estiver em cima do urso,
+		# não recebe dano pelo corpo.
+		#
+		# O dano do urso nesse caso é o pisão.
+		# ==========================================
+
 		if normal.y < -0.5:
 
 			return
 
+
+		# ==========================================
+		# PLAYER PELA LATERAL
+		# ==========================================
 
 		if abs(normal.x) > 0.5:
 
@@ -528,7 +547,6 @@ func verificar_colisao_corpo() -> void:
 				dar_dano_no_player(
 					other_body as CharacterBody2D
 				)
-
 
 			return
 
@@ -1094,12 +1112,6 @@ func _on_hitbox_body_exited(
 # ==========================================
 # VERIFICAR PLAYER NA CABEÇA
 # ==========================================
-#
-# Isso resolve o caso em que o player entra
-# na hitbox enquanto está caindo, mas chega
-# parado e continua em cima.
-#
-# ==========================================
 
 func verificar_player_na_cabeca() -> void:
 
@@ -1144,6 +1156,22 @@ func verificar_player_na_cabeca() -> void:
 
 
 	if player_on_head:
+
+		# ==========================================
+		# GARANTE QUE O PLAYER NÃO FIQUE
+		# PARADO EM CIMA DO URSO
+		# ==========================================
+
+		if player is CharacterBody2D:
+
+			var player_body: CharacterBody2D = (
+				player as CharacterBody2D
+			)
+
+			if player_body.velocity.y > -40.0:
+
+				player_body.velocity.y = STOMP_BOUNCE_FORCE
+
 		return
 
 
@@ -1210,12 +1238,24 @@ func pisar_no_urso() -> void:
 			)
 
 
-			player_body.velocity.y = -180.0
+			# ==========================================
+			# FORÇA O PLAYER PARA CIMA
+			# ==========================================
+
+			player_body.velocity.y = STOMP_BOUNCE_FORCE
 
 
-			# pequeno afastamento lateral
+			# Pequeno afastamento lateral
+
+			var bounce_direction: float = 1.0
+
+			if player_body.global_position.x < global_position.x:
+
+				bounce_direction = -1.0
+
+
 			player_body.velocity.x += (
-				-direction * 20.0
+				bounce_direction * STOMP_BOUNCE_X
 			)
 
 
@@ -1260,9 +1300,11 @@ func reagir_ao_dano() -> void:
 		animated_sprite.position
 	)
 
+
 	var original_scale: Vector2 = (
 		animated_sprite.scale
 	)
+
 
 	var original_rotation: float = (
 		animated_sprite.rotation
@@ -1539,6 +1581,7 @@ func matar_urso() -> void:
 	var original_position: Vector2 = (
 		animated_sprite.position
 	)
+
 
 	var original_scale: Vector2 = (
 		animated_sprite.scale

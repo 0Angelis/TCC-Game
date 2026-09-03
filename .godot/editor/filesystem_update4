@@ -1,0 +1,8 @@
+res://levels/world_03.tscn
+res://tema/new_theme.tres
+res://shaders/transition.gdshader
+res://frag/frag_atencao.tres
+res://frag/frag_memoria.tres
+res://frag/frag_raciocinio.tres
+res://scripts/urso.gd
+res://levels/loja.tscn
