@@ -1694,9 +1694,10 @@ position = Vector2(3150, 752)
 next_level = "res://levels/world_02.tscn"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
-visible = false
 zoom = Vector2(2.5, 2.5)
 limit_left = 0
+limit_top = -100
+limit_bottom = 820
 position_smoothing_enabled = true
 
 [node name="warning" type="Node2D" parent="." unique_id=1954291522]

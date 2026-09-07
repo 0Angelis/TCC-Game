@@ -963,6 +963,7 @@ centered = false
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
 zoom = Vector2(2.5, 2.5)
 limit_left = 0
+limit_bottom = 800
 position_smoothing_enabled = true
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]

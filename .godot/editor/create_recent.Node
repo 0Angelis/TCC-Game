@@ -1,4 +1,5 @@
 AnimatedSprite2D
+Node2D
 CharacterBody2D
 Sprite2D
 CollisionShape2D
@@ -7,7 +8,6 @@ TextureRect
 ColorRect
 ParallaxBackground
 Control
-Node2D
 Node
 CenterContainer
 HBoxContainer
