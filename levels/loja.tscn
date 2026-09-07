@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cu2qwong3kyvc" path="res://scripts/world_01.gd" id="1_lhykt"]
 [ext_resource type="PackedScene" uid="uid://cvence5b8xxpw" path="res://prefabs/pause_menu.tscn" id="2_2ts34"]
 [ext_resource type="Texture2D" uid="uid://ciui18xao3bit" path="res://assets/Comandos/Red!Assets.png" id="3_tnfrt"]
+[ext_resource type="PackedScene" uid="uid://ct4nxdqyghxxn" path="res://prefabs/coin.tscn" id="4_7hy5n"]
 [ext_resource type="Texture2D" uid="uid://0fyk46lijo1j" path="res://assets/Seasonal Tilesets/1 - Grassland/Terrain (16 x 16).png" id="4_a0a5v"]
 [ext_resource type="Texture2D" uid="uid://de6sg4txwpppx" path="res://assets/Sprite Pack 5/9 - Wispy Fire/Idle_Flicker_(32 x 32).png" id="4_de6gb"]
 [ext_resource type="Texture2D" uid="uid://c5wxdxmb13d41" path="res://assets/Seasonal Tilesets/1 - Grassland/Grassland_entities (16 x 16).png" id="5_ct18h"]
@@ -27,6 +28,7 @@
 [ext_resource type="Texture2D" uid="uid://diern7layrefr" path="res://assets/Mini FX, Items & UI/Common Pick-ups/00_Coin-Sprites.png" id="30_pipjp"]
 [ext_resource type="Texture2D" uid="uid://f86ocwm53s20" path="res://assets/Mini FX, Items & UI/Common Pick-ups/01_Coin-Sprites.png" id="31_vvuf5"]
 [ext_resource type="Texture2D" uid="uid://dbi2ulj2dt0dn" path="res://assets/Mini FX, Items & UI/Common Pick-ups/02_Coin-Sprites.png" id="32_s3uk8"]
+[ext_resource type="Script" uid="uid://8a4hiqpjdol7" path="res://scripts/lojinha.gd" id="33_fygsc"]
 [ext_resource type="Texture2D" uid="uid://v36h3di4vd1d" path="res://assets/Mini FX, Items & UI/Common Pick-ups/03_Coin-Sprites.png" id="33_iixm4"]
 [ext_resource type="FontFile" uid="uid://ciyqtt45x1jtc" path="res://assets/Fontes/RevMiniPixel.ttf" id="34_axgu8"]
 [ext_resource type="Texture2D" uid="uid://bdai1dxok1ply" path="res://assets/Mini FX, Items & UI/Common Pick-ups/Health_Kit (16 x 16).png" id="35_y5vpw"]
@@ -102,6 +104,9 @@ animations = [{
 "name": &"default",
 "speed": 5.0
 }]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5t4lp"]
+size = Vector2(44, 59)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4tjap"]
 atlas = ExtResource("4_de6gb")
@@ -1376,7 +1381,7 @@ shader_parameter/threshold = 0.0
 shader_parameter/line_color_a = Color(0.5411765, 0.2, 1, 1)
 shader_parameter/line_color_b = Color(0, 0, 0, 1)
 
-[node name="World-03" type="Node2D" unique_id=540749280]
+[node name="loja" type="Node2D" unique_id=540749280]
 position = Vector2(2, 0)
 script = ExtResource("1_lhykt")
 
@@ -1392,6 +1397,138 @@ scale = Vector2(0.016, 0.016)
 sprite_frames = SubResource("SpriteFrames_4e1o6")
 autoplay = "default"
 
+[node name="lojinha" type="Area2D" parent="." unique_id=2106371613]
+position = Vector2(-2, 0)
+script = ExtResource("33_fygsc")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="lojinha" unique_id=7484785]
+position = Vector2(488, 708.5)
+shape = SubResource("RectangleShape2D_5t4lp")
+
+[node name="coins" type="TileMap" parent="." unique_id=480792775]
+position = Vector2(3268, 509)
+format = 2
+
+[node name="coin" parent="coins" unique_id=549563926 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1990, -109)
+
+[node name="coin2" parent="coins" unique_id=743477279 instance=ExtResource("4_7hy5n")]
+position = Vector2(-3078, 67)
+
+[node name="coin3" parent="coins" unique_id=1028704339 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1990, -149)
+
+[node name="coin4" parent="coins" unique_id=1166722450 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2430, 3)
+
+[node name="coin5" parent="coins" unique_id=1265521115 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2498, 220)
+
+[node name="coin6" parent="coins" unique_id=1749015031 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2450, 213)
+
+[node name="coin7" parent="coins" unique_id=934335076 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1990, -69)
+
+[node name="coin8" parent="coins" unique_id=874173436 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2534, 218)
+
+[node name="coin9" parent="coins" unique_id=1950858522 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2277, 211)
+
+[node name="coin10" parent="coins" unique_id=1235269180 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1118, 51)
+
+[node name="coin11" parent="coins" unique_id=986294520 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2558, 67)
+
+[node name="coin14" parent="coins" unique_id=777594586 instance=ExtResource("4_7hy5n")]
+position = Vector2(-3222, -245)
+
+[node name="coin24" parent="coins" unique_id=314959809 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2546, 213)
+
+[node name="coin25" parent="coins" unique_id=419964123 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2469, 211)
+
+[node name="coin26" parent="coins" unique_id=190629607 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2434, 220)
+
+[node name="coin13" parent="coins" unique_id=1224615981 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2494, 35)
+
+[node name="coin12" parent="coins" unique_id=438007643 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2498, 213)
+
+[node name="coin15" parent="coins" unique_id=324967879 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2455, 208)
+
+[node name="coin16" parent="coins" unique_id=1836781845 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2206, -13)
+
+[node name="coin17" parent="coins" unique_id=1989395662 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2562, 220)
+
+[node name="coin18" parent="coins" unique_id=1350416115 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2559, 208)
+
+[node name="coin19" parent="coins" unique_id=1962675501 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2530, 212)
+
+[node name="coin20" parent="coins" unique_id=1352187344 instance=ExtResource("4_7hy5n")]
+position = Vector2(-270, 19)
+
+[node name="coin36" parent="coins" unique_id=312113940 instance=ExtResource("4_7hy5n")]
+position = Vector2(-998, 51)
+
+[node name="coin37" parent="coins" unique_id=742397674 instance=ExtResource("4_7hy5n")]
+position = Vector2(58, 67)
+
+[node name="coin38" parent="coins" unique_id=848973140 instance=ExtResource("4_7hy5n")]
+position = Vector2(-206, 131)
+
+[node name="coin39" parent="coins" unique_id=1366167599 instance=ExtResource("4_7hy5n")]
+position = Vector2(-174, 51)
+
+[node name="coin40" parent="coins" unique_id=1877516892 instance=ExtResource("4_7hy5n")]
+position = Vector2(-422, -93)
+
+[node name="coin27" parent="coins" unique_id=758028869 instance=ExtResource("4_7hy5n")]
+position = Vector2(-806, -93)
+
+[node name="coin28" parent="coins" unique_id=383042756 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1606, 51)
+
+[node name="coin29" parent="coins" unique_id=1574353526 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1734, 51)
+
+[node name="coin30" parent="coins" unique_id=733112509 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1862, 51)
+
+[node name="coin31" parent="coins" unique_id=369396489 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1654, -133)
+
+[node name="coin32" parent="coins" unique_id=250661500 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1894, -53)
+
+[node name="coin33" parent="coins" unique_id=864084272 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1894, -213)
+
+[node name="coin34" parent="coins" unique_id=2100360899 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1654, -293)
+
+[node name="coin35" parent="coins" unique_id=1236466815 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1654, -397)
+
+[node name="coin21" parent="coins" unique_id=2146927899 instance=ExtResource("4_7hy5n")]
+position = Vector2(-1918, -413)
+
+[node name="coin22" parent="coins" unique_id=1669659705 instance=ExtResource("4_7hy5n")]
+position = Vector2(-2118, -445)
+
+[node name="coin23" parent="coins" unique_id=1195570025 instance=ExtResource("4_7hy5n")]
+position = Vector2(66, 211)
+
 [node name="vendedor" type="Node2D" parent="." unique_id=1868724572]
 position = Vector2(565, 703)
 
@@ -1400,7 +1537,7 @@ position = Vector2(-78, 0)
 scale = Vector2(0.8124994, 0.7421863)
 sprite_frames = SubResource("SpriteFrames_sob1t")
 autoplay = "default"
-frame_progress = 0.5423396
+frame_progress = 0.40565017
 
 [node name="level" type="TileMap" parent="." unique_id=2135947595]
 position = Vector2(-1, 4)
@@ -1637,7 +1774,7 @@ position = Vector2(1.5, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="warning_sing3" type="Node2D" parent="warning" unique_id=1333985931]
-position = Vector2(-224, -2384)
+position = Vector2(223, -1747)
 script = ExtResource("48_62vpf")
 dialog_texts = Array[String](["O primeiro desafio está logo à frente!", "Derrote o urso para iniciar o desafio.", "Neste minigame, você deverá memorizar uma sequência de cores e repeti-la na ordem correta.", "Preste muita atenção e use sua memória!", "A sequência poderá ser importante mais adiante..."])
 
@@ -1725,6 +1862,7 @@ position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
+visible = false
 script = ExtResource("51_d4u6g")
 
 [node name="color_rect" type="ColorRect" parent="transition" unique_id=1131400237]

@@ -7,3 +7,4 @@ res://frag/frag_raciocinio.tres
 res://levels/world_03.tscn
 res://levels/world_01.tscn
 res://levels/world_00.tscn
+res://scripts/lojinha.gd
