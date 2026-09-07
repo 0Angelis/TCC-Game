@@ -1533,7 +1533,7 @@ position = Vector2(-78, 0)
 scale = Vector2(0.8124994, 0.7421863)
 sprite_frames = SubResource("SpriteFrames_sob1t")
 autoplay = "default"
-frame_progress = 0.57879984
+frame_progress = 0.551134
 
 [node name="level" type="TileMap" parent="." unique_id=2135947595]
 position = Vector2(-1, 4)
