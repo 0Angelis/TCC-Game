@@ -42,8 +42,8 @@ var jogador_na_area: bool = false
 
 var bloqueado: bool = false
 var esperando_soltar_e: bool = false
-var movimento_anterior_player: bool = true
-var movimento_bloqueado_pela_loja: bool = false
+var player_bloqueado_loja: bool = false
+var player_physics_was_enabled: bool = true
 
 
 # =========================================================
@@ -73,19 +73,16 @@ var resultado: Label = null
 var voltar: Button = null
 var comprar: Button = null
 
-var controles: Label = null
-
-
 # =========================================================
 # SELEÇÃO
 #
 # 0 = VOLTAR
 # 1 = COMPRAR
 #
-# COMPRAR começa selecionado
+# Nenhum botão começa selecionado.
 # =========================================================
 
-var selecao: int = 1
+var selecao: int = -1
 
 
 # =========================================================
@@ -102,7 +99,7 @@ var fonte_retro = preload(
 # =========================================================
 
 var textura_vida = preload(
-	"res://assets/Mini FX, Items & UI/Common Pick-ups/Heart_Spin (16 x 16).png"
+	"res://assets/Mini FX, Items & UI/Common Pick-ups/Health_Kit (16 x 16).png"
 )
 
 
@@ -282,11 +279,18 @@ func _process(_delta: float) -> void:
 func _input(event: InputEvent) -> void:
 
 	# =====================================================
-	# PLAYER PRECISA ESTAR DENTRO
+	# MENU
+	# O menu continua recebendo input mesmo depois da conversa.
 	# =====================================================
+	if estado == EstadoLoja.MENU:
+		processar_menu(event)
+		return
 
+
+	# =====================================================
+	# PLAYER PRECISA ESTAR DENTRO PARA ABRIR CONVERSA
+	# =====================================================
 	if not jogador_na_area:
-
 		return
 
 
@@ -304,17 +308,6 @@ func _input(event: InputEvent) -> void:
 	# =====================================================
 
 	if esperando_soltar_e:
-
-		return
-
-
-	# =====================================================
-	# MENU
-	# =====================================================
-
-	if estado == EstadoLoja.MENU:
-
-		processar_menu(event)
 
 		return
 
@@ -502,10 +495,16 @@ func abrir_menu() -> void:
 	# Depois da conversa, o menu abre automaticamente.
 	estado = EstadoLoja.MENU
 
-	selecao = 1
+	# Congela o pinguim completamente enquanto a tela da loja
+	# estiver aberta: sem movimento e sem animação.
+	bloquear_player_para_loja()
 
-	bloquear_movimento_player()
-	bloquear_processamento_player()
+	selecao = -1
+
+	if voltar != null:
+		remover_destaque_botao(voltar)
+	if comprar != null:
+		remover_destaque_botao(comprar)
 
 	bloqueado = false
 
@@ -516,11 +515,6 @@ func abrir_menu() -> void:
 	tela.show()
 
 	aviso.hide()
-
-	# Deixa COMPRAR VIDA como foco inicial para teclado.
-	# As setas continuam sendo processadas pelo _input antes do player.
-	if comprar != null:
-		comprar.grab_focus()
 
 
 	print("========================================")
@@ -575,10 +569,18 @@ func criar_menu() -> void:
 	canvas.layer = 200
 
 	canvas.process_mode = (
-		Node.PROCESS_MODE_ALWAYS
+		Node.PROCESS_MODE_PAUSABLE
 	)
 
-	get_tree().root.add_child(canvas)
+	# O Canvas da loja fica dentro da cena atual.
+	# Assim, quando o jogador reiniciar a fase ou voltar ao menu,
+	# a cena antiga é destruída junto com a tela da loja.
+	var cena_atual := get_tree().current_scene
+
+	if cena_atual != null:
+		cena_atual.add_child(canvas)
+	else:
+		get_tree().root.add_child(canvas)
 
 
 	# =====================================================
@@ -594,7 +596,7 @@ func criar_menu() -> void:
 	)
 
 	tela.process_mode = (
-		Node.PROCESS_MODE_ALWAYS
+		Node.PROCESS_MODE_PAUSABLE
 	)
 
 	tela.mouse_filter = (
@@ -715,13 +717,13 @@ func criar_menu() -> void:
 
 	titulo = criar_label(
 		"LOJA DA VIDA",
-		19,
+		17,
 		Color("#F5D56A")
 	)
 
 	titulo.position = Vector2(
 		0.0,
-		36.0
+		28.0
 	)
 
 	titulo.size = Vector2(
@@ -742,13 +744,13 @@ func criar_menu() -> void:
 
 	subtitulo = criar_label(
 		"UMA VIDA EXTRA PARA SUA AVENTURA",
-		8,
+		9,
 		Color("#C18ADB")
 	)
 
 	subtitulo.position = Vector2(
 		0.0,
-		68.0
+		56.0
 	)
 
 	subtitulo.size = Vector2(
@@ -772,13 +774,13 @@ func criar_menu() -> void:
 	icone_vida.texture = textura_vida
 
 	icone_vida.position = Vector2(
-		250.0,
-		94.0
+		260.0,
+		90.0
 	)
 
 	icone_vida.size = Vector2(
-		100.0,
-		100.0
+		80.0,
+		80.0
 	)
 
 	icone_vida.expand_mode = (
@@ -806,13 +808,13 @@ func criar_menu() -> void:
 
 	nome_item = criar_label(
 		"VIDA EXTRA",
-		13,
+		11,
 		Color("#7BE7FF")
 	)
 
 	nome_item.position = Vector2(
 		0.0,
-		198.0
+		174.0
 	)
 
 	nome_item.size = Vector2(
@@ -833,13 +835,13 @@ func criar_menu() -> void:
 
 	preco = criar_label(
 		"10 MOEDAS",
-		12,
+		10,
 		Color("#F5D56A")
 	)
 
 	preco.position = Vector2(
 		0.0,
-		224.0
+		202.0
 	)
 
 	preco.size = Vector2(
@@ -866,7 +868,7 @@ func criar_menu() -> void:
 
 	moedas.position = Vector2(
 		0.0,
-		252.0
+		228.0
 	)
 
 	moedas.size = Vector2(
@@ -893,7 +895,7 @@ func criar_menu() -> void:
 
 	vidas.position = Vector2(
 		0.0,
-		275.0
+		254.0
 	)
 
 	vidas.size = Vector2(
@@ -914,13 +916,13 @@ func criar_menu() -> void:
 
 	resultado = criar_label(
 		"",
-		9,
+		8,
 		Color.WHITE
 	)
 
 	resultado.position = Vector2(
 		0.0,
-		300.0
+		278.0
 	)
 
 	resultado.size = Vector2(
@@ -944,17 +946,17 @@ func criar_menu() -> void:
 
 	voltar = Button.new()
 	voltar.text = "VOLTAR"
-	voltar.position = Vector2(45.0, 320.0)
+	voltar.position = Vector2(45.0, 300.0)
 	voltar.size = Vector2(230.0, 44.0)
-	voltar.focus_mode = Control.FOCUS_ALL
+	voltar.focus_mode = Control.FOCUS_NONE
 	voltar.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 	voltar.add_theme_font_override("font", fonte_retro)
 	voltar.add_theme_font_size_override("font_size", 10)
 
 	var voltar_normal := StyleBoxFlat.new()
-	voltar_normal.bg_color = Color("#241936")
-	voltar_normal.border_color = Color("#624579")
+	voltar_normal.bg_color = Color("#39234C")
+	voltar_normal.border_color = Color("#8C5BB2")
 	voltar_normal.set_border_width_all(2)
 	voltar_normal.corner_radius_top_left = 6
 	voltar_normal.corner_radius_top_right = 6
@@ -962,8 +964,8 @@ func criar_menu() -> void:
 	voltar_normal.corner_radius_bottom_right = 6
 
 	var voltar_hover := StyleBoxFlat.new()
-	voltar_hover.bg_color = Color("#35224D")
-	voltar_hover.border_color = Color("#B96CFF")
+	voltar_hover.bg_color = Color("#472D63")
+	voltar_hover.border_color = Color("#D58CFF")
 	voltar_hover.set_border_width_all(2)
 	voltar_hover.corner_radius_top_left = 6
 	voltar_hover.corner_radius_top_right = 6
@@ -971,8 +973,8 @@ func criar_menu() -> void:
 	voltar_hover.corner_radius_bottom_right = 6
 
 	var voltar_pressed := StyleBoxFlat.new()
-	voltar_pressed.bg_color = Color("#4A3064")
-	voltar_pressed.border_color = Color("#B96CFF")
+	voltar_pressed.bg_color = Color("#5A3B78")
+	voltar_pressed.border_color = Color("#D58CFF")
 	voltar_pressed.set_border_width_all(2)
 	voltar_pressed.corner_radius_top_left = 6
 	voltar_pressed.corner_radius_top_right = 6
@@ -982,12 +984,13 @@ func criar_menu() -> void:
 	voltar.add_theme_stylebox_override("normal", voltar_normal)
 	voltar.add_theme_stylebox_override("hover", voltar_hover)
 	voltar.add_theme_stylebox_override("pressed", voltar_pressed)
-	voltar.add_theme_stylebox_override("focus", voltar_hover)
 	voltar.add_theme_color_override("font_color", Color("#FFF0C7"))
 	voltar.add_theme_color_override("font_hover_color", Color("#D9A7FF"))
 	voltar.add_theme_color_override("font_pressed_color", Color("#D9A7FF"))
 
 	voltar.pressed.connect(_clicar_voltar)
+	voltar.mouse_entered.connect(_mouse_entrou_voltar)
+	voltar.mouse_exited.connect(_mouse_saiu_botao)
 	painel.add_child(voltar)
 
 
@@ -998,9 +1001,9 @@ func criar_menu() -> void:
 
 	comprar = Button.new()
 	comprar.text = "COMPRAR VIDA"
-	comprar.position = Vector2(325.0, 320.0)
+	comprar.position = Vector2(325.0, 300.0)
 	comprar.size = Vector2(230.0, 44.0)
-	comprar.focus_mode = Control.FOCUS_ALL
+	comprar.focus_mode = Control.FOCUS_NONE
 	comprar.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 	comprar.add_theme_font_override("font", fonte_retro)
@@ -1016,8 +1019,8 @@ func criar_menu() -> void:
 	comprar_normal.corner_radius_bottom_right = 6
 
 	var comprar_hover := StyleBoxFlat.new()
-	comprar_hover.bg_color = Color("#4A3064")
-	comprar_hover.border_color = Color("#B96CFF")
+	comprar_hover.bg_color = Color("#472D63")
+	comprar_hover.border_color = Color("#D58CFF")
 	comprar_hover.set_border_width_all(2)
 	comprar_hover.corner_radius_top_left = 6
 	comprar_hover.corner_radius_top_right = 6
@@ -1026,7 +1029,7 @@ func criar_menu() -> void:
 
 	var comprar_pressed := StyleBoxFlat.new()
 	comprar_pressed.bg_color = Color("#5A3B78")
-	comprar_pressed.border_color = Color("#B96CFF")
+	comprar_pressed.border_color = Color("#D58CFF")
 	comprar_pressed.set_border_width_all(2)
 	comprar_pressed.corner_radius_top_left = 6
 	comprar_pressed.corner_radius_top_right = 6
@@ -1036,29 +1039,15 @@ func criar_menu() -> void:
 	comprar.add_theme_stylebox_override("normal", comprar_normal)
 	comprar.add_theme_stylebox_override("hover", comprar_hover)
 	comprar.add_theme_stylebox_override("pressed", comprar_pressed)
-	comprar.add_theme_stylebox_override("focus", comprar_hover)
 	comprar.add_theme_color_override("font_color", Color("#FFF0C7"))
 	comprar.add_theme_color_override("font_hover_color", Color("#D9A7FF"))
 	comprar.add_theme_color_override("font_pressed_color", Color("#D9A7FF"))
 
 	comprar.pressed.connect(_clicar_comprar)
+	comprar.mouse_entered.connect(_mouse_entrou_comprar)
+	comprar.mouse_exited.connect(_mouse_saiu_botao)
 	painel.add_child(comprar)
 
-
-	# =====================================================
-	# CONTROLES
-	# =====================================================
-
-	controles = criar_label(
-		"← → SELECIONAR      E / ENTER CONFIRMAR      ESC PAUSAR",
-		7,
-		Color("#8E7A9B")
-	)
-
-	controles.position = Vector2(0.0, 370.0)
-	controles.size = Vector2(600.0, 18.0)
-	controles.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	painel.add_child(controles)
 
 	# =====================================================
 	# ESCONDER
@@ -1141,49 +1130,134 @@ func atualizar_menu() -> void:
 
 	atualizar_dados()
 
-	# =====================================================
-	# BOTÕES
-	# =====================================================
+	if voltar == null or comprar == null:
+		return
 
-	voltar.text = "VOLTAR"
-	comprar.text = "COMPRAR VIDA"
+	# Nenhum botão selecionado.
+	if selecao == -1:
 
+		voltar.add_theme_color_override(
+			"font_color",
+			Color("#FFF0C7")
+		)
+
+		comprar.add_theme_color_override(
+			"font_color",
+			Color("#FFF0C7")
+		)
+
+		return
+
+	# Seleção pelo teclado: roxo.
 	if selecao == 0:
 
-		aplicar_visual_botao(voltar, true)
-		aplicar_visual_botao(comprar, false)
+		voltar.add_theme_color_override(
+			"font_color",
+			Color("#D9B5FF")
+		)
+
+		comprar.add_theme_color_override(
+			"font_color",
+			Color("#FFF0C7")
+		)
 
 	else:
 
-		aplicar_visual_botao(voltar, false)
-		aplicar_visual_botao(comprar, true)
+		voltar.add_theme_color_override(
+			"font_color",
+			Color("#FFF0C7")
+		)
+
+		comprar.add_theme_color_override(
+			"font_color",
+			Color("#D9B5FF")
+		)
 
 
-func aplicar_visual_botao(botao: Button, selecionado: bool) -> void:
+# =========================================================
+# MOUSE
+# =========================================================
 
-	var estilo := StyleBoxFlat.new()
+func _mouse_entrou_voltar() -> void:
+	if voltar == null or comprar == null:
+		return
 
-	if selecionado:
-		estilo.bg_color = Color("#4A2B68")
-		estilo.border_color = Color("#B96CFF")
-		estilo.set_border_width_all(3)
-	else:
-		estilo.bg_color = Color("#241936")
-		estilo.border_color = Color("#624579")
-		estilo.set_border_width_all(2)
+	selecao = -1
+	remover_destaque_botao(comprar)
+	destacar_botao(voltar)
 
-	estilo.corner_radius_top_left = 7
-	estilo.corner_radius_top_right = 7
-	estilo.corner_radius_bottom_left = 7
-	estilo.corner_radius_bottom_right = 7
 
-	botao.add_theme_stylebox_override("normal", estilo)
+func _mouse_entrou_comprar() -> void:
+	if voltar == null or comprar == null:
+		return
+
+	selecao = -1
+	remover_destaque_botao(voltar)
+	destacar_botao(comprar)
+
+
+func _mouse_saiu_botao() -> void:
+	if voltar == null or comprar == null:
+		return
+
+	# Só tira a seleção do mouse quando ele não estiver sobre
+	# nenhum dos dois botões.
+	var mouse_pos := get_viewport().get_mouse_position()
+	var sobre_voltar := voltar.get_global_rect().has_point(mouse_pos)
+	var sobre_comprar := comprar.get_global_rect().has_point(mouse_pos)
+
+	if not sobre_voltar and not sobre_comprar:
+		selecao = -1
+		remover_destaque_botao(voltar)
+		remover_destaque_botao(comprar)
+
+
+# =========================================================
+# DESTAQUE DOS BOTÕES
+# =========================================================
+
+func destacar_botao(botao: Button) -> void:
+	if botao == null:
+		return
+
 	botao.add_theme_color_override(
 		"font_color",
-		Color("#D9A7FF") if selecionado else Color("#FFF0C7")
+		Color("#D9A7FF")
 	)
-	botao.add_theme_color_override("font_hover_color", Color("#E8C8FF"))
-	botao.add_theme_color_override("font_pressed_color", Color("#E8C8FF"))
+
+	var tween := create_tween()
+	tween.tween_property(
+		botao,
+		"scale",
+		Vector2(1.04, 1.04),
+		0.10
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+
+func remover_destaque_botao(botao: Button) -> void:
+	if botao == null:
+		return
+
+	botao.add_theme_color_override(
+		"font_color",
+		Color("#FFF0C7")
+	)
+
+	var tween := create_tween()
+	tween.tween_property(
+		botao,
+		"scale",
+		Vector2.ONE,
+		0.10
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
 
 
 # =========================================================
@@ -1205,6 +1279,8 @@ func processar_menu(event: InputEvent) -> void:
 
 		selecao = 0
 		atualizar_menu()
+		remover_destaque_botao(comprar)
+		destacar_botao(voltar)
 		get_viewport().set_input_as_handled()
 		return
 
@@ -1217,6 +1293,8 @@ func processar_menu(event: InputEvent) -> void:
 
 		selecao = 1
 		atualizar_menu()
+		remover_destaque_botao(voltar)
+		destacar_botao(comprar)
 		get_viewport().set_input_as_handled()
 		return
 
@@ -1230,6 +1308,8 @@ func processar_menu(event: InputEvent) -> void:
 
 		selecao = 1
 		atualizar_menu()
+		remover_destaque_botao(voltar)
+		destacar_botao(comprar)
 		get_viewport().set_input_as_handled()
 		return
 
@@ -1238,6 +1318,8 @@ func processar_menu(event: InputEvent) -> void:
 
 		selecao = 0
 		atualizar_menu()
+		remover_destaque_botao(comprar)
+		destacar_botao(voltar)
 		get_viewport().set_input_as_handled()
 		return
 
@@ -1247,6 +1329,9 @@ func processar_menu(event: InputEvent) -> void:
 	# -----------------------------------------------------
 
 	if event.is_action_pressed("interact"):
+
+		if selecao == -1:
+			return
 
 		get_viewport().set_input_as_handled()
 
@@ -1261,6 +1346,9 @@ func processar_menu(event: InputEvent) -> void:
 
 	if event.is_action_pressed("ui_accept"):
 
+		if selecao == -1:
+			return
+
 		get_viewport().set_input_as_handled()
 
 		confirmar_opcao()
@@ -1269,11 +1357,14 @@ func processar_menu(event: InputEvent) -> void:
 
 
 	# -----------------------------------------------------
-	# ESC / PAUSE
+	# ESC
+	# A pausa do jogo fica por cima da loja.
+	# A loja não fecha aqui.
 	# -----------------------------------------------------
-	# Não fechamos a loja com ESC.
-	# Essa tecla fica livre para o sistema de pausa do jogo
-	# desenhar a tela de pause POR CIMA da loja.
+
+	if event.is_action_pressed("ui_cancel"):
+
+		return
 
 
 # =========================================================
@@ -1453,78 +1544,55 @@ func _clicar_comprar() -> void:
 
 
 # =========================================================
-# BLOQUEAR MOVIMENTO DO PLAYER
+# BLOQUEAR PLAYER DURANTE A LOJA
 # =========================================================
 
-func bloquear_movimento_player() -> void:
-
+func bloquear_player_para_loja() -> void:
 	if player == null:
 		return
 
-	if movimento_bloqueado_pela_loja:
+	if not is_instance_valid(player):
 		return
 
-	var valor = player.get("can_move")
-	if typeof(valor) == TYPE_BOOL:
-		movimento_anterior_player = valor
-	else:
-		movimento_anterior_player = true
+	if player_bloqueado_loja:
+		return
 
-	player.set("can_move", false)
+	player_bloqueado_loja = true
 
-	if player is CharacterBody2D:
-		(player as CharacterBody2D).velocity = Vector2.ZERO
+	# Guarda o estado antes de congelar.
+	player_physics_was_enabled = player.is_physics_processing()
 
-	movimento_bloqueado_pela_loja = true
+	# Para completamente movimento, pulo e animação de caminhada.
+	if player.has_method("set_physics_process"):
+		player.set_physics_process(false)
+
+	if player.has_method("set"):
+		player.set("can_move", false)
+		player.set("velocity", Vector2.ZERO)
+
+	var sprite := player.get_node_or_null("Anim") as AnimatedSprite2D
+	if sprite != null:
+		sprite.stop()
 
 
-# =========================================================
-# BLOQUEAR PROCESSAMENTO DO PLAYER
-# =========================================================
-
-func bloquear_processamento_player() -> void:
+func desbloquear_player_da_loja() -> void:
 	if player == null:
 		return
 
-	# O player não pode continuar executando física/animação
-	# enquanto a tela de compra estiver aberta.
-	player.set_physics_process(false)
-	player.set_process(false)
-
-	if player is CharacterBody2D:
-		(player as CharacterBody2D).velocity = Vector2.ZERO
-
-	var anim := player.get_node_or_null("Anim") as AnimatedSprite2D
-	if anim != null:
-		anim.stop()
-
-
-# =========================================================
-# RESTAURAR PROCESSAMENTO DO PLAYER
-# =========================================================
-
-func restaurar_processamento_player() -> void:
-	if player == null:
+	if not is_instance_valid(player):
 		return
 
-	player.set_physics_process(true)
-	player.set_process(true)
-
-
-# =========================================================
-# RESTAURAR MOVIMENTO DO PLAYER
-# =========================================================
-
-func restaurar_movimento_player() -> void:
-
-	if player == null:
+	if not player_bloqueado_loja:
 		return
 
-	if not movimento_bloqueado_pela_loja:
-		return
+	player_bloqueado_loja = false
 
-	player.set("can_move", movimento_anterior_player)
-	movimento_bloqueado_pela_loja = false
+	if player.has_method("set"):
+		player.set("can_move", true)
+		player.set("velocity", Vector2.ZERO)
+
+	if player_physics_was_enabled:
+		player.set_physics_process(true)
 
 
 # =========================================================
@@ -1542,12 +1610,11 @@ func fechar_menu() -> void:
 
 		tela.hide()
 
-	restaurar_processamento_player()
-	restaurar_movimento_player()
+	desbloquear_player_da_loja()
 
 	estado = EstadoLoja.ESPERANDO
 
-	selecao = 1
+	selecao = -1
 
 	bloqueado = false
 
