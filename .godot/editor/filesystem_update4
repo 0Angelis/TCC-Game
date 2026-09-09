@@ -11,3 +11,5 @@ res://scripts/goal.gd
 res://scripts/game_over.gd
 res://scripts/pause_menu.gd
 res://scripts/title_screen.gd
+res://levels/world_01.tscn
+res://levels/world_03.tscn

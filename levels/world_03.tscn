@@ -1817,12 +1817,11 @@ position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="warning_sing7" type="Node2D" parent="warning" unique_id=820047536]
-position = Vector2(2712, -1664)
+position = Vector2(2711, -1671)
 script = ExtResource("33_4gm61")
 dialog_texts = Array[String](["Depois de concluir vários desafios, você treinou suas habilidades cognitivas.", "Sua memória, atenção e raciocínio foram colocados à prova durante toda essa jornada.", "Agora que todos os fragmentos foram recuperados...", "Será que você finalmente conseguirá voltar para casa?"])
 
 [node name="alert_sign" type="Sprite2D" parent="warning/warning_sing7" unique_id=2049498898]
-visible = false
 position = Vector2(0, -13)
 texture = ExtResource("34_g77hq")
 region_enabled = true
