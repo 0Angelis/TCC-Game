@@ -754,6 +754,11 @@ func start_game():
 	# RESET COMPLETO
 	# ==========================================
 
+	# Novo jogo sempre começa com 5 vidas.
+	Globals.player_life = 5
+	Globals.lives_before_level = 5
+	Globals.life_snapshot_scene = ""
+
 	Globals.score = 0
 	Globals.coins = 0
 

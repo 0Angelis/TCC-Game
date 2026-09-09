@@ -100,8 +100,6 @@ func _ready() -> void:
 
 	add_to_group("player")
 
-	Globals.player_life = 5
-
 	is_dead = false
 	taking_damage = false
 	can_take_damage = true
@@ -116,6 +114,25 @@ func _ready() -> void:
 	enemy_damage_cooldown = 0.0
 
 	spike_contact_active = false
+
+	# ==========================================
+	# SALVA AS VIDAS DO INÍCIO DA FASE
+	# ==========================================
+	# Cria um novo snapshot somente quando entramos em
+	# outra cena. No RESTART da mesma fase, o snapshot
+	# continua sendo o valor original.
+	var current_scene := get_tree().current_scene
+
+	if current_scene != null:
+
+		var current_path := current_scene.scene_file_path.to_lower()
+
+		if Globals.life_snapshot_scene != current_path:
+
+			Globals.lives_before_level = Globals.player_life
+			Globals.life_snapshot_scene = current_path
+
+			print("SNAPSHOT DE VIDAS: ", Globals.lives_before_level)
 
 	print("PLAYER INICIADO")
 	print("VIDAS: ", Globals.player_life)

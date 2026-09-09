@@ -720,6 +720,69 @@ func _hide_portal_message() -> void:
 
 
 # =========================================================
+# PRÓXIMA FASE DA ROTA
+# =========================================================
+
+func _get_next_level() -> String:
+
+	var current_scene := get_tree().current_scene
+
+	if current_scene == null:
+
+		return next_level
+
+	var scene_path := current_scene.scene_file_path.to_lower()
+
+	# =====================================================
+	# ROTA FIXA
+	# =====================================================
+	# world_00 -> world_01
+	# world_01 -> loja
+	# loja -> world_02
+	# world_02 -> loja
+	# loja -> world_03
+	# world_03 -> loja final
+
+	if scene_path.contains("world_00"):
+
+		return "res://levels/world_01.tscn"
+
+	if scene_path.contains("world_01"):
+
+		return "res://levels/loja.tscn"
+
+	if scene_path.contains("world_02"):
+
+		return "res://levels/loja.tscn"
+
+	if scene_path.contains("world_03"):
+
+		return "res://levels/loja.tscn"
+
+	if (
+		scene_path.ends_with("/loja.tscn")
+		or scene_path.ends_with("\\loja.tscn")
+	):
+
+		match Globals.last_world_before_shop:
+
+			1:
+				return "res://levels/world_02.tscn"
+
+			2:
+				return "res://levels/world_03.tscn"
+
+			3:
+				return ""
+
+			_: 
+				return ""
+
+
+	return next_level
+
+
+# =========================================================
 # PLAYER ENTROU
 # =========================================================
 
@@ -816,7 +879,20 @@ func _on_body_entered(
 	# PRÓXIMA FASE
 	# =====================================================
 
-	if next_level == "":
+	var destination := _get_next_level()
+
+	# A última loja é o destino final.
+	if destination == "":
+
+		var current_scene := get_tree().current_scene
+
+		if current_scene != null and current_scene.scene_file_path.to_lower().ends_with("/loja.tscn"):
+
+			_show_portal_message(
+				"FIM DA AVENTURA!"
+			)
+
+			return
 
 		print(
 			"ERRO: PRÓXIMA FASE NÃO DEFINIDA!"
@@ -824,6 +900,29 @@ func _on_body_entered(
 
 		return
 
+
+	# =====================================================
+	# GUARDA O MUNDO ANTES DA LOJA
+	# =====================================================
+	# Isso é salvo imediatamente ao tocar no portal.
+	# Assim a mesma loja sabe para qual mundo voltar.
+	var route_scene := get_tree().current_scene
+
+	if route_scene != null:
+
+		var route_path := route_scene.scene_file_path.to_lower()
+
+		if route_path.contains("world_01"):
+
+			Globals.last_world_before_shop = 1
+
+		elif route_path.contains("world_02"):
+
+			Globals.last_world_before_shop = 2
+
+		elif route_path.contains("world_03"):
+
+			Globals.last_world_before_shop = 3
 
 	# =====================================================
 	# BLOQUEIA DUPLA ENTRADA
@@ -1922,6 +2021,13 @@ func _close_result_screen() -> void:
 	# TROCA DE FASE
 	# =====================================================
 
+	var destination := _get_next_level()
+
+	if destination == "":
+
+		return
+
+
 	if transition != null:
 
 		if transition.has_method(
@@ -1929,7 +2035,7 @@ func _close_result_screen() -> void:
 		):
 
 			transition.change_scene(
-				next_level
+				destination
 			)
 
 			return
@@ -1940,7 +2046,7 @@ func _close_result_screen() -> void:
 	# =====================================================
 
 	get_tree().change_scene_to_file(
-		next_level
+		destination
 	)
 
 

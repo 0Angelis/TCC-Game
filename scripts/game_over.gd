@@ -603,6 +603,11 @@ func restart_game():
 	# RESET DOS DADOS
 	# ==========================================
 
+	# Morte = novo começo com 5 vidas.
+	Globals.player_life = 5
+	Globals.lives_before_level = 5
+	Globals.life_snapshot_scene = ""
+
 	Globals.coins = 0
 
 	Globals.score = 0

@@ -808,6 +808,10 @@ func restart_game():
 
 	Globals.coins = Globals.coins_before_level
 
+	# Restaura as vidas que o jogador tinha ao entrar nesta fase.
+	# Não leva em conta as vidas perdidas durante a tentativa.
+	Globals.player_life = Globals.lives_before_level
+
 	# O score continua sendo resetado no restart.
 	Globals.score = 0
 
