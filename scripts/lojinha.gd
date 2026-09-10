@@ -7,6 +7,9 @@ extends Area2D
 
 const PRECO_VIDA: int = 10
 
+# Distância máxima para interagir com a loja.
+const DISTANCIA_MAXIMA: float = 100.0
+
 # Caixa do diálogo mais baixa
 const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 90.0)
 
@@ -201,6 +204,23 @@ func _on_body_exited(body: Node2D) -> void:
 
 
 # =========================================================
+# VERIFICAR DISTÂNCIA DO PLAYER
+# =========================================================
+
+func jogador_esta_perto() -> bool:
+	if player == null or not is_instance_valid(player):
+		return false
+
+	var ponto_loja: Vector2 = global_position
+
+	var collision := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if collision != null:
+		ponto_loja = collision.global_position
+
+	return player.global_position.distance_to(ponto_loja) <= DISTANCIA_MAXIMA
+
+
+# =========================================================
 # PROCESS
 # =========================================================
 
@@ -293,6 +313,10 @@ func _input(event: InputEvent) -> void:
 	if not jogador_na_area:
 		return
 
+	if not jogador_esta_perto():
+		aviso.hide()
+		return
+
 
 	# =====================================================
 	# DIÁLOGO
@@ -330,6 +354,9 @@ func _input(event: InputEvent) -> void:
 # =========================================================
 
 func abrir_conversa() -> void:
+
+	if not jogador_esta_perto():
+		return
 
 	if bloqueado:
 		return
@@ -404,7 +431,12 @@ func abrir_conversa() -> void:
 	# ABRIR MENU AUTOMATICAMENTE
 	# =====================================================
 
-	abrir_menu()
+	if jogador_esta_perto():
+		abrir_menu()
+	else:
+		estado = EstadoLoja.ESPERANDO
+		bloqueado = false
+		aviso.hide()
 
 
 # =========================================================

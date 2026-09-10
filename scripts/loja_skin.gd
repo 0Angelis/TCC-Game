@@ -7,6 +7,10 @@ extends Area2D
 const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 90.0)
 const OFFSET_AVISO: Vector2 = Vector2(-45.0, -58.0)
 
+# Distancia maxima para poder interagir com a lojinha.
+# Isso impede que o E abra a loja mesmo quando o jogador esta longe.
+const DISTANCIA_MAXIMA_INTERACAO: float = 100.0
+
 # Arquivo usado para guardar skins compradas/equipadas.
 const ARQUIVO_SAVE: String = "user://skins_save.json"
 const VERSAO_SAVE: int = 3
@@ -95,27 +99,6 @@ var skins: Array[Dictionary] = [
 		"cor": Color.WHITE
 	},
 	{
-		"id": "bronze",
-		"nome": "PINGUIM BRONZE",
-		"preco": 10,
-		"icone": "BRONZE",
-		"cor": Color("#B87333")
-	},
-	{
-		"id": "prata",
-		"nome": "PINGUIM PRATA",
-		"preco": 15,
-		"icone": "PRATA",
-		"cor": Color("#C8C8C8")
-	},
-	{
-		"id": "ouro",
-		"nome": "PINGUIM OURO",
-		"preco": 20,
-		"icone": "OURO",
-		"cor": Color("#FFD21F")
-	},
-	{
 		"id": "azul",
 		"nome": "PINGUIM AZUL",
 		"preco": 10,
@@ -135,6 +118,27 @@ var skins: Array[Dictionary] = [
 		"preco": 10,
 		"icone": "AMARELO",
 		"cor": Color("#FFD600")
+	},
+	{
+		"id": "bronze",
+		"nome": "PINGUIM BRONZE",
+		"preco": 20,
+		"icone": "BRONZE",
+		"cor": Color("#B87333")
+	},
+	{
+		"id": "prata",
+		"nome": "PINGUIM PRATA",
+		"preco": 25,
+		"icone": "PRATA",
+		"cor": Color("#C8C8C8")
+	},
+	{
+		"id": "ouro",
+		"nome": "PINGUIM OURO",
+		"preco": 30,
+		"icone": "OURO",
+		"cor": Color("#FFD21F")
 	},
 	{
 		"id": "rgb",
@@ -228,12 +232,33 @@ func _on_body_exited(body: Node2D) -> void:
 	if aviso != null:
 		aviso.hide()
 
+	# Se o jogador saiu da proximidade durante a conversa,
+	# ele nao podera entrar no menu depois de ficar longe.
+	if estado == EstadoLoja.CONVERSA:
+		bloqueado = false
+
+	# Se ainda estava esperando o jogador soltar o E, cancela.
+	esperando_soltar_e = false
+
 
 # =========================================================
 # PROCESS
 # =========================================================
 
 func _process(_delta: float) -> void:
+
+	# -----------------------------------------------------
+	# SEGURANCA DE DISTANCIA
+	# -----------------------------------------------------
+	# Alem da Area2D, conferimos a distancia real do jogador.
+	# Assim, uma CollisionShape2D grande demais nao permite
+	# abrir a loja de longe.
+	if jogador_na_area and not jogador_esta_perto_da_loja():
+		jogador_na_area = false
+		esperando_soltar_e = false
+
+		if aviso != null:
+			aviso.hide()
 
 	# -----------------------------------------------------
 	# ESPERAR SOLTAR E
@@ -334,9 +359,36 @@ func _input(event: InputEvent) -> void:
 
 		if event.is_action_pressed("interact"):
 
+			# Segunda verificacao no exato momento do E.
+			if not jogador_esta_perto_da_loja():
+				return
+
 			get_viewport().set_input_as_handled()
 
 			abrir_conversa()
+
+
+# =========================================================
+# CHECAR DISTANCIA
+# =========================================================
+
+func jogador_esta_perto_da_loja() -> bool:
+
+	if player == null:
+		return false
+
+	if not is_instance_valid(player):
+		return false
+
+	var centro_loja: Vector2 = global_position
+
+	var collision := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if collision != null:
+		centro_loja = collision.global_position
+
+	var distancia: float = player.global_position.distance_to(centro_loja)
+
+	return distancia <= DISTANCIA_MAXIMA_INTERACAO
 
 
 # =========================================================
@@ -357,10 +409,9 @@ func abrir_conversa() -> void:
 	aviso.hide()
 
 	var falas: Array[String] = [
-		"Bem-vindo a Feirinha do Vale!",
+		"Bem-vindo a Loja de Roupas!",
 		"Aqui voce encontra visuais para o seu pinguim.",
 		"Compre uma skin e equipe na hora!",
-		"Use suas moedas com sabedoria!"
 	]
 
 	var posicao: Vector2 = (
@@ -384,6 +435,14 @@ func abrir_conversa() -> void:
 		await get_tree().process_frame
 
 	if not is_inside_tree():
+		return
+
+	# Se o jogador se afastou enquanto a conversa estava aberta,
+	# nao abre o menu. Ele precisa voltar para perto da lojinha.
+	if not jogador_esta_perto_da_loja():
+		bloqueado = false
+		esperando_soltar_e = false
+		estado = EstadoLoja.ESPERANDO
 		return
 
 	abrir_menu()

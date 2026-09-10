@@ -1617,14 +1617,14 @@ position = Vector2(321.00003, 1.9999809)
 scale = Vector2(1.1035161, 1.0815443)
 sprite_frames = SubResource("SpriteFrames_scsv4")
 autoplay = "default"
-frame_progress = 0.3054388
+frame_progress = 0.64001524
 
 [node name="vendedor barata" type="AnimatedSprite2D" parent="vendedor" unique_id=69723636]
 position = Vector2(446.99997, -1.000016)
 scale = Vector2(0.9062519, 0.890626)
 sprite_frames = SubResource("SpriteFrames_hvom3")
 autoplay = "default"
-frame_progress = 0.69124943
+frame_progress = 0.6237343
 
 [node name="level" type="TileMap" parent="." unique_id=2135947595]
 position = Vector2(-1, 4)
