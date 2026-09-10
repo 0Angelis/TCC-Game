@@ -1,5 +1,5 @@
 78098b89c88a74ebe8c20117b8754620
-::res://::1789051019
+::res://::1789056429
 export_presets.cfg::TextFile::-1::1787929115::0::1::::<><><>0<>0<><>::
 icon.svg::CompressedTexture2D::6063952031870446696::1781536624::1785347248::1::::<><><>0<>0<>cfd3e028912ec79602b0ab10f9796824<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
 ::res://actors/::1787925894
@@ -728,7 +728,7 @@ game_over.tscn::PackedScene::7180067264052296635::1787079712::0::1::::<><><>0<>0
 memory_game.tscn::PackedScene::8399238210927664330::1787924776::0::1::::<><><>0<>0<><>::uid://vadbvti5crgg::::res://scripts/memory_game.gd<>uid://cg8ke0pi0g0ri::::res://assets/Telas/telamemoria 1.png<>uid://cvkbais0uvyds::::res://assets/Telas/TUTORIAL MEMORIA.png<>uid://bjxb0igslhykh::::res://assets/Telas/BG2 DESAFIO3.png<>uid://hqo83c4rrn6w::::res://assets/Telas/BG3DESAFIO3.png<>uid://ubpeduwi5qpf::::res://assets/Sprite Pack 6/1 - Penguin/Surprised (16 x 16).png
 stroop_challenge.tscn::PackedScene::4732975522764996778::1787939468::0::1::::<><><>0<>0<><>::uid://olh4nfbnklem::::res://scripts/stroop_challenge.gd<>uid://b6gh7p3ydemrw::::res://assets/Sunny-land-files/Assets/environment/Background/back.png<>uid://k1lrsupgeu5t::::res://assets/Comandos/comando stroop.png<>uid://cgy04jtyd0m57::::res://assets/portal/fundo desafio 2.png<>uid://d3qvsema2motn::::res://assets/Sprite Pack 6/1 - Penguin/Looking_Off (16 x 16).png<>uid://dyixm1inxu0cr::::res://assets/Seasonal Tilesets/1 - Grassland/Background parts/3 - Cloud_cover_1.png
 title_screen.tscn::PackedScene::4520159421925710538::1787159365::0::1::::<><><>0<>0<><>::uid://cdpkrk77js0ql::::res://scripts/title_screen.gd<>uid://caje1wl53vpyi::::res://assets/Telas/fundoperfil.png<>uid://c8kijta6gaf1h::::res://assets/Sprite Pack 6/1 - Penguin/Jump (16 x 16).png<>uid://cagecckmhe33g::::res://assets/Telas/title.png<>uid://dtt881cw14h2g::::res://tema/new_theme.tres<>uid://dawcynbe612wd::::res://assets/Fontes/Pixeloid_Font_1_0/OpenType (.otf)/PixeloidSans-Bold.otf
-::res://scripts/::1789049647
+::res://scripts/::1789056310
 brabao.gd::GDScript::8961207967110025533::1787927078::0::1::::<>CharacterBody2D<><>0<>0<><>::
 coin.gd::GDScript::1712782778607554196::1787525538::0::1::::<>Area2D<><>0<>0<><>::
 color_rect.gd::GDScript::4620286254710313535::1786385096::0::1::::<>ColorRect<><>0<>0<><>::
@@ -736,20 +736,20 @@ crocs.gd::GDScript::1941160976896028108::1787691996::0::1::::<>CharacterBody2D<>
 dialog_box.gd::GDScript::5241754639761997104::1787079594::0::1::::<>MarginContainer<><>0<>0<><>::
 fantasma.gd::GDScript::8543093154097621083::1787687484::0::1::::<>CharacterBody2D<><>0<>0<><>::
 frag_raciocinio.gd::GDScript::1111174350492039580::1787188017::0::1::::<>Area2D<><>0<>0<><>::
-game_over.gd::GDScript::78492389523176972::1789049647::0::1::::<>Control<><>0<>0<><>::
+game_over.gd::GDScript::78492389523176972::1789055528::0::1::::<>Control<><>0<>0<><>::
 goal.gd::GDScript::9014754770629179522::1788919584::0::1::::<>Area2D<><>0<>0<><>::
 hitbox.gd::GDScript::3550974086031982761::1781536624::0::1::::<>Area2D<><>0<>0<><>::
 hud_manager.gd::GDScript::6006181787085107556::1787786437::0::1::::<>Control<><>0<>0<><>::
 laranjao.gd::GDScript::5232060310169281929::1787686787::0::1::::<>CharacterBody2D<><>0<>0<><>::
-loja_skin.gd::GDScript::8002707855959565347::1789049647::0::1::::<>Area2D<><>0<>0<><>::
+loja_skin.gd::GDScript::8002707855959565347::1789056310::0::1::::<>Area2D<><>0<>0<><>::
 lojinha.gd::GDScript::2318005578999995094::1789047755::0::1::::<>Area2D<><>0<>0<><>::
 memory_game.gd::GDScript::1474150785916193222::1787922971::0::1::::<>Control<><>0<>0<><>::
 memory_trigger.gd::GDScript::3475883078732176876::1787786437::0::1::::<>Area2D<><>0<>0<><>::
 minhoca.gd::GDScript::1317255293829115167::1787686850::0::1::::<>CharacterBody2D<><>0<>0<><>::
 mosquito.gd::GDScript::1611117519612870921::1787686850::0::1::::<>CharacterBody2D<><>0<>0<><>::
 moving_platform.gd::GDScript::628194836022821770::1781536624::0::1::::<>Node2D<><>0<>0<><>::
-pause_menu.gd::GDScript::4524341683300020848::1788919584::0::1::::<>CanvasLayer<><>0<>0<><>::
-player.gd::GDScript::8979246397898367810::1789049647::0::1::::<>CharacterBody2D<><>0<>0<><>::
+pause_menu.gd::GDScript::4524341683300020848::1789055528::0::1::::<>CanvasLayer<><>0<>0<><>::
+player.gd::GDScript::8979246397898367810::1789055929::0::1::::<>CharacterBody2D<><>0<>0<><>::
 stroop_challenge.gd::GDScript::1005829463790505792::1787753945::0::1::::<>Control<><>0<>0<><>::
 stroop_trigger.gd::GDScript::5766768938036743573::1787599097::0::1::::<>Area2D<><>0<>0<><>::
 title_screen.gd::GDScript::5015011669169184047::1788919584::0::1::::<>Control<><>0<>0<><>::
