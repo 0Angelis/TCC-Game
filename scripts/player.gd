@@ -146,11 +146,10 @@ func _ready() -> void:
 			print("SNAPSHOT DE VIDAS: ", Globals.lives_before_level)
 
 	# ==========================================
-	# SKIN DA SESSAO
+	# SKIN DA SESSAO / BASELINE DA FASE
 	# ==========================================
-	# O estado fica no SceneTree, entao atravessa as cenas
-	# enquanto o jogo estiver aberto.
 	carregar_skin_da_sessao()
+	preparar_baseline_da_fase()
 
 	call_deferred("atualizar_cor_skin")
 
@@ -166,6 +165,25 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 
 	if is_dead:
+		return
+
+
+	# ==========================================
+	# V = TROCAR SKIN
+	# ==========================================
+	# Só funciona quando existe mais de uma skin
+	# realmente desbloqueada/comprada na sessão.
+	if (
+		event is InputEventKey
+		and event.pressed
+		and not event.echo
+		and event.keycode == KEY_V
+	):
+
+		trocar_skin_com_v()
+
+		get_viewport().set_input_as_handled()
+
 		return
 
 
@@ -1199,29 +1217,125 @@ func carregar_skin() -> void:
 func carregar_skin_da_sessao() -> void:
 	skin_equipada = "original"
 
-	# A raiz do SceneTree nunca e destruida quando uma fase muda.
-	# Por isso a skin permanece ate o jogo ser fechado.
+	var raiz := get_tree().root
+
+	if not raiz.has_meta(SKIN_META_SESSAO):
+		return
+
+	var dados = raiz.get_meta(SKIN_META_SESSAO)
+
+	if typeof(dados) != TYPE_DICTIONARY:
+		return
+
+	if not dados.has("skin_equipada"):
+		return
+
+	var id: String = str(dados["skin_equipada"])
+
+	if id in [
+		"original",
+		"bronze",
+		"prata",
+		"ouro",
+		"azul",
+		"vermelho",
+		"amarelo",
+		"rgb"
+	]:
+		skin_equipada = id
+
+
+func estado_skin_atual() -> Dictionary:
 	var raiz := get_tree().root
 
 	if raiz.has_meta(SKIN_META_SESSAO):
 		var dados = raiz.get_meta(SKIN_META_SESSAO)
 
 		if typeof(dados) == TYPE_DICTIONARY:
-			if dados.has("skin_equipada"):
-				var id: String = str(dados["skin_equipada"])
+			var estado: Dictionary = {
+				"skins_desbloqueadas": ["original"],
+				"skin_equipada": "original"
+			}
 
-				if id in [
-					"original",
-					"bronze",
-					"prata",
-					"ouro",
-					"azul",
-					"vermelho",
-					"amarelo",
-					"rgb"
-				]:
-					skin_equipada = id
-					return
+			if dados.has("skins_desbloqueadas") 			and typeof(dados["skins_desbloqueadas"]) == TYPE_ARRAY:
+				estado["skins_desbloqueadas"] = dados["skins_desbloqueadas"].duplicate()
+
+			if dados.has("skin_equipada"):
+				estado["skin_equipada"] = str(dados["skin_equipada"])
+
+			return estado
+
+	return {
+		"skins_desbloqueadas": ["original"],
+		"skin_equipada": "original"
+	}
+
+
+func chave_fase_atual() -> String:
+	var cena = get_tree().current_scene
+
+	if cena == null:
+		return ""
+
+	return cena.scene_file_path
+
+
+func preparar_baseline_da_fase() -> void:
+	var raiz := get_tree().root
+	var chave_atual: String = chave_fase_atual()
+
+	if chave_atual.is_empty():
+		return
+
+	# =====================================================
+	# RESTART
+	# =====================================================
+	# O restart.gd ja restaurou a sessao antes de trocar a cena.
+	# Nao criamos outro snapshot aqui.
+	if raiz.has_meta("skins_restart_pending") 	and bool(raiz.get_meta("skins_restart_pending", false)):
+		raiz.set_meta(
+			"skins_last_scene_path",
+			chave_atual
+		)
+
+		print("SKINS: entrada por RESTART, snapshot preservado.")
+		return
+
+	# =====================================================
+	# NOVA ENTRADA NORMAL
+	# =====================================================
+	# Compara com a cena anterior, e nao apenas com um dicionario
+	# permanente por nome.
+	#
+	# Isso permite:
+	# MUNDO -> LOJA -> MUNDO -> LOJA
+	# Mesmo sendo a mesma lojas.tscn, cada retorno normal a loja
+	# recebe um novo snapshot.
+	var cena_anterior: String = str(
+		raiz.get_meta("skins_last_scene_path", "")
+	)
+
+	if cena_anterior == chave_atual:
+		return
+
+	# Primeira entrada ou entrada normal vindo de outra cena.
+	var estado_inicial: Dictionary = estado_skin_atual()
+
+	raiz.set_meta(
+		"skins_before_level",
+		estado_inicial.duplicate(true)
+	)
+
+	raiz.set_meta(
+		"skins_last_scene_path",
+		chave_atual
+	)
+
+	print("========================================")
+	print("NOVO SNAPSHOT DE SKINS")
+	print("CENA: ", chave_atual)
+	print("ESTADO: ", estado_inicial)
+	print("========================================")
 
 
 func obter_cor_skin() -> Color:
@@ -1537,17 +1651,95 @@ func definir_skin_visual(skin_id: String) -> void:
 
 	skin_equipada = skin_id
 
-	# Mantem a skin equipada entre as fases enquanto o jogo
-	# continua aberto.
+	# Mantem a skin equipada durante toda a sessao.
+	var raiz := get_tree().root
+
 	var dados: Dictionary = {
+		"skins_desbloqueadas": ["original"],
 		"skin_equipada": skin_equipada
 	}
 
-	# A raiz fica viva durante toda a execucao do jogo.
-	# Assim a skin acompanha o jogador em qualquer mundo/fase.
-	get_tree().root.set_meta(SKIN_META_SESSAO, dados)
+	if raiz.has_meta(SKIN_META_SESSAO):
+		var anterior = raiz.get_meta(SKIN_META_SESSAO)
+
+		if typeof(anterior) == TYPE_DICTIONARY:
+			if anterior.has("skins_desbloqueadas") 			and typeof(anterior["skins_desbloqueadas"]) == TYPE_ARRAY:
+				dados["skins_desbloqueadas"] = anterior["skins_desbloqueadas"].duplicate()
+
+	raiz.set_meta(SKIN_META_SESSAO, dados)
 
 	atualizar_cor_skin()
+
+# ==========================================
+# TROCAR SKIN PELA TECLA V
+# ==========================================
+func trocar_skin_com_v() -> void:
+	if is_dead:
+		return
+
+	if celebrating or taking_damage:
+		return
+
+	var raiz := get_tree().root
+
+	if not raiz.has_meta(SKIN_META_SESSAO):
+		return
+
+	var dados = raiz.get_meta(SKIN_META_SESSAO)
+
+	if typeof(dados) != TYPE_DICTIONARY:
+		return
+
+	if not dados.has("skins_desbloqueadas"):
+		return
+
+	var lista = dados["skins_desbloqueadas"]
+
+	if typeof(lista) != TYPE_ARRAY:
+		return
+
+	# Mantém somente IDs válidos e realmente desbloqueados.
+	var skins_validas: Array[String] = []
+
+	for item in lista:
+		var id := str(item)
+
+		if id in [
+			"original",
+			"bronze",
+			"prata",
+			"ouro",
+			"azul",
+			"vermelho",
+			"amarelo",
+			"rgb"
+		] and not skins_validas.has(id):
+			skins_validas.append(id)
+
+	# Só troca se houver mais de uma skin disponível.
+	if skins_validas.size() <= 1:
+		return
+
+	var indice_atual := skins_validas.find(skin_equipada)
+
+	if indice_atual < 0:
+		indice_atual = 0
+
+	var proximo_indice := (indice_atual + 1) % skins_validas.size()
+	var proxima_skin := skins_validas[proximo_indice]
+
+	# Atualiza a skin equipada sem alterar o inventário.
+	skin_equipada = proxima_skin
+	dados["skins_desbloqueadas"] = skins_validas.duplicate()
+	dados["skin_equipada"] = skin_equipada
+
+	raiz.set_meta(SKIN_META_SESSAO, dados)
+
+	atualizar_cor_skin()
+
+	print("SKIN TROCADA PELA TECLA V: ", skin_equipada)
+
+
 
 # ==========================================
 # CÂMERA

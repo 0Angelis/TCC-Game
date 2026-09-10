@@ -4,7 +4,7 @@ extends Area2D
 # FEIRINHA DO VALE - LOJA DE SKINS
 # =========================================================
 
-const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 90.0)
+const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 80.0)
 const OFFSET_AVISO: Vector2 = Vector2(-45.0, -58.0)
 
 # Distancia maxima para poder interagir com a lojinha.
@@ -420,6 +420,7 @@ func abrir_conversa() -> void:
 		"Bem-vindo a Loja de Roupas!",
 		"Aqui voce encontra visuais para o seu pinguim.",
 		"Compre uma skin e equipe na hora!",
+		"Se tiver mais de uma skin comprada, aperte V para trocar!",
 	]
 
 	var posicao: Vector2 = (
@@ -1638,8 +1639,12 @@ func remover_destaque_botao(botao: Button) -> void:
 
 
 # =========================================================
-# SESSAO / RODADA
+# SESSAO
 # =========================================================
+
+func raiz_do_jogo() -> Node:
+	return get_tree().root
+
 
 func criar_estado_inicial_sessao() -> Dictionary:
 	return {
@@ -1648,48 +1653,17 @@ func criar_estado_inicial_sessao() -> Dictionary:
 	}
 
 
-func raiz_do_jogo() -> Node:
-	return get_tree().root
-
-
 func preparar_estado_da_rodada() -> void:
 	var raiz := raiz_do_jogo()
-	var cena_atual: String = ""
 
-	var cena = get_tree().current_scene
-	if cena != null:
-		cena_atual = cena.scene_file_path
-
-	# PRIMEIRO INICIO DO JOGO
 	if not raiz.has_meta(META_SESSAO):
-		var inicial := criar_estado_inicial_sessao()
-		raiz.set_meta(META_SESSAO, inicial)
-		raiz.set_meta(META_SNAPSHOT, inicial.duplicate(true))
-		raiz.set_meta(META_SCENE, cena_atual)
-		return
-
-	# PRIMEIRA VEZ que este sistema encontra uma cena.
-	if not raiz.has_meta(META_SCENE):
-		raiz.set_meta(META_SCENE, cena_atual)
 		raiz.set_meta(
-		META_SNAPSHOT,
-		duplicar_estado_sessao()
-	)
-	return
-
-	var ultima_cena: String = str(
-		raiz.get_meta(META_SCENE, "")
-	)
-
-	# Mudanca normal de fase:
-	# a compra ja realizada continua para a proxima fase e
-	# torna-se o novo estado de inicio dessa fase.
-	if ultima_cena != cena_atual:
-		raiz.set_meta(META_SCENE, cena_atual)
-		raiz.set_meta(
-		META_SNAPSHOT,
-		duplicar_estado_sessao()
+			META_SESSAO,
+			criar_estado_inicial_sessao()
 		)
+
+	# A loja NUNCA cria ou altera checkpoint de fase.
+	# Ela apenas usa o estado atual da sessao.
 
 
 func duplicar_estado_sessao() -> Dictionary:
@@ -1705,15 +1679,12 @@ func duplicar_estado_sessao() -> Dictionary:
 
 	var lista: Array[String] = ["original"]
 
-	if dados.has("skins_desbloqueadas"):
-		var lista_original = dados["skins_desbloqueadas"]
+	if dados.has("skins_desbloqueadas") 	and typeof(dados["skins_desbloqueadas"]) == TYPE_ARRAY:
+		for item in dados["skins_desbloqueadas"]:
+			var id: String = str(item)
 
-		if typeof(lista_original) == TYPE_ARRAY:
-			for item in lista_original:
-				var id: String = str(item)
-
-				if skin_id_existe(id) and not lista.has(id):
-					lista.append(id)
+			if skin_id_existe(id) and not lista.has(id):
+				lista.append(id)
 
 	var equipada: String = "original"
 
@@ -1734,48 +1705,63 @@ func carregar_estado_da_sessao() -> void:
 
 	skins_desbloqueadas.clear()
 
-	var lista = dados["skins_desbloqueadas"]
-
-	for item in lista:
+	for item in dados["skins_desbloqueadas"]:
 		var id: String = str(item)
 
 		if not skins_desbloqueadas.has(id):
 			skins_desbloqueadas.append(id)
 
-	skin_equipada = str(dados["skin_equipada"])
+	if not skins_desbloqueadas.has("original"):
+		skins_desbloqueadas.push_front("original")
+
+	skin_equipada = str(
+		dados["skin_equipada"]
+	)
 
 	if skin_equipada not in skins_desbloqueadas:
 		skin_equipada = "original"
 
 
 func atualizar_estado_da_sessao() -> void:
-	var dados: Dictionary = {
-		"skins_desbloqueadas": skins_desbloqueadas.duplicate(),
-		"skin_equipada": skin_equipada
-	}
+	var raiz := raiz_do_jogo()
 
-	# Estado global da execucao do jogo.
-	# Nao desaparece ao trocar de mundo/fase.
-	raiz_do_jogo().set_meta(META_SESSAO, dados)
+	raiz.set_meta(
+		META_SESSAO,
+		{
+			"skins_desbloqueadas": skins_desbloqueadas.duplicate(),
+			"skin_equipada": skin_equipada
+		}
+	)
 
 
 func resetar_compras_da_rodada() -> void:
+	restarar_estado_da_fase()
+
+
+func restarar_estado_da_fase() -> void:
 	var raiz := raiz_do_jogo()
-
-	if not raiz.has_meta(META_SNAPSHOT):
-		return
-
-	var snapshot = raiz.get_meta(META_SNAPSHOT)
-
-	if typeof(snapshot) != TYPE_DICTIONARY:
-		return
-
-	# Restart: volta somente ao estado do inicio da fase.
-	raiz.set_meta(
-		META_SESSAO,
-		snapshot.duplicate(true)
+	var chave_fase: String = str(
+		raiz.get_meta("skins_current_phase_key", "")
 	)
 
+	if chave_fase.is_empty():
+		return
+
+	if not raiz.has_meta("skins_phase_checkpoints"):
+		return
+
+	var checkpoints = raiz.get_meta("skins_phase_checkpoints")
+
+	if typeof(checkpoints) != TYPE_DICTIONARY:
+		return
+
+	if not checkpoints.has(chave_fase):
+		return
+
+	raiz.set_meta(
+		META_SESSAO,
+		checkpoints[chave_fase].duplicate(true)
+	)
 # =========================================================
 # CHECAR ID
 # =========================================================

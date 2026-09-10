@@ -773,6 +773,38 @@ func close_dialog():
 
 
 # ==========================================
+# RESTAURAR SKINS DO INICIO DA FASE
+# ==========================================
+
+func resetar_skins_no_restart() -> void:
+	var raiz := get_tree().root
+
+	# O player salva este estado no inicio da cena.
+	# A loja NUNCA altera este snapshot.
+	if not raiz.has_meta("skins_before_level"):
+		print("SKINS RESTART: snapshot nao encontrado.")
+		return
+
+	var snapshot = raiz.get_meta("skins_before_level")
+
+	if typeof(snapshot) != TYPE_DICTIONARY:
+		print("SKINS RESTART: snapshot invalido.")
+		return
+
+	# Mesma ideia das moedas:
+	# estado atual -> estado do inicio da fase.
+	raiz.set_meta(
+		"skins_session_state",
+		snapshot.duplicate(true)
+	)
+
+	print("========================================")
+	print("RESTART: SKINS RESETADAS")
+	print("ESTADO INICIAL: ", snapshot)
+	print("========================================")
+
+
+# ==========================================
 # RESTART
 # ==========================================
 
@@ -805,6 +837,11 @@ func restart_game():
 	# ==========================================
 	# Mantém as moedas dos mapas anteriores.
 	# Remove somente as moedas coletadas no mapa atual.
+
+	# SKINS:
+	# remove as compras feitas nesta fase e volta exatamente
+	# ao estado que existia quando a fase comecou.
+	resetar_skins_no_restart()
 
 	Globals.coins = Globals.coins_before_level
 

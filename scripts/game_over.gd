@@ -1,7 +1,7 @@
 extends Control
 
 const META_SESSAO_SKINS: String = "skins_session_state"
-const META_SNAPSHOT_SKINS: String = "skins_phase_snapshot"
+const META_SNAPSHOT_SKINS: String = "skins_phase_checkpoints"
 
 
 # ==========================================
@@ -694,16 +694,45 @@ func restart_game():
 # ==========================================
 
 func restarar_skins_para_inicio_da_fase() -> void:
-	# IMPORTANTE:
-	# Este Restart e o Restart da tela de GAME OVER, ou seja,
-	# ele acontece depois que o jogador morreu.
+	var raiz := get_tree().root
+
+	if not raiz.has_meta("skins_before_level"):
+		print("RESTART SKINS: nenhum snapshot da fase.")
+		return
+
+	var snapshot = raiz.get_meta("skins_before_level")
+
+	if typeof(snapshot) != TYPE_DICTIONARY:
+		print("RESTART SKINS: snapshot invalido.")
+		return
+
+	# =====================================================
+	# RESET REAL
+	# =====================================================
+	# Exatamente como as moedas:
+	# antes de trocar a cena, substituimos o estado atual pelo
+	# estado salvo no inicio da fase.
 	#
-	# A morte NAO apaga skins compradas.
-	# Mantemos META_SESSAO intacta para que o novo player carregue
-	# a mesma skin e as mesmas compras ao recriar a fase.
+	# Se comprou uma skin em lojas.tscn e reiniciar lojas.tscn,
+	# ela desaparece daqui.
 	#
-	# Nao restauramos META_SNAPSHOT aqui.
-	return
+	# Se a skin ja existia antes de entrar nessa loja, ela fica.
+	raiz.set_meta(
+		"skins_session_state",
+		snapshot.duplicate(true)
+	)
+
+	# Marca que a proxima entrada e um Restart.
+	# O player nao criara um novo snapshot por cima do antigo.
+	raiz.set_meta(
+		"skins_restart_pending",
+		true
+	)
+
+	print("========================================")
+	print("RESTART SKINS - RESET REAL")
+	print("ESTADO RESTAURADO: ", snapshot)
+	print("========================================")
 
 
 # ==========================================
