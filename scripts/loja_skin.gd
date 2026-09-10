@@ -12,8 +12,12 @@ const OFFSET_AVISO: Vector2 = Vector2(-45.0, -58.0)
 const DISTANCIA_MAXIMA_INTERACAO: float = 100.0
 
 # Arquivo usado para guardar skins compradas/equipadas.
-const ARQUIVO_SAVE: String = "user://skins_save.json"
-const VERSAO_SAVE: int = 3
+# As compras existem somente enquanto o jogo esta aberto.
+# Elas NAO sao gravadas em arquivo.
+#
+# O snapshot abaixo fica no autoload Globals e representa o que o
+# jogador ja possuia ANTES de comecar a rodada atual.
+const META_SNAPSHOT_INICIAL: String = "skin_snapshot_rodada"
 
 # =========================================================
 # ESTADOS
@@ -188,10 +192,12 @@ func _ready() -> void:
 	criar_aviso()
 
 	# -----------------------------------------------------
-	# SAVE
+	# SESSAO / RODADA
 	# -----------------------------------------------------
 
-	carregar_skins()
+	preparar_snapshot_da_rodada()
+	carregar_skins_da_rodada()
+	aplicar_skin_no_player()
 
 	print("========================================")
 	print("LOJA DE SKINS INICIADA")
@@ -1345,8 +1351,6 @@ func comprar_ou_equipar() -> void:
 
 	equipar_skin(id)
 
-	salvar_skins()
-
 	atualizar_menu()
 	atualizar_dados()
 
@@ -1381,9 +1385,6 @@ func equipar_skin(id: String) -> void:
 
 	# A skin equipada existe somente durante esta sessão.
 	skin_equipada = id
-
-	# Salva apenas as skins compradas/desbloqueadas.
-	salvar_skins()
 
 	if player != null and is_instance_valid(player):
 		if player.has_method("definir_skin_visual"):
@@ -1632,118 +1633,93 @@ func remover_destaque_botao(botao: Button) -> void:
 
 
 # =========================================================
-# SALVAR SKINS
+# SESSAO / RODADA
 # =========================================================
 
-func salvar_skins() -> void:
-
-	var dados: Dictionary = {
-		"versao": VERSAO_SAVE,
-		"skins_desbloqueadas": skins_desbloqueadas
-	}
-
-	var arquivo := FileAccess.open(
-		ARQUIVO_SAVE,
-		FileAccess.WRITE
-	)
-
-	if arquivo == null:
-
-		print(
-			"ERRO: NAO FOI POSSIVEL SALVAR AS SKINS."
+func preparar_snapshot_da_rodada() -> void:
+	# O snapshot e criado apenas uma vez por ciclo de jogo/rodada.
+	# Assim, compras feitas depois do inicio da rodada podem ser
+	# apagadas no Restart sem apagar o que o jogador ja possuia.
+	if not Globals.has_meta(META_SNAPSHOT_INICIAL):
+		Globals.set_meta(
+			META_SNAPSHOT_INICIAL,
+			{
+				"skins_desbloqueadas": ["original"],
+				"skin_equipada": "original"
+			}
 		)
 
-		return
-
-	arquivo.store_string(
-		JSON.stringify(dados)
-	)
-
-	arquivo.close()
-
-
-# =========================================================
-# CARREGAR SKINS
-# =========================================================
-
-func carregar_skins() -> void:
-
-	# Sempre começa com a skin original.
+func carregar_skins_da_rodada() -> void:
+	# Comeca exatamente com o que estava disponivel no inicio
+	# da rodada. Nada e lido do disco.
 	skins_desbloqueadas.clear()
-	skins_desbloqueadas.append("original")
 	skin_equipada = "original"
 
-	if not FileAccess.file_exists(ARQUIVO_SAVE):
+	if not Globals.has_meta(META_SNAPSHOT_INICIAL):
+		preparar_snapshot_da_rodada()
+
+	var snapshot = Globals.get_meta(META_SNAPSHOT_INICIAL)
+
+	if typeof(snapshot) != TYPE_DICTIONARY:
 		return
 
-	var arquivo := FileAccess.open(
-		ARQUIVO_SAVE,
-		FileAccess.READ
-	)
-
-	if arquivo == null:
-		return
-
-	var texto: String = arquivo.get_as_text()
-	arquivo.close()
-
-	var dados = JSON.parse_string(texto)
-
-	if typeof(dados) != TYPE_DICTIONARY:
-		return
-
-	# Ignora o save antigo que foi criado antes do sistema
-	# ficar pronto. Assim nenhuma skin aparece equipada
-	# sem o jogador ter comprado/equipado.
-	if not dados.has("versao"):
-		print("SAVE ANTIGO DE SKINS IGNORADO.")
-		return
-
-	# Aceita o save anterior (versao 2) para manter as compras.
-	# A partir daqui, a skin equipada nunca e carregada.
-	var versao_save := int(dados["versao"])
-	if versao_save != 2 and versao_save != VERSAO_SAVE:
-		print("VERSAO DE SAVE DE SKINS INCOMPATIVEL. USANDO ORIGINAL.")
-		return
-
-	# -----------------------------------------------------
-	# SKINS DESBLOQUEADAS
-	# -----------------------------------------------------
-
-	if dados.has("skins_desbloqueadas"):
-
-		var lista = dados["skins_desbloqueadas"]
+	if snapshot.has("skins_desbloqueadas"):
+		var lista = snapshot["skins_desbloqueadas"]
 
 		if typeof(lista) == TYPE_ARRAY:
-
 			for item in lista:
-
 				var id: String = str(item)
 
-				if id == "original":
-					continue
-
-				if skin_id_existe(id) 				and not skins_desbloqueadas.has(id):
-
+				if skin_id_existe(id) and not skins_desbloqueadas.has(id):
 					skins_desbloqueadas.append(id)
 
-	# -----------------------------------------------------
-	# SKIN EQUIPADA
-	# -----------------------------------------------------
-	# A skin equipada NAO fica salva. Ao iniciar/reiniciar,
-	# o jogo sempre começa com a skin original.
-	skin_equipada = "original"
+	if not skins_desbloqueadas.has("original"):
+		skins_desbloqueadas.push_front("original")
 
-	print(
-		"SKINS CARREGADAS: ",
-		skins_desbloqueadas
+	# A skin equipada tambem volta para o estado do inicio da rodada.
+	if snapshot.has("skin_equipada"):
+		var equipada: String = str(snapshot["skin_equipada"])
+
+		if skin_id_existe(equipada) 		and (equipada == "original" or skins_desbloqueadas.has(equipada)):
+			skin_equipada = equipada
+	else:
+		skin_equipada = "original"
+
+	print("========================================")
+	print("SKINS DA RODADA CARREGADAS: ", skins_desbloqueadas)
+	print("SKIN EQUIPADA NA RODADA: ", skin_equipada)
+	print("========================================")
+
+func registrar_snapshot_da_rodada(
+	lista_skins: Array,
+	equipada: String = "original"
+) -> void:
+	var lista_valida: Array[String] = ["original"]
+
+	for item in lista_skins:
+		var id: String = str(item)
+
+		if skin_id_existe(id) and not lista_valida.has(id):
+			lista_valida.append(id)
+
+	var equipada_valida: String = "original"
+
+	if skin_id_existe(equipada) 	and (equipada == "original" or lista_valida.has(equipada)):
+		equipada_valida = equipada
+
+	Globals.set_meta(
+		META_SNAPSHOT_INICIAL,
+		{
+			"skins_desbloqueadas": lista_valida,
+			"skin_equipada": equipada_valida
+		}
 	)
 
-	print(
-		"SKIN EQUIPADA: ",
-		skin_equipada
-	)
-
+func resetar_compras_da_rodada() -> void:
+	# A loja sera criada novamente quando a cena reiniciar e
+	# carregara este snapshot. Esta funcao existe para deixar o
+	# comportamento explicito e permitir uso pelo Restart.
+	carregar_skins_da_rodada()
 
 # =========================================================
 # CHECAR ID

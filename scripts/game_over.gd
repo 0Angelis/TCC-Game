@@ -600,6 +600,21 @@ func restart_game():
 
 
 	# ==========================================
+	# RESET DAS COMPRAS DE SKINS DA RODADA
+	# ==========================================
+	#
+	# IMPORTANTE:
+	# A Loja de Skins NAO salva compras em arquivo.
+	# O snapshot em Globals representa o que o jogador ja tinha
+	# antes de iniciar a rodada. O Restart recria a cena e a loja
+	# volta exatamente para esse snapshot.
+	#
+	# Nao apagamos o snapshot aqui.
+	# Assim, uma skin comprada antes da rodada continua disponivel,
+	# enquanto uma skin comprada durante esta rodada volta a ficar
+	# bloqueada.
+
+	# ==========================================
 	# RESET DOS DADOS
 	# ==========================================
 
