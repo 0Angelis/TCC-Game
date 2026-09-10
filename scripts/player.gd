@@ -95,8 +95,10 @@ var celebrating: bool = false
 # SKIN
 # ==========================================
 
-const SKIN_SAVE_PATH: String = "user://skins_save.json"
-const SKIN_SAVE_VERSION: int = 2
+# A skin fica somente na memoria durante a execucao do jogo.
+# Isso permite passar de fase sem perder a skin, mas ao fechar
+# o jogo tudo volta ao estado inicial.
+const SKIN_META_SESSAO: String = "skins_session_state"
 
 var skin_equipada: String = "original"
 
@@ -144,11 +146,12 @@ func _ready() -> void:
 			print("SNAPSHOT DE VIDAS: ", Globals.lives_before_level)
 
 	# ==========================================
-	# SKIN AO INICIAR O JOGO
+	# SKIN DA SESSAO
 	# ==========================================
-	# A skin equipada vale apenas durante esta sessão.
-	# Ao reiniciar o jogo/fase, o pinguim volta ao original.
-	skin_equipada = "original"
+	# O estado fica no SceneTree, entao atravessa as cenas
+	# enquanto o jogo estiver aberto.
+	carregar_skin_da_sessao()
+
 	call_deferred("atualizar_cor_skin")
 
 	print("PLAYER INICIADO")
@@ -1190,11 +1193,35 @@ var skin_metal_material: ShaderMaterial = null
 
 
 func carregar_skin() -> void:
+	carregar_skin_da_sessao()
 
-	# A skin equipada NÃO é carregada do save.
-	# O save guarda somente as skins compradas.
-	# Ao iniciar/reiniciar, sempre começa na original.
+
+func carregar_skin_da_sessao() -> void:
 	skin_equipada = "original"
+
+	# A raiz do SceneTree nunca e destruida quando uma fase muda.
+	# Por isso a skin permanece ate o jogo ser fechado.
+	var raiz := get_tree().root
+
+	if raiz.has_meta(SKIN_META_SESSAO):
+		var dados = raiz.get_meta(SKIN_META_SESSAO)
+
+		if typeof(dados) == TYPE_DICTIONARY:
+			if dados.has("skin_equipada"):
+				var id: String = str(dados["skin_equipada"])
+
+				if id in [
+					"original",
+					"bronze",
+					"prata",
+					"ouro",
+					"azul",
+					"vermelho",
+					"amarelo",
+					"rgb"
+				]:
+					skin_equipada = id
+					return
 
 
 func obter_cor_skin() -> Color:
@@ -1496,9 +1523,7 @@ func definir_skin_visual(skin_id: String) -> void:
 	if skin_id.is_empty():
 		skin_id = "original"
 
-	skin_equipada = skin_id
-
-	if not skin_equipada in [
+	if not skin_id in [
 		"original",
 		"bronze",
 		"prata",
@@ -1508,7 +1533,19 @@ func definir_skin_visual(skin_id: String) -> void:
 		"amarelo",
 		"rgb"
 	]:
-		skin_equipada = "original"
+		skin_id = "original"
+
+	skin_equipada = skin_id
+
+	# Mantem a skin equipada entre as fases enquanto o jogo
+	# continua aberto.
+	var dados: Dictionary = {
+		"skin_equipada": skin_equipada
+	}
+
+	# A raiz fica viva durante toda a execucao do jogo.
+	# Assim a skin acompanha o jogador em qualquer mundo/fase.
+	get_tree().root.set_meta(SKIN_META_SESSAO, dados)
 
 	atualizar_cor_skin()
 

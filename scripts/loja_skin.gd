@@ -13,11 +13,13 @@ const DISTANCIA_MAXIMA_INTERACAO: float = 100.0
 
 # Arquivo usado para guardar skins compradas/equipadas.
 # As compras existem somente enquanto o jogo esta aberto.
-# Elas NAO sao gravadas em arquivo.
+# Nada e salvo em arquivo.
 #
-# O snapshot abaixo fica no autoload Globals e representa o que o
-# jogador ja possuia ANTES de comecar a rodada atual.
-const META_SNAPSHOT_INICIAL: String = "skin_snapshot_rodada"
+# O estado da sessao atravessa as fases.
+# O snapshot representa o que o jogador possuia no inicio da fase.
+const META_SESSAO: String = "skins_session_state"
+const META_SNAPSHOT: String = "skins_phase_snapshot"
+const META_SCENE: String = "skins_phase_scene"
 
 # =========================================================
 # ESTADOS
@@ -195,8 +197,8 @@ func _ready() -> void:
 	# SESSAO / RODADA
 	# -----------------------------------------------------
 
-	preparar_snapshot_da_rodada()
-	carregar_skins_da_rodada()
+	preparar_estado_da_rodada()
+	carregar_estado_da_sessao()
 	aplicar_skin_no_player()
 
 	print("========================================")
@@ -1350,6 +1352,7 @@ func comprar_ou_equipar() -> void:
 		skins_desbloqueadas.append(id)
 
 	equipar_skin(id)
+	atualizar_estado_da_sessao()
 
 	atualizar_menu()
 	atualizar_dados()
@@ -1383,8 +1386,10 @@ func equipar_skin(id: String) -> void:
 	if id != "original" and not skins_desbloqueadas.has(id):
 		return
 
-	# A skin equipada existe somente durante esta sessão.
+	# A skin equipada existe durante toda a sessão do jogo,
+	# inclusive quando a cena muda de fase.
 	skin_equipada = id
+	atualizar_estado_da_sessao()
 
 	if player != null and is_instance_valid(player):
 		if player.has_method("definir_skin_visual"):
@@ -1636,90 +1641,140 @@ func remover_destaque_botao(botao: Button) -> void:
 # SESSAO / RODADA
 # =========================================================
 
-func preparar_snapshot_da_rodada() -> void:
-	# O snapshot e criado apenas uma vez por ciclo de jogo/rodada.
-	# Assim, compras feitas depois do inicio da rodada podem ser
-	# apagadas no Restart sem apagar o que o jogador ja possuia.
-	if not Globals.has_meta(META_SNAPSHOT_INICIAL):
-		Globals.set_meta(
-			META_SNAPSHOT_INICIAL,
-			{
-				"skins_desbloqueadas": ["original"],
-				"skin_equipada": "original"
-			}
+func criar_estado_inicial_sessao() -> Dictionary:
+	return {
+		"skins_desbloqueadas": ["original"],
+		"skin_equipada": "original"
+	}
+
+
+func raiz_do_jogo() -> Node:
+	return get_tree().root
+
+
+func preparar_estado_da_rodada() -> void:
+	var raiz := raiz_do_jogo()
+	var cena_atual: String = ""
+
+	var cena = get_tree().current_scene
+	if cena != null:
+		cena_atual = cena.scene_file_path
+
+	# PRIMEIRO INICIO DO JOGO
+	if not raiz.has_meta(META_SESSAO):
+		var inicial := criar_estado_inicial_sessao()
+		raiz.set_meta(META_SESSAO, inicial)
+		raiz.set_meta(META_SNAPSHOT, inicial.duplicate(true))
+		raiz.set_meta(META_SCENE, cena_atual)
+		return
+
+	# PRIMEIRA VEZ que este sistema encontra uma cena.
+	if not raiz.has_meta(META_SCENE):
+		raiz.set_meta(META_SCENE, cena_atual)
+		raiz.set_meta(
+		META_SNAPSHOT,
+		duplicar_estado_sessao()
+	)
+	return
+
+	var ultima_cena: String = str(
+		raiz.get_meta(META_SCENE, "")
+	)
+
+	# Mudanca normal de fase:
+	# a compra ja realizada continua para a proxima fase e
+	# torna-se o novo estado de inicio dessa fase.
+	if ultima_cena != cena_atual:
+		raiz.set_meta(META_SCENE, cena_atual)
+		raiz.set_meta(
+		META_SNAPSHOT,
+		duplicar_estado_sessao()
 		)
 
-func carregar_skins_da_rodada() -> void:
-	# Comeca exatamente com o que estava disponivel no inicio
-	# da rodada. Nada e lido do disco.
+
+func duplicar_estado_sessao() -> Dictionary:
+	var raiz := raiz_do_jogo()
+
+	if not raiz.has_meta(META_SESSAO):
+		return criar_estado_inicial_sessao()
+
+	var dados = raiz.get_meta(META_SESSAO)
+
+	if typeof(dados) != TYPE_DICTIONARY:
+		return criar_estado_inicial_sessao()
+
+	var lista: Array[String] = ["original"]
+
+	if dados.has("skins_desbloqueadas"):
+		var lista_original = dados["skins_desbloqueadas"]
+
+		if typeof(lista_original) == TYPE_ARRAY:
+			for item in lista_original:
+				var id: String = str(item)
+
+				if skin_id_existe(id) and not lista.has(id):
+					lista.append(id)
+
+	var equipada: String = "original"
+
+	if dados.has("skin_equipada"):
+		var tentativa: String = str(dados["skin_equipada"])
+
+		if skin_id_existe(tentativa) 		and (tentativa == "original" or lista.has(tentativa)):
+			equipada = tentativa
+
+	return {
+		"skins_desbloqueadas": lista,
+		"skin_equipada": equipada
+	}
+
+
+func carregar_estado_da_sessao() -> void:
+	var dados := duplicar_estado_sessao()
+
 	skins_desbloqueadas.clear()
-	skin_equipada = "original"
 
-	if not Globals.has_meta(META_SNAPSHOT_INICIAL):
-		preparar_snapshot_da_rodada()
+	var lista = dados["skins_desbloqueadas"]
 
-	var snapshot = Globals.get_meta(META_SNAPSHOT_INICIAL)
+	for item in lista:
+		var id: String = str(item)
+
+		if not skins_desbloqueadas.has(id):
+			skins_desbloqueadas.append(id)
+
+	skin_equipada = str(dados["skin_equipada"])
+
+	if skin_equipada not in skins_desbloqueadas:
+		skin_equipada = "original"
+
+
+func atualizar_estado_da_sessao() -> void:
+	var dados: Dictionary = {
+		"skins_desbloqueadas": skins_desbloqueadas.duplicate(),
+		"skin_equipada": skin_equipada
+	}
+
+	# Estado global da execucao do jogo.
+	# Nao desaparece ao trocar de mundo/fase.
+	raiz_do_jogo().set_meta(META_SESSAO, dados)
+
+
+func resetar_compras_da_rodada() -> void:
+	var raiz := raiz_do_jogo()
+
+	if not raiz.has_meta(META_SNAPSHOT):
+		return
+
+	var snapshot = raiz.get_meta(META_SNAPSHOT)
 
 	if typeof(snapshot) != TYPE_DICTIONARY:
 		return
 
-	if snapshot.has("skins_desbloqueadas"):
-		var lista = snapshot["skins_desbloqueadas"]
-
-		if typeof(lista) == TYPE_ARRAY:
-			for item in lista:
-				var id: String = str(item)
-
-				if skin_id_existe(id) and not skins_desbloqueadas.has(id):
-					skins_desbloqueadas.append(id)
-
-	if not skins_desbloqueadas.has("original"):
-		skins_desbloqueadas.push_front("original")
-
-	# A skin equipada tambem volta para o estado do inicio da rodada.
-	if snapshot.has("skin_equipada"):
-		var equipada: String = str(snapshot["skin_equipada"])
-
-		if skin_id_existe(equipada) 		and (equipada == "original" or skins_desbloqueadas.has(equipada)):
-			skin_equipada = equipada
-	else:
-		skin_equipada = "original"
-
-	print("========================================")
-	print("SKINS DA RODADA CARREGADAS: ", skins_desbloqueadas)
-	print("SKIN EQUIPADA NA RODADA: ", skin_equipada)
-	print("========================================")
-
-func registrar_snapshot_da_rodada(
-	lista_skins: Array,
-	equipada: String = "original"
-) -> void:
-	var lista_valida: Array[String] = ["original"]
-
-	for item in lista_skins:
-		var id: String = str(item)
-
-		if skin_id_existe(id) and not lista_valida.has(id):
-			lista_valida.append(id)
-
-	var equipada_valida: String = "original"
-
-	if skin_id_existe(equipada) 	and (equipada == "original" or lista_valida.has(equipada)):
-		equipada_valida = equipada
-
-	Globals.set_meta(
-		META_SNAPSHOT_INICIAL,
-		{
-			"skins_desbloqueadas": lista_valida,
-			"skin_equipada": equipada_valida
-		}
+	# Restart: volta somente ao estado do inicio da fase.
+	raiz.set_meta(
+		META_SESSAO,
+		snapshot.duplicate(true)
 	)
-
-func resetar_compras_da_rodada() -> void:
-	# A loja sera criada novamente quando a cena reiniciar e
-	# carregara este snapshot. Esta funcao existe para deixar o
-	# comportamento explicito e permitir uso pelo Restart.
-	carregar_skins_da_rodada()
 
 # =========================================================
 # CHECAR ID

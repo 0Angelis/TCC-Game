@@ -1,5 +1,8 @@
 extends Control
 
+const META_SESSAO_SKINS: String = "skins_session_state"
+const META_SNAPSHOT_SKINS: String = "skins_phase_snapshot"
+
 
 # ==========================================
 # BOTÕES
@@ -614,6 +617,9 @@ func restart_game():
 	# enquanto uma skin comprada durante esta rodada volta a ficar
 	# bloqueada.
 
+	# Restaura o estado de skins do inicio da fase antes de
+	# recriar a cena.
+	restarar_skins_para_inicio_da_fase()
 	# ==========================================
 	# RESET DOS DADOS
 	# ==========================================
@@ -681,6 +687,23 @@ func restart_game():
 	get_tree().change_scene_to_file(
 		restart_scene
 	)
+
+
+# ==========================================
+# RESTAURAR SKINS DO INICIO DA FASE
+# ==========================================
+
+func restarar_skins_para_inicio_da_fase() -> void:
+	# IMPORTANTE:
+	# Este Restart e o Restart da tela de GAME OVER, ou seja,
+	# ele acontece depois que o jogador morreu.
+	#
+	# A morte NAO apaga skins compradas.
+	# Mantemos META_SESSAO intacta para que o novo player carregue
+	# a mesma skin e as mesmas compras ao recriar a fase.
+	#
+	# Nao restauramos META_SNAPSHOT aqui.
+	return
 
 
 # ==========================================
