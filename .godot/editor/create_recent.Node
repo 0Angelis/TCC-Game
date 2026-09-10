@@ -1,9 +1,9 @@
+CollisionShape2D
 Area2D
-AnimatedSprite2D
 Node2D
+AnimatedSprite2D
 CharacterBody2D
 Sprite2D
-CollisionShape2D
 TextureRect
 ColorRect
 ParallaxBackground

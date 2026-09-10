@@ -91,6 +91,15 @@ var celebrating: bool = false
 @onready var remote_transform: RemoteTransform2D = $remote
 @onready var level = get_tree().current_scene.get_node("level")
 
+# ==========================================
+# SKIN
+# ==========================================
+
+const SKIN_SAVE_PATH: String = "user://skins_save.json"
+const SKIN_SAVE_VERSION: int = 2
+
+var skin_equipada: String = "original"
+
 
 # ==========================================
 # READY
@@ -134,8 +143,17 @@ func _ready() -> void:
 
 			print("SNAPSHOT DE VIDAS: ", Globals.lives_before_level)
 
+	# ==========================================
+	# SKIN AO INICIAR O JOGO
+	# ==========================================
+	# A skin equipada vale apenas durante esta sessão.
+	# Ao reiniciar o jogo/fase, o pinguim volta ao original.
+	skin_equipada = "original"
+	call_deferred("atualizar_cor_skin")
+
 	print("PLAYER INICIADO")
 	print("VIDAS: ", Globals.player_life)
+	print("SKIN: ", skin_equipada)
 
 
 # ==========================================
@@ -399,36 +417,16 @@ func _physics_process(delta: float) -> void:
 
 
 	# ==========================================
-	# ÚLTIMA VIDA
+	# COR / SKIN
+	# ==========================================
+	#
+	# Dano continua usando vermelho.
+	# Fora do dano, a skin equipada é aplicada
+	# diretamente como MODULATE no sprite.
+	#
 	# ==========================================
 
-	if (
-		Globals.player_life == 1
-		and not taking_damage
-	):
-
-		var blink: float = abs(
-			sin(
-				Time.get_ticks_msec() * 0.005
-			)
-		)
-
-
-		animation.modulate = Color(
-			1.0,
-			blink,
-			blink,
-			1.0
-		)
-
-	elif not taking_damage:
-
-		animation.modulate = Color(
-			1.0,
-			1.0,
-			1.0,
-			1.0
-		)
+	atualizar_cor_skin()
 
 
 	# ==========================================
@@ -841,12 +839,8 @@ func take_damage(
 	taking_damage = false
 
 
-	animation.modulate = Color(
-		1.0,
-		1.0,
-		1.0,
-		1.0
-	)
+	# A cor da skin volta automaticamente no próximo frame.
+	atualizar_cor_skin()
 
 
 	# ==========================================
@@ -1180,6 +1174,343 @@ func die() -> void:
 		"res://scenes/game_over.tscn"
 	)
 
+
+# ==========================================
+# SISTEMA DE SKINS
+# ==========================================
+#
+# Skins normais usam MODULATE.
+# Bronze, Prata e Ouro usam um shader metálico criado por código,
+# então não precisam de PNG novo.
+#
+# ==========================================
+
+var skin_metal_shader: Shader = null
+var skin_metal_material: ShaderMaterial = null
+
+
+func carregar_skin() -> void:
+
+	# A skin equipada NÃO é carregada do save.
+	# O save guarda somente as skins compradas.
+	# Ao iniciar/reiniciar, sempre começa na original.
+	skin_equipada = "original"
+
+
+func obter_cor_skin() -> Color:
+
+	match skin_equipada:
+
+		"bronze":
+			return Color("#B87333")
+
+		"prata":
+			return Color.WHITE
+
+		"ouro":
+			return Color.WHITE
+
+		"azul":
+			return Color("#2196FF")
+
+		"vermelho":
+			return Color("#F44336")
+
+		"amarelo":
+			return Color("#FFE000")
+
+		"rgb":
+			var tempo: float = Time.get_ticks_msec() * 0.001
+			var hue: float = fmod(tempo * 0.35, 1.0)
+
+			return Color.from_hsv(
+				hue,
+				0.85,
+				1.0
+			)
+
+		_:
+			return Color.WHITE
+
+
+func criar_shader_metalico() -> void:
+
+	if skin_metal_shader != null:
+		return
+
+	skin_metal_shader = Shader.new()
+
+	skin_metal_shader.code = """
+shader_type canvas_item;
+
+uniform vec4 metal_dark : source_color;
+uniform vec4 metal_mid : source_color;
+uniform vec4 metal_light : source_color;
+uniform float shine_strength : hint_range(0.0, 2.0) = 0.75;
+uniform float shine_speed : hint_range(0.0, 3.0) = 0.65;
+
+void fragment() {
+	vec4 tex = texture(TEXTURE, UV);
+
+	if (tex.a <= 0.01) {
+		discard;
+	}
+
+	// Pega a luminosidade original do sprite para preservar
+	// sombras e detalhes do pinguim.
+	float luminance = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
+
+	// Cria três níveis de metal: sombra, meio e reflexo.
+	float middle = smoothstep(0.10, 0.55, luminance);
+	float bright = smoothstep(0.50, 0.90, luminance);
+
+	vec3 metal_color = mix(metal_dark.rgb, metal_mid.rgb, middle);
+	metal_color = mix(metal_color, metal_light.rgb, bright);
+
+	// Reflexo metálico passando pelo personagem.
+	float sweep = fract(TIME * shine_speed);
+	float distance_to_shine = abs(UV.x - sweep);
+	float shine = 1.0 - smoothstep(0.0, 0.16, distance_to_shine);
+	shine *= shine_strength;
+
+	metal_color += metal_light.rgb * shine * 0.55;
+	metal_color = clamp(metal_color, vec3(0.0), vec3(1.0));
+
+	COLOR = vec4(metal_color, tex.a);
+}
+"""
+
+	skin_metal_material = ShaderMaterial.new()
+	skin_metal_material.shader = skin_metal_shader
+
+
+func aplicar_metal_bronze() -> void:
+
+	if skin_metal_material == null:
+		criar_shader_metalico()
+
+	if skin_metal_material == null:
+		return
+
+	# Bronze com aparência de metal/cobre, bem diferente do amarelo.
+	skin_metal_material.set_shader_parameter(
+		"metal_dark",
+		Color("#4A2410")
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"metal_mid",
+		Color("#A95F2A")
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"metal_light",
+		Color("#E9A35A")
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"shine_strength",
+		0.78
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"shine_speed",
+		0.52
+	)
+
+	animation.material = skin_metal_material
+
+
+func aplicar_metal_prata() -> void:
+
+	if skin_metal_material == null:
+		criar_shader_metalico()
+
+	if skin_metal_material == null:
+		return
+
+	skin_metal_material.set_shader_parameter(
+		"metal_dark",
+		Color("#666A70")
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"metal_mid",
+		Color("#BFC4CA")
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"metal_light",
+		Color("#F7F9FC")
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"shine_strength",
+		0.85
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"shine_speed",
+		0.55
+	)
+
+	animation.material = skin_metal_material
+
+
+func aplicar_metal_ouro() -> void:
+
+	if skin_metal_material == null:
+		criar_shader_metalico()
+
+	if skin_metal_material == null:
+		return
+
+	skin_metal_material.set_shader_parameter(
+		"metal_dark",
+		Color("#6B3F05")
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"metal_mid",
+		Color("#D99516")
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"metal_light",
+		Color("#FFF0A0")
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"shine_strength",
+		0.95
+	)
+
+	skin_metal_material.set_shader_parameter(
+		"shine_speed",
+		0.48
+	)
+
+	animation.material = skin_metal_material
+
+
+func remover_shader_metalico() -> void:
+
+	if animation == null:
+		return
+
+	animation.material = null
+
+
+func atualizar_cor_skin() -> void:
+
+	if animation == null:
+		return
+
+	# ------------------------------------------
+	# BRONZE, PRATA E OURO = MATERIAL METÁLICO
+	# ------------------------------------------
+
+	if skin_equipada == "bronze":
+		aplicar_metal_bronze()
+	elif skin_equipada == "prata":
+		aplicar_metal_prata()
+	elif skin_equipada == "ouro":
+		aplicar_metal_ouro()
+	else:
+		remover_shader_metalico()
+
+	# ------------------------------------------
+	# QUANDO ESTÁ TOMANDO DANO
+	# ------------------------------------------
+
+	if taking_damage:
+		animation.modulate = Color(
+			1.0,
+			0.55,
+			0.55,
+			1.0
+		)
+		return
+
+	# ------------------------------------------
+	# SKINS METÁLICAS
+	# ------------------------------------------
+	# O shader cuida da cor. Aqui só controlamos o
+	# brilho quando o personagem está na última vida.
+	# ------------------------------------------
+
+	if skin_equipada == "bronze" or skin_equipada == "prata" or skin_equipada == "ouro":
+
+		var intensidade_metal: float = 1.0
+
+		if Globals.player_life == 1:
+
+			var blink_metal: float = abs(
+				sin(
+					Time.get_ticks_msec() * 0.005
+				)
+			)
+
+			intensidade_metal = lerp(
+				0.35,
+				1.0,
+				blink_metal
+			)
+
+		animation.modulate = Color(
+			intensidade_metal,
+			intensidade_metal,
+			intensidade_metal,
+			1.0
+		)
+
+		return
+
+	# ------------------------------------------
+	# SKINS NORMAIS
+	# ------------------------------------------
+
+	var cor_skin: Color = obter_cor_skin()
+
+	if Globals.player_life == 1:
+
+		var blink: float = abs(
+			sin(
+				Time.get_ticks_msec() * 0.005
+			)
+		)
+
+		var intensidade: float = lerp(
+			0.35,
+			1.0,
+			blink
+		)
+
+		cor_skin *= intensidade
+
+	animation.modulate = cor_skin
+
+
+func definir_skin_visual(skin_id: String) -> void:
+
+	if skin_id.is_empty():
+		skin_id = "original"
+
+	skin_equipada = skin_id
+
+	if not skin_equipada in [
+		"original",
+		"bronze",
+		"prata",
+		"ouro",
+		"azul",
+		"vermelho",
+		"amarelo",
+		"rgb"
+	]:
+		skin_equipada = "original"
+
+	atualizar_cor_skin()
 
 # ==========================================
 # CÂMERA
