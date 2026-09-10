@@ -28,7 +28,7 @@ var life_snapshot_scene := ""
 
 # 1 = mundo 01 -> loja -> mundo 02
 # 2 = mundo 02 -> loja -> mundo 03
-# 3 = mundo 03 -> loja final
+# 3 = mundo 03 -> loja -> mundo 04 (boss final)
 var last_world_before_shop := 0
 
 

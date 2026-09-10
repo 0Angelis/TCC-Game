@@ -1691,7 +1691,7 @@ position = Vector2(1096, 504)
 
 [node name="goal" parent="." unique_id=1383269650 instance=ExtResource("24_rja6n")]
 position = Vector2(3150, 752)
-next_level = "res://levels/world_02.tscn"
+next_level = "uid://2lrgxc7earf0"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
 zoom = Vector2(2.5, 2.5)

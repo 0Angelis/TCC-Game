@@ -532,6 +532,12 @@ func get_current_world() -> int:
 
 		return 3
 
+	if path.contains(
+		"world_04"
+	):
+
+		return 4
+
 
 	return 0
 
@@ -555,6 +561,9 @@ func get_required_fragments() -> int:
 
 		3:
 			return 3
+
+		4:
+			return 0
 
 
 	return 0
@@ -582,6 +591,10 @@ func get_fragment_count() -> int:
 
 			return Globals.memoria_fragments
 
+		4:
+
+			return 0
+
 
 	return 0
 
@@ -607,6 +620,10 @@ func get_fragment_name() -> String:
 		3:
 
 			return "Memória"
+
+		4:
+
+			return "Fragmentos"
 
 
 	return "Fragmentos"
@@ -741,7 +758,8 @@ func _get_next_level() -> String:
 	# loja -> world_02
 	# world_02 -> loja
 	# loja -> world_03
-	# world_03 -> loja final
+	# world_03 -> loja
+	# loja -> world_04 (boss final)
 
 	if scene_path.contains("world_00"):
 
@@ -773,7 +791,7 @@ func _get_next_level() -> String:
 				return "res://levels/world_03.tscn"
 
 			3:
-				return ""
+				return "res://levels/world_04.tscn"
 
 			_: 
 				return ""
