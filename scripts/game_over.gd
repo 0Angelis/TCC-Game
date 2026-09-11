@@ -603,23 +603,16 @@ func restart_game():
 
 
 	# ==========================================
-	# RESET DAS COMPRAS DE SKINS DA RODADA
+	# SKINS NAO SAO PERDIDAS AO MORRER
 	# ==========================================
 	#
-	# IMPORTANTE:
-	# A Loja de Skins NAO salva compras em arquivo.
-	# O snapshot em Globals representa o que o jogador ja tinha
-	# antes de iniciar a rodada. O Restart recria a cena e a loja
-	# volta exatamente para esse snapshot.
+	# O estado das skins fica em "skins_session_state"
+	# durante toda a sessao do jogo.
 	#
-	# Nao apagamos o snapshot aqui.
-	# Assim, uma skin comprada antes da rodada continua disponivel,
-	# enquanto uma skin comprada durante esta rodada volta a ficar
-	# bloqueada.
-
-	# Restaura o estado de skins do inicio da fase antes de
-	# recriar a cena.
-	restarar_skins_para_inicio_da_fase()
+	# Ao morrer e usar RESTART no Game Over, nao
+	# restauramos o snapshot antigo da fase.
+	# Nenhuma skin comprada e perdida e a ultima skin
+	# equipada continua equipada.
 	# ==========================================
 	# RESET DOS DADOS
 	# ==========================================
@@ -687,52 +680,6 @@ func restart_game():
 	get_tree().change_scene_to_file(
 		restart_scene
 	)
-
-
-# ==========================================
-# RESTAURAR SKINS DO INICIO DA FASE
-# ==========================================
-
-func restarar_skins_para_inicio_da_fase() -> void:
-	var raiz := get_tree().root
-
-	if not raiz.has_meta("skins_before_level"):
-		print("RESTART SKINS: nenhum snapshot da fase.")
-		return
-
-	var snapshot = raiz.get_meta("skins_before_level")
-
-	if typeof(snapshot) != TYPE_DICTIONARY:
-		print("RESTART SKINS: snapshot invalido.")
-		return
-
-	# =====================================================
-	# RESET REAL
-	# =====================================================
-	# Exatamente como as moedas:
-	# antes de trocar a cena, substituimos o estado atual pelo
-	# estado salvo no inicio da fase.
-	#
-	# Se comprou uma skin em lojas.tscn e reiniciar lojas.tscn,
-	# ela desaparece daqui.
-	#
-	# Se a skin ja existia antes de entrar nessa loja, ela fica.
-	raiz.set_meta(
-		"skins_session_state",
-		snapshot.duplicate(true)
-	)
-
-	# Marca que a proxima entrada e um Restart.
-	# O player nao criara um novo snapshot por cima do antigo.
-	raiz.set_meta(
-		"skins_restart_pending",
-		true
-	)
-
-	print("========================================")
-	print("RESTART SKINS - RESET REAL")
-	print("ESTADO RESTAURADO: ", snapshot)
-	print("========================================")
 
 
 # ==========================================

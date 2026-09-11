@@ -1389,13 +1389,13 @@ func processar_menu(event: InputEvent) -> void:
 
 
 	# -----------------------------------------------------
-	# ESC
-	# A pausa do jogo fica por cima da loja.
-	# A loja não fecha aqui.
+	# ESC = FECHAR A LOJA
 	# -----------------------------------------------------
 
 	if event.is_action_pressed("ui_cancel"):
 
+		get_viewport().set_input_as_handled()
+		fechar_menu()
 		return
 
 
