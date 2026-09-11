@@ -1780,7 +1780,6 @@ position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
-visible = false
 script = ExtResource("30_7k4mt")
 
 [node name="color_rect" type="ColorRect" parent="transition" unique_id=1131400237]
