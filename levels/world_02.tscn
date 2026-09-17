@@ -1325,6 +1325,7 @@ next_level = "uid://gxukbahnutqp"
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
 zoom = Vector2(2.5, 2.5)
 limit_left = 0
+limit_bottom = 896
 position_smoothing_enabled = true
 
 [node name="warning" type="Node2D" parent="." unique_id=1954291522]
