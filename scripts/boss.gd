@@ -23,7 +23,7 @@ signal boss_health_changed(current_health: int, maximum_health: int)
 const MAX_HEALTH: int = 120
 const DAMAGE_PER_SUCCESS: int = 15
 const EXHAUSTED_TIME: float = 10.0
-const CHALLENGE_INTERACTION_DISTANCE: float = 78.0
+const CHALLENGE_INTERACTION_DISTANCE: float = 130.0
 
 const ATTACK_REQUIREMENTS: Array[int] = [3, 5, 10, 10]
 const CHALLENGE_ORDER: Array[String] = ["logic", "attention", "memory", "mixed"]
@@ -83,13 +83,20 @@ func _ready() -> void:
 	collision_mask = 1
 
 	_find_player()
-	_create_or_get_controllers()
 	_spawn_existing_boss()
+	_create_or_get_controllers()
 	_create_boss_prompt()
 	_create_hud()
 	_connect_signals()
 
+	# O prompt interno do ChallengeManager fica desativado.
+	# O unico prompt usado e o que fica acima da cabeca do boss.
+	if challenge_manager != null and challenge_manager.has_method("set_external_start_prompt"):
+		challenge_manager.call("set_external_start_prompt", true)
+
+	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
+	_set_boss_stomp_enabled(false)
 	_set_boss_prompt_visible(false)
 	_set_hud_visible(false)
 	_update_health_ui()
@@ -127,23 +134,33 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not event.is_action_pressed("interact"):
+	if not (event is InputEventKey):
+		return
+
+	var key_event: InputEventKey = event as InputEventKey
+
+	if not key_event.pressed or key_event.echo:
 		return
 
 	if DialogManager.is_message_active:
 		return
 
-	# Entrada do boss.
+	if key_event.keycode != KEY_E:
+		return
+
+	# Entrada da batalha.
 	if state == BossState.WAITING and player_inside and not fight_started:
 		get_viewport().set_input_as_handled()
 		_start_intro()
 		return
 
-	# Início do desafio.
+	# Inicio do desafio.
 	if state == BossState.EXHAUSTED and waiting_for_challenge:
 		if _player_is_close_to_boss():
 			get_viewport().set_input_as_handled()
+			print("BOSS: E pressionado. Iniciando desafio.")
 			_start_current_challenge()
+		return
 
 
 # ============================================================
@@ -342,7 +359,9 @@ func _start_chase() -> void:
 		ATTACK_REQUIREMENTS.size() - 1
 	)
 
+	_set_boss_attack_enabled(true)
 	_set_boss_damage_enabled(challenge_index > 0)
+	_set_boss_stomp_enabled(false)
 	_set_boss_prompt_visible(false)
 
 	if is_instance_valid(boss_visual):
@@ -384,8 +403,10 @@ func _start_exhausted() -> void:
 	waiting_for_challenge = true
 	exhausted_time_left = EXHAUSTED_TIME
 
-	# Player fica livre. Só o boss para.
+	# Player fica livre. So o boss para.
+	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
+	_set_boss_stomp_enabled(false)
 
 	if is_instance_valid(boss_visual):
 		if boss_visual.has_method("freeze_boss"):
@@ -405,7 +426,6 @@ func _process_exhausted(delta: float) -> void:
 	if not is_instance_valid(player):
 		_find_player_if_needed()
 
-	# Se chegar perto e apertar E, o unhandled_input inicia.
 	if exhausted_time_left <= 0.0:
 		waiting_for_challenge = false
 		_set_boss_prompt_visible(false)
@@ -418,19 +438,24 @@ func _process_exhausted(delta: float) -> void:
 
 func _start_current_challenge() -> void:
 	if state != BossState.EXHAUSTED:
+		print("BOSS: Nao pode iniciar. Estado atual: ", state)
 		return
 
 	if not _player_is_close_to_boss():
+		print("BOSS: Jogador esta longe do boss.")
 		return
 
 	if challenge_manager == null:
+		push_error("BOSS: BossChallengeManager nao encontrado.")
 		return
 
 	waiting_for_challenge = false
 	state = BossState.CHALLENGE
 
 	_set_boss_prompt_visible(false)
+	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
+	_set_boss_stomp_enabled(false)
 
 	if is_instance_valid(boss_visual):
 		if boss_visual.has_method("freeze_boss"):
@@ -440,15 +465,29 @@ func _start_current_challenge() -> void:
 		min(challenge_index, CHALLENGE_ORDER.size() - 1)
 	]
 
-	if challenge_manager.has_method("prepare_challenge"):
-		challenge_manager.call(
-			"prepare_challenge",
-			type,
-			challenge_index
-		)
+	print("BOSS: Preparando desafio: ", type)
+	print("BOSS: Rodada: ", challenge_index)
 
-	if challenge_manager.has_method("start_current_challenge"):
-		challenge_manager.call("start_current_challenge")
+	if not challenge_manager.has_method("prepare_challenge"):
+		push_error("BOSS: prepare_challenge nao encontrado.")
+		state = BossState.EXHAUSTED
+		waiting_for_challenge = true
+		return
+
+	challenge_manager.call(
+		"prepare_challenge",
+		type,
+		challenge_index
+	)
+
+	if not challenge_manager.has_method("start_current_challenge"):
+		push_error("BOSS: start_current_challenge nao encontrado.")
+		state = BossState.EXHAUSTED
+		waiting_for_challenge = true
+		return
+
+	challenge_manager.call("start_current_challenge")
+	print("BOSS: Desafio iniciado com sucesso.")
 
 
 func _on_challenge_finished(
@@ -600,6 +639,26 @@ func _player_is_close_to_boss() -> bool:
 			boss_visual.global_position
 		) <= CHALLENGE_INTERACTION_DISTANCE
 	)
+
+
+# ============================================================
+# CONTROLES OFENSIVOS DO BOSS
+# ============================================================
+
+func _set_boss_attack_enabled(enabled: bool) -> void:
+	if not is_instance_valid(boss_visual):
+		return
+
+	if boss_visual.has_method("set_attack_enabled"):
+		boss_visual.call("set_attack_enabled", enabled)
+
+
+func _set_boss_stomp_enabled(enabled: bool) -> void:
+	if not is_instance_valid(boss_visual):
+		return
+
+	if boss_visual.has_method("set_stomp_enabled"):
+		boss_visual.call("set_stomp_enabled", enabled)
 
 
 # ============================================================

@@ -68,7 +68,9 @@ var is_dead: bool = false
 var is_hurt: bool = false
 var is_attacking: bool = false
 
+var attack_enabled: bool = false
 var damage_enabled: bool = false
+var stomp_enabled: bool = false
 
 var attack_cooldown: float = 0.0
 var attack_timer: float = 0.0
@@ -184,7 +186,7 @@ func _physics_process(delta: float) -> void:
 	)
 
 	if (
-		damage_enabled
+		attack_enabled
 		and
 		distance_x <= ATTACK_TRIGGER_DISTANCE
 		and
@@ -316,10 +318,10 @@ func _chase_player(delta: float) -> void:
 
 
 func _start_attack() -> void:
-	if is_attacking:
+	if not attack_enabled:
 		return
 
-	if not damage_enabled:
+	if is_attacking:
 		return
 
 	if attack_locked_until_leave:
@@ -539,6 +541,9 @@ func _check_stomp_overlap() -> void:
 
 
 func _check_single_stomp(body: Node2D) -> void:
+	if not stomp_enabled:
+		return
+
 	if is_dead:
 		return
 
@@ -828,6 +833,15 @@ func _play_animation(name: String) -> void:
 # CONTROLE DA BATALHA
 # ============================================================
 
+func set_attack_enabled(enabled: bool) -> void:
+	attack_enabled = enabled
+
+	if not enabled:
+		is_attacking = false
+		attack_timer = 0.0
+		attack_hit_done = false
+
+
 func set_damage_enabled(enabled: bool) -> void:
 	damage_enabled = enabled
 
@@ -835,6 +849,10 @@ func set_damage_enabled(enabled: bool) -> void:
 	# para o pisão do Player.
 	hitbox_area.monitoring = true
 	hitbox_area.monitorable = true
+
+
+func set_stomp_enabled(enabled: bool) -> void:
+	stomp_enabled = enabled
 
 
 func freeze_boss() -> void:

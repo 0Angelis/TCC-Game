@@ -72,8 +72,6 @@ func _process(delta: float) -> void:
 		_finish(false)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if state != "active":
-		return
 	if input_locked:
 		return
 	if not (event is InputEventKey):
@@ -81,6 +79,15 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	var key_event: InputEventKey = event as InputEventKey
 	if not key_event.pressed or key_event.echo:
+		return
+
+	# E inicia o desafio quando ele esta pronto.
+	if state == "ready" and key_event.keycode == KEY_E:
+		start_current_challenge()
+		get_viewport().set_input_as_handled()
+		return
+
+	if state != "active":
 		return
 
 	if key_event.keycode == KEY_1:
