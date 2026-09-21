@@ -168,6 +168,7 @@ func _unhandled_input(event: InputEvent) -> void:
 # ============================================================
 
 func _spawn_existing_boss() -> void:
+	# Primeiro tenta encontrar um boss que ja esteja no World-04.
 	var existing: Node = get_parent().get_node_or_null("boss inimigo")
 
 	if existing == null:
@@ -177,13 +178,31 @@ func _spawn_existing_boss() -> void:
 				existing = candidate
 				break
 
-	if existing == null or not existing is CharacterBody2D:
-		push_error("BOSS: não encontrei o 'boss inimigo' no World-04.")
+	# O world_04.tscn deste projeto nao tinha uma instancia do boss.tscn.
+	# Para nao depender disso, criamos o boss automaticamente.
+	if existing == null:
+		var boss_scene: PackedScene = load("res://actors/boss.tscn") as PackedScene
+
+		if boss_scene == null:
+			push_error("BOSS: nao foi possivel carregar res://actors/boss.tscn")
+			return
+
+		existing = boss_scene.instantiate()
+		existing.name = "boss inimigo"
+		get_parent().add_child(existing)
+
+		if existing is Node2D:
+			(existing as Node2D).global_position = _get_collision_global_position()
+
+		print("BOSS: boss.tscn criado automaticamente no World-04.")
+
+	if not (existing is CharacterBody2D):
+		push_error("BOSS: o boss encontrado nao e CharacterBody2D.")
 		return
 
 	var shape: CollisionShape2D = get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if shape == null:
-		push_error("BOSS: CollisionShape2D não encontrado.")
+		push_error("BOSS: CollisionShape2D nao encontrado.")
 		return
 
 	boss_visual = existing as CharacterBody2D
@@ -425,6 +444,11 @@ func _process_exhausted(delta: float) -> void:
 	# O Player continua com can_move = true.
 	if not is_instance_valid(player):
 		_find_player_if_needed()
+
+	# Se o jogador estiver perto, mantem a janela do desafio aberta.
+	# Assim o prompt nao desaparece enquanto ele esta tentando apertar E.
+	if waiting_for_challenge and _player_is_close_to_boss():
+		exhausted_time_left = max(exhausted_time_left, EXHAUSTED_TIME)
 
 	if exhausted_time_left <= 0.0:
 		waiting_for_challenge = false
