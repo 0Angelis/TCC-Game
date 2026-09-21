@@ -1,41 +1,97 @@
 extends Area2D
 
 # ============================================================
-# BOSS.GD — CONTROLADOR DA BATALHA FINAL
+# BOSS.GD - BATALHA FINAL
 # ============================================================
-# ESTE NÓ (BOSS) É APENAS O GATILHO DA PORTA.
-# O inimigo real já existe no World-04 como:
-#     boss inimigo (CharacterBody2D)
 #
-# O boss.gd:
-# - usa o CollisionShape2D como ponto de spawn;
-# - controla a lore;
-# - conta ataques reais do boss;
-# - faz 3 -> 5 -> 10 -> 10 ataques;
-# - deixa o Player livre quando o boss cansa;
-# - mostra o [E] acima da cabeça do boss;
-# - abre o desafio somente quando o Player chega perto;
-# - impede dano do boss antes do primeiro desafio.
+# REGRAS:
+# - boss começa com 100 HP
+# - existem 5 desafios
+# - cada desafio correto causa 20 de dano
+# - 5 acertos derrotam o boss
+# - boss luta por 20 segundos antes de cansar
+# - jogador aperta E para iniciar o desafio
+#
+# DESAFIOS:
+# - existe apenas 1 desafio de raciocínio
+# - os outros são atenção / memória
+# - a posição do desafio de raciocínio é aleatória
+#
+# HUD:
+# - fica na região onde estavam as moedas
+# - maior que a versão anterior
+# - ainda pequeno o suficiente para não cobrir a tela
+#
 # ============================================================
 
-signal boss_health_changed(current_health: int, maximum_health: int)
 
-const MAX_HEALTH: int = 120
-const DAMAGE_PER_SUCCESS: int = 15
-const EXHAUSTED_TIME: float = 10.0
-const CHALLENGE_INTERACTION_DISTANCE: float = 130.0
+signal boss_health_changed(
+	current_health: int,
+	maximum_health: int
+)
 
-const ATTACK_REQUIREMENTS: Array[int] = [3, 5, 10, 10]
-const CHALLENGE_ORDER: Array[String] = ["logic", "attention", "memory", "mixed"]
 
-const FONT_PATH: String = "res://assets/Fontes/Pixeloid_Font_1_0/OpenType (.otf)/PixeloidSans-Bold.otf"
-const PURPLE: Color = Color("#8E4EDB")
-const PURPLE_LIGHT: Color = Color("#C39BFF")
-const PANEL: Color = Color("#120D1B")
-const WHITE: Color = Color("#F8F5FF")
-const MUTED: Color = Color("#BDB5C9")
-const GREEN: Color = Color("#78E08F")
-const RED: Color = Color("#FF6B7A")
+# ============================================================
+# CONFIGURAÇÃO DA BATALHA
+# ============================================================
+
+const MAX_HEALTH: int = 100
+const DAMAGE_PER_SUCCESS: int = 20
+
+const TOTAL_CHALLENGES: int = 5
+
+const FATIGUE_TIME: float = 20.0
+const EXHAUSTED_TIME: float = 30.0
+
+const TALK_DISTANCE: float = 180.0
+const CHALLENGE_DISTANCE: float = 130.0
+
+
+# ============================================================
+# POSIÇÃO DO HUD
+# ============================================================
+#
+# Aumente/diminua o segundo valor para mover para cima/baixo.
+#
+# ============================================================
+
+const HUD_POSITION: Vector2 = Vector2(
+	11.0,
+	11.0
+)
+
+
+# ============================================================
+# DESAFIOS
+# ============================================================
+
+# ÚNICO DESAFIO DE RACIOCÍNIO
+const LOGIC_CHALLENGE: String = (
+	"sequence_double"
+)
+
+
+# Desafios que aparecem com mais frequência.
+const FUN_CHALLENGE_POOL: Array[String] = [
+	"attention_red",
+	"attention_blue",
+	"memory_numbers",
+	"memory_words",
+	"attention_red",
+	"memory_words"
+]
+
+
+# ============================================================
+# ORDEM DOS DESAFIOS
+# ============================================================
+
+var challenge_order: Array[String] = []
+
+
+# ============================================================
+# ESTADOS
+# ============================================================
 
 enum BossState {
 	WAITING,
@@ -46,74 +102,201 @@ enum BossState {
 	VICTORY
 }
 
+
 var state: BossState = BossState.WAITING
 
+
+# ============================================================
+# PLAYER
+# ============================================================
+
 var player: Node2D = null
-var player_inside: bool = false
+
+
+# ============================================================
+# BOSS
+# ============================================================
 
 var boss_visual: CharacterBody2D = null
 var boss_sprite: AnimatedSprite2D = null
 
+
+# ============================================================
+# CONTROLLERS
+# ============================================================
+
 var dialogue_controller: Node = null
 var challenge_manager: Node = null
 
+
+# ============================================================
+# BATALHA
+# ============================================================
+
 var current_health: int = MAX_HEALTH
+
 var challenge_index: int = 0
-var attack_count: int = 0
+
+var fatigue_time_left: float = 0.0
 var exhausted_time_left: float = 0.0
 
 var fight_started: bool = false
 var waiting_for_challenge: bool = false
 
-var boss_prompt: Panel = null
-var boss_prompt_text: Label = null
-var boss_prompt_timer: Label = null
+
+# ============================================================
+# PROMPT
+# ============================================================
+
+var boss_prompt: Label = null
+
+
+# ============================================================
+# HUD
+# ============================================================
 
 var hud_canvas: CanvasLayer = null
 var hud_panel: Panel = null
+
+var hud_name: Label = null
 var hud_phase: Label = null
+
+var hud_fatigue_label: Label = null
+var hud_fatigue_value: Label = null
+
 var hud_bar: ProgressBar = null
 var hud_value: Label = null
 
 
+# ============================================================
+# READY
+# ============================================================
+
 func _ready() -> void:
+
 	monitoring = true
 	monitorable = true
+
 	collision_layer = 0
 	collision_mask = 1
 
+
+	# --------------------------------------------------------
+	# ORDEM DOS DESAFIOS
+	# --------------------------------------------------------
+
+	_build_challenge_order()
+
+
+	# --------------------------------------------------------
+	# PLAYER
+	# --------------------------------------------------------
+
 	_find_player()
+
+
+	# --------------------------------------------------------
+	# BOSS
+	# --------------------------------------------------------
+
 	_spawn_existing_boss()
+
+
+	# --------------------------------------------------------
+	# CONTROLLERS
+	# --------------------------------------------------------
+
 	_create_or_get_controllers()
+
+
+	# --------------------------------------------------------
+	# PROMPT
+	# --------------------------------------------------------
+
 	_create_boss_prompt()
+
+
+	# --------------------------------------------------------
+	# HUD
+	# --------------------------------------------------------
+
 	_create_hud()
+
+
+	# --------------------------------------------------------
+	# SINAIS
+	# --------------------------------------------------------
+
 	_connect_signals()
 
-	# O prompt interno do ChallengeManager fica desativado.
-	# O unico prompt usado e o que fica acima da cabeca do boss.
-	if challenge_manager != null and challenge_manager.has_method("set_external_start_prompt"):
-		challenge_manager.call("set_external_start_prompt", true)
+
+	# --------------------------------------------------------
+	# CHALLENGE MANAGER
+	# --------------------------------------------------------
+
+	if (
+		challenge_manager != null
+		and
+		challenge_manager.has_method(
+			"set_external_start_prompt"
+		)
+	):
+
+		challenge_manager.call(
+			"set_external_start_prompt",
+			true
+		)
+
+
+	# --------------------------------------------------------
+	# ESTADO INICIAL DO BOSS
+	# --------------------------------------------------------
 
 	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
 	_set_boss_stomp_enabled(false)
+
 	_set_boss_prompt_visible(false)
 	_set_hud_visible(false)
+
 	_update_health_ui()
 
-	if not body_entered.is_connected(_on_body_entered):
-		body_entered.connect(_on_body_entered)
 
-	if not body_exited.is_connected(_on_body_exited):
-		body_exited.connect(_on_body_exited)
+	print(
+		"================================"
+	)
+	print(
+		"BOSS FINAL INICIADO"
+	)
+	print(
+		"VIDA: ",
+		MAX_HEALTH
+	)
+	print(
+		"DESAFIOS: ",
+		TOTAL_CHALLENGES
+	)
+	print(
+		"ORDEM: ",
+		challenge_order
+	)
+	print(
+		"================================"
+	)
 
-	print("BOSS.GD pronto.")
 
+# ============================================================
+# PROCESS
+# ============================================================
 
-func _process(delta: float) -> void:
+func _process(
+	delta: float
+) -> void:
+
 	_find_player_if_needed()
 
 	match state:
+
 		BossState.WAITING:
 			_process_waiting()
 
@@ -121,7 +304,7 @@ func _process(delta: float) -> void:
 			pass
 
 		BossState.CHASE:
-			_process_chase()
+			_process_chase(delta)
 
 		BossState.EXHAUSTED:
 			_process_exhausted(delta)
@@ -133,141 +316,418 @@ func _process(delta: float) -> void:
 			pass
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not (event is InputEventKey):
+# ============================================================
+# INPUT
+# ============================================================
+
+func _unhandled_input(
+	event: InputEvent
+) -> void:
+
+	if not event is InputEventKey:
 		return
 
-	var key_event: InputEventKey = event as InputEventKey
+	var key_event: InputEventKey = (
+		event as InputEventKey
+	)
 
-	if not key_event.pressed or key_event.echo:
+	if not key_event.pressed:
 		return
 
-	if DialogManager.is_message_active:
+	if key_event.echo:
 		return
 
-	if key_event.keycode != KEY_E:
+
+	var is_e: bool = (
+		key_event.keycode == KEY_E
+		or
+		key_event.physical_keycode == KEY_E
+	)
+
+	if not is_e:
 		return
 
-	# Entrada da batalha.
-	if state == BossState.WAITING and player_inside and not fight_started:
+
+	# ========================================================
+	# FALAR COM O CHEFE
+	# ========================================================
+
+	if (
+		state == BossState.WAITING
+		and
+		not fight_started
+		and
+		_is_player_close_to_boss(
+			TALK_DISTANCE
+		)
+	):
+
 		get_viewport().set_input_as_handled()
+
 		_start_intro()
+
 		return
 
-	# Inicio do desafio.
-	if state == BossState.EXHAUSTED and waiting_for_challenge:
-		if _player_is_close_to_boss():
-			get_viewport().set_input_as_handled()
-			print("BOSS: E pressionado. Iniciando desafio.")
-			_start_current_challenge()
+
+	# ========================================================
+	# INICIAR DESAFIO
+	# ========================================================
+
+	if (
+		state == BossState.EXHAUSTED
+		and
+		waiting_for_challenge
+		and
+		_is_player_close_to_boss(
+			CHALLENGE_DISTANCE
+		)
+	):
+
+		get_viewport().set_input_as_handled()
+
+		_start_current_challenge()
+
 		return
 
 
 # ============================================================
-# SPAWN
+# PLAYER
+# ============================================================
+
+func _find_player() -> void:
+
+	var found: Node = (
+		get_tree().get_first_node_in_group(
+			"player"
+		)
+	)
+
+	if found is Node2D:
+
+		player = (
+			found as Node2D
+		)
+
+		return
+
+
+	var scene: Node = (
+		get_tree().current_scene
+	)
+
+	if scene != null:
+
+		var direct_player: Node = (
+			scene.get_node_or_null(
+				"player"
+			)
+		)
+
+		if direct_player is Node2D:
+
+			player = (
+				direct_player as Node2D
+			)
+
+
+func _find_player_if_needed() -> void:
+
+	if is_instance_valid(player):
+		return
+
+	_find_player()
+
+
+func _is_player_close_to_boss(
+	distance_limit: float
+) -> bool:
+
+	if not is_instance_valid(player):
+		return false
+
+	if not is_instance_valid(boss_visual):
+		return false
+
+	var distance: float = (
+		player.global_position.distance_to(
+			boss_visual.global_position
+		)
+	)
+
+	return distance <= distance_limit
+
+
+# ============================================================
+# ORDEM DOS DESAFIOS
+# ============================================================
+
+func _build_challenge_order() -> void:
+
+	challenge_order.clear()
+
+
+	# --------------------------------------------------------
+	# 4 desafios de atenção / memória
+	# --------------------------------------------------------
+
+	var fun_pool: Array[String] = (
+		FUN_CHALLENGE_POOL.duplicate()
+	)
+
+	var fun_selected: Array[String] = []
+
+
+	while fun_selected.size() < 4:
+
+		var possible: Array[String] = (
+			fun_pool.duplicate()
+		)
+
+		# Evita repetir o mesmo imediatamente.
+		if (
+			fun_selected.size() > 0
+			and
+			possible.size() > 1
+		):
+
+			possible.erase(
+				fun_selected[
+					fun_selected.size() - 1
+				]
+			)
+
+		var selected: String = (
+			possible.pick_random()
+		)
+
+		fun_selected.append(
+			selected
+		)
+
+
+	# --------------------------------------------------------
+	# 1 DESAFIO DE RACIOCÍNIO EM POSIÇÃO ALEATÓRIA
+	# --------------------------------------------------------
+
+	var logic_position: int = (
+		randi_range(
+			0,
+			TOTAL_CHALLENGES - 1
+		)
+	)
+
+	var fun_index: int = 0
+
+
+	for i: int in range(
+		TOTAL_CHALLENGES
+	):
+
+		if i == logic_position:
+
+			challenge_order.append(
+				LOGIC_CHALLENGE
+			)
+
+		else:
+
+			challenge_order.append(
+				fun_selected[
+					fun_index
+				]
+			)
+
+			fun_index += 1
+
+
+	print(
+		"BOSS: ordem sorteada = ",
+		challenge_order
+	)
+
+
+# ============================================================
+# SPAWN DO BOSS
 # ============================================================
 
 func _spawn_existing_boss() -> void:
-	# Primeiro tenta encontrar um boss que ja esteja no World-04.
-	var existing: Node = get_parent().get_node_or_null("boss inimigo")
+
+	var existing: Node = (
+		get_parent().get_node_or_null(
+			"boss inimigo"
+		)
+	)
+
+
+	# --------------------------------------------------------
+	# PROCURA NO GRUPO
+	# --------------------------------------------------------
 
 	if existing == null:
-		var candidates: Array[Node] = get_tree().get_nodes_in_group("boss")
+
+		var candidates: Array[Node] = (
+			get_tree().get_nodes_in_group(
+				"boss"
+			)
+		)
+
 		for candidate: Node in candidates:
+
 			if candidate is CharacterBody2D:
+
 				existing = candidate
+
 				break
 
-	# O world_04.tscn deste projeto nao tinha uma instancia do boss.tscn.
-	# Para nao depender disso, criamos o boss automaticamente.
+
+	# --------------------------------------------------------
+	# CRIA CASO NÃO EXISTA
+	# --------------------------------------------------------
+
 	if existing == null:
-		var boss_scene: PackedScene = load("res://actors/boss.tscn") as PackedScene
+
+		var boss_scene: PackedScene = (
+			load(
+				"res://actors/boss.tscn"
+			)
+			as PackedScene
+		)
 
 		if boss_scene == null:
-			push_error("BOSS: nao foi possivel carregar res://actors/boss.tscn")
+
+			push_error(
+				"BOSS: não encontrei "
+				+ "res://actors/boss.tscn"
+			)
+
 			return
 
-		existing = boss_scene.instantiate()
-		existing.name = "boss inimigo"
-		get_parent().add_child(existing)
+		existing = (
+			boss_scene.instantiate()
+		)
+
+		if existing == null:
+			return
+
+		existing.name = (
+			"boss inimigo"
+		)
+
+		get_parent().add_child(
+			existing
+		)
 
 		if existing is Node2D:
-			(existing as Node2D).global_position = _get_collision_global_position()
 
-		print("BOSS: boss.tscn criado automaticamente no World-04.")
+			var existing_2d: Node2D = (
+				existing as Node2D
+			)
 
-	if not (existing is CharacterBody2D):
-		push_error("BOSS: o boss encontrado nao e CharacterBody2D.")
+			existing_2d.global_position = (
+				_get_spawn_position()
+			)
+
+
+	# --------------------------------------------------------
+	# VERIFICA TIPO
+	# --------------------------------------------------------
+
+	if not (
+		existing is CharacterBody2D
+	):
+
+		push_error(
+			"BOSS: boss precisa ser CharacterBody2D."
+		)
+
 		return
 
-	var shape: CollisionShape2D = get_node_or_null("CollisionShape2D") as CollisionShape2D
-	if shape == null:
-		push_error("BOSS: CollisionShape2D nao encontrado.")
-		return
 
-	boss_visual = existing as CharacterBody2D
+	boss_visual = (
+		existing as CharacterBody2D
+	)
 
-	# PONTO EXATO: centro do CollisionShape2D.
-	boss_visual.global_position = shape.global_position
+	boss_visual.global_position = (
+		_get_spawn_position()
+	)
 
 	boss_visual.visible = true
 	boss_visual.z_index = 20
-	boss_visual.set_physics_process(true)
 
-	boss_sprite = boss_visual.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	boss_visual.set_physics_process(
+		true
+	)
+
+
+	# --------------------------------------------------------
+	# SPRITE
+	# --------------------------------------------------------
+
+	boss_sprite = (
+		boss_visual.get_node_or_null(
+			"AnimatedSprite2D"
+		)
+		as AnimatedSprite2D
+	)
+
 	if boss_sprite != null:
+
 		boss_sprite.visible = true
 		boss_sprite.modulate = Color.WHITE
-		if boss_sprite.sprite_frames.has_animation("olhando"):
-			boss_sprite.play("olhando")
 
-	if boss_visual.has_method("set_boss_health"):
-		boss_visual.call("set_boss_health", MAX_HEALTH)
-
-	if boss_visual.has_method("set_damage_enabled"):
-		boss_visual.call("set_damage_enabled", false)
-
-	if boss_visual.has_method("freeze_boss"):
-		boss_visual.call("freeze_boss")
-
-	# Conta ataques reais emitidos pelo boss.
-	if boss_visual.has_signal("boss_attack_started"):
-		if not boss_visual.is_connected(
-			"boss_attack_started",
-			Callable(self, "_on_boss_attack_started")
-		):
-			boss_visual.connect(
-				"boss_attack_started",
-				Callable(self, "_on_boss_attack_started")
+		if (
+			boss_sprite.sprite_frames != null
+			and
+			boss_sprite.sprite_frames.has_animation(
+				"olhando"
 			)
-
-	if boss_visual.has_signal("boss_health_changed"):
-		if not boss_visual.is_connected(
-			"boss_health_changed",
-			Callable(self, "_on_boss_health_changed")
 		):
-			boss_visual.connect(
-				"boss_health_changed",
-				Callable(self, "_on_boss_health_changed")
-			)
 
-	if boss_visual.has_signal("boss_defeated"):
-		if not boss_visual.is_connected(
-			"boss_defeated",
-			Callable(self, "_on_boss_defeated")
-		):
-			boss_visual.connect(
-				"boss_defeated",
-				Callable(self, "_on_boss_defeated")
-			)
-
-	print("BOSS spawn:", boss_visual.global_position)
+			boss_sprite.stop()
+			boss_sprite.frame = 0
 
 
-func _get_collision_global_position() -> Vector2:
-	var shape: CollisionShape2D = get_node_or_null("CollisionShape2D") as CollisionShape2D
+	# --------------------------------------------------------
+	# VIDA
+	# --------------------------------------------------------
+
+	if boss_visual.has_method(
+		"set_boss_health"
+	):
+
+		boss_visual.call(
+			"set_boss_health",
+			MAX_HEALTH
+		)
+
+
+	_set_boss_attack_enabled(false)
+	_set_boss_damage_enabled(false)
+	_set_boss_stomp_enabled(false)
+
+
+	if boss_visual.has_method(
+		"freeze_boss"
+	):
+
+		boss_visual.call(
+			"freeze_boss"
+		)
+
+
+func _get_spawn_position() -> Vector2:
+
+	var shape: CollisionShape2D = (
+		get_node_or_null(
+			"CollisionShape2D"
+		)
+		as CollisionShape2D
+	)
+
 	if shape != null:
+
 		return shape.global_position
+
 	return global_position
 
 
@@ -276,501 +736,952 @@ func _get_collision_global_position() -> Vector2:
 # ============================================================
 
 func _create_or_get_controllers() -> void:
-	dialogue_controller = get_node_or_null("BossDialogue")
+
+	# --------------------------------------------------------
+	# DIALOGUE
+	# --------------------------------------------------------
+
+	dialogue_controller = (
+		get_node_or_null(
+			"BossDialogue"
+		)
+	)
+
 	if dialogue_controller == null:
+
 		dialogue_controller = Node.new()
-		dialogue_controller.name = "BossDialogue"
-		dialogue_controller.set_script(load("res://scripts/boss_dialogue.gd"))
-		add_child(dialogue_controller)
 
-	challenge_manager = get_node_or_null("BossChallengeManager")
+		dialogue_controller.name = (
+			"BossDialogue"
+		)
+
+		var dialogue_script: Script = (
+			load(
+				"res://scripts/boss_dialogue.gd"
+			)
+			as Script
+		)
+
+		if dialogue_script != null:
+
+			dialogue_controller.set_script(
+				dialogue_script
+			)
+
+		add_child(
+			dialogue_controller
+		)
+
+
+	# --------------------------------------------------------
+	# CHALLENGE MANAGER
+	# --------------------------------------------------------
+
+	challenge_manager = (
+		get_node_or_null(
+			"BossChallengeManager"
+		)
+	)
+
 	if challenge_manager == null:
+
 		challenge_manager = Node.new()
-		challenge_manager.name = "BossChallengeManager"
-		challenge_manager.set_script(load("res://scripts/boss_challenge_manager.gd"))
-		add_child(challenge_manager)
 
-	if dialogue_controller.has_method("setup"):
-		dialogue_controller.call("setup", boss_visual)
+		challenge_manager.name = (
+			"BossChallengeManager"
+		)
 
+		var challenge_script: Script = (
+			load(
+				"res://scripts/"
+				+ "boss_challenge_manager.gd"
+			)
+			as Script
+		)
+
+		if challenge_script != null:
+
+			challenge_manager.set_script(
+				challenge_script
+			)
+
+		add_child(
+			challenge_manager
+		)
+
+
+	# --------------------------------------------------------
+	# SETUP DO DIALOGUE
+	# --------------------------------------------------------
+
+	if (
+		dialogue_controller != null
+		and
+		dialogue_controller.has_method(
+			"setup"
+		)
+	):
+
+		dialogue_controller.call(
+			"setup",
+			boss_visual
+		)
+
+
+# ============================================================
+# SINAIS
+# ============================================================
 
 func _connect_signals() -> void:
+
+	# --------------------------------------------------------
+	# DIALOGUE
+	# --------------------------------------------------------
+
 	if dialogue_controller != null:
+
 		if not dialogue_controller.is_connected(
 			"intro_finished",
-			Callable(self, "_on_intro_finished")
+			Callable(
+				self,
+				"_on_intro_finished"
+			)
 		):
+
 			dialogue_controller.connect(
 				"intro_finished",
-				Callable(self, "_on_intro_finished")
+				Callable(
+					self,
+					"_on_intro_finished"
+				)
 			)
+
 
 		if not dialogue_controller.is_connected(
 			"victory_finished",
-			Callable(self, "_on_victory_finished")
+			Callable(
+				self,
+				"_on_victory_finished"
+			)
 		):
+
 			dialogue_controller.connect(
 				"victory_finished",
-				Callable(self, "_on_victory_finished")
+				Callable(
+					self,
+					"_on_victory_finished"
+				)
 			)
 
+
+	# --------------------------------------------------------
+	# CHALLENGE
+	# --------------------------------------------------------
+
 	if challenge_manager != null:
+
 		if not challenge_manager.is_connected(
 			"challenge_finished",
-			Callable(self, "_on_challenge_finished")
+			Callable(
+				self,
+				"_on_challenge_finished"
+			)
 		):
+
 			challenge_manager.connect(
 				"challenge_finished",
-				Callable(self, "_on_challenge_finished")
+				Callable(
+					self,
+					"_on_challenge_finished"
+				)
 			)
+
+
+	# --------------------------------------------------------
+	# BOSS
+	# --------------------------------------------------------
+
+	if boss_visual != null:
+
+		if boss_visual.has_signal(
+			"boss_health_changed"
+		):
+
+			if not boss_visual.is_connected(
+				"boss_health_changed",
+				Callable(
+					self,
+					"_on_boss_health_changed"
+				)
+			):
+
+				boss_visual.connect(
+					"boss_health_changed",
+					Callable(
+						self,
+						"_on_boss_health_changed"
+					)
+				)
+
+
+		if boss_visual.has_signal(
+			"boss_defeated"
+		):
+
+			if not boss_visual.is_connected(
+				"boss_defeated",
+				Callable(
+					self,
+					"_on_boss_defeated"
+				)
+			):
+
+				boss_visual.connect(
+					"boss_defeated",
+					Callable(
+						self,
+						"_on_boss_defeated"
+					)
+				)
 
 
 # ============================================================
-# ENTRADA + LORE
+# WAITING
 # ============================================================
 
 func _process_waiting() -> void:
-	# Nada é criado aqui. O aviso da porta já pode ser feito por
-	# este próprio Area2D, sem mexer nos outros mapas.
-	pass
 
+	if fight_started:
 
-func _start_intro() -> void:
-	if fight_started or state != BossState.WAITING:
+		if boss_prompt != null:
+
+			boss_prompt.hide()
+
 		return
 
+
+	if boss_prompt == null:
+
+		_create_boss_prompt()
+
+
+	if not _is_player_close_to_boss(
+		TALK_DISTANCE
+	):
+
+		boss_prompt.hide()
+
+		return
+
+
+	boss_prompt.text = (
+		"[ E ] FALAR COM O CHEFE"
+	)
+
+	boss_prompt.show()
+
+	_update_boss_prompt_position()
+
+
+# ============================================================
+# INTRO
+# ============================================================
+
+func _start_intro() -> void:
+
+	if fight_started:
+		return
+
+	if state != BossState.WAITING:
+		return
+
+
 	fight_started = true
-	player_inside = false
+
 	state = BossState.DIALOGUE
 
-	_set_hud_visible(false)
+
 	_set_boss_prompt_visible(false)
+	_set_hud_visible(false)
+
+	_set_player_can_move(false)
+
+	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
+	_set_boss_stomp_enabled(false)
 
-	if is_instance_valid(boss_visual):
-		if boss_visual.has_method("freeze_boss"):
-			boss_visual.call("freeze_boss")
 
-	if dialogue_controller != null and dialogue_controller.has_method("start_intro"):
-		dialogue_controller.call("start_intro")
+	if (
+		is_instance_valid(boss_visual)
+		and
+		boss_visual.has_method("freeze_boss")
+	):
+
+		boss_visual.call(
+			"freeze_boss"
+		)
+
+
+	if (
+		dialogue_controller != null
+		and
+		dialogue_controller.has_method(
+			"start_intro"
+		)
+	):
+
+		dialogue_controller.call(
+			"start_intro"
+		)
+
 	else:
+
 		_on_intro_finished()
 
 
 func _on_intro_finished() -> void:
+
 	_set_hud_visible(true)
+
+	_set_player_can_move(true)
+
 	_start_chase()
 
 
 # ============================================================
-# PERSEGUIÇÃO / ATAQUES
+# LUTA
 # ============================================================
 
 func _start_chase() -> void:
+
 	if state == BossState.VICTORY:
 		return
 
-	state = BossState.CHASE
-	attack_count = 0
 
-	var index: int = min(
-		challenge_index,
-		ATTACK_REQUIREMENTS.size() - 1
+	state = BossState.CHASE
+
+	fatigue_time_left = (
+		FATIGUE_TIME
 	)
 
+
 	_set_boss_attack_enabled(true)
-	_set_boss_damage_enabled(challenge_index > 0)
+	_set_boss_damage_enabled(true)
 	_set_boss_stomp_enabled(false)
+
 	_set_boss_prompt_visible(false)
 
-	if is_instance_valid(boss_visual):
-		if boss_visual.has_method("unfreeze_boss"):
-			boss_visual.call("unfreeze_boss")
+
+	if (
+		is_instance_valid(boss_visual)
+		and
+		boss_visual.has_method(
+			"unfreeze_boss"
+		)
+	):
+
+		boss_visual.call(
+			"unfreeze_boss"
+		)
+
 
 	_update_phase_ui()
 
 
-func _process_chase() -> void:
-	# Toda a perseguição, ataque, pulo e animação
-	# fica exclusivamente no bossinimigo.gd.
-	pass
+func _process_chase(
+	delta: float
+) -> void:
 
-
-func _on_boss_attack_started() -> void:
 	if state != BossState.CHASE:
 		return
 
-	attack_count += 1
+
+	fatigue_time_left -= delta
+
 	_update_phase_ui()
 
-	var index: int = min(
-		challenge_index,
-		ATTACK_REQUIREMENTS.size() - 1
-	)
 
-	var required: int = ATTACK_REQUIREMENTS[index]
+	if fatigue_time_left <= 0.0:
 
-	if attack_count >= required:
+		fatigue_time_left = 0.0
+
 		_start_exhausted()
 
 
+# ============================================================
+# EXAUSTÃO
+# ============================================================
+
 func _start_exhausted() -> void:
+
 	if state != BossState.CHASE:
 		return
 
-	state = BossState.EXHAUSTED
-	waiting_for_challenge = true
-	exhausted_time_left = EXHAUSTED_TIME
 
-	# Player fica livre. So o boss para.
+	state = BossState.EXHAUSTED
+
+	waiting_for_challenge = true
+
+	exhausted_time_left = (
+		EXHAUSTED_TIME
+	)
+
+
 	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
 	_set_boss_stomp_enabled(false)
 
-	if is_instance_valid(boss_visual):
-		if boss_visual.has_method("freeze_boss"):
-			boss_visual.call("freeze_boss")
+
+	if (
+		is_instance_valid(boss_visual)
+		and
+		boss_visual.has_method(
+			"freeze_boss"
+		)
+	):
+
+		boss_visual.call(
+			"freeze_boss"
+		)
+
 
 	_update_exhausted_prompt()
+	_update_phase_ui()
 
 
-func _process_exhausted(delta: float) -> void:
+func _process_exhausted(
+	delta: float
+) -> void:
+
 	if state != BossState.EXHAUSTED:
 		return
 
-	exhausted_time_left -= delta
+
 	_update_exhausted_prompt()
 
-	# O Player continua com can_move = true.
-	if not is_instance_valid(player):
-		_find_player_if_needed()
 
-	# Se o jogador estiver perto, mantem a janela do desafio aberta.
-	# Assim o prompt nao desaparece enquanto ele esta tentando apertar E.
-	if waiting_for_challenge and _player_is_close_to_boss():
-		exhausted_time_left = max(exhausted_time_left, EXHAUSTED_TIME)
+	if _is_player_close_to_boss(
+		CHALLENGE_DISTANCE
+	):
+
+		exhausted_time_left = max(
+			exhausted_time_left,
+			5.0
+		)
+
+
+	exhausted_time_left -= delta
+
 
 	if exhausted_time_left <= 0.0:
+
 		waiting_for_challenge = false
+
 		_set_boss_prompt_visible(false)
+
 		_start_chase()
 
 
 # ============================================================
-# DESAFIOS
+# INICIAR DESAFIO
 # ============================================================
 
 func _start_current_challenge() -> void:
+
 	if state != BossState.EXHAUSTED:
-		print("BOSS: Nao pode iniciar. Estado atual: ", state)
 		return
 
-	if not _player_is_close_to_boss():
-		print("BOSS: Jogador esta longe do boss.")
+
+	if not _is_player_close_to_boss(
+		CHALLENGE_DISTANCE
+	):
+
 		return
+
 
 	if challenge_manager == null:
-		push_error("BOSS: BossChallengeManager nao encontrado.")
 		return
 
+
+	if challenge_index >= TOTAL_CHALLENGES:
+		return
+
+
 	waiting_for_challenge = false
+
 	state = BossState.CHALLENGE
 
+
 	_set_boss_prompt_visible(false)
+
 	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
 	_set_boss_stomp_enabled(false)
 
-	if is_instance_valid(boss_visual):
-		if boss_visual.has_method("freeze_boss"):
-			boss_visual.call("freeze_boss")
+	_set_player_can_move(false)
 
-	var type: String = CHALLENGE_ORDER[
-		min(challenge_index, CHALLENGE_ORDER.size() - 1)
-	]
 
-	print("BOSS: Preparando desafio: ", type)
-	print("BOSS: Rodada: ", challenge_index)
+	if (
+		is_instance_valid(boss_visual)
+		and
+		boss_visual.has_method(
+			"freeze_boss"
+		)
+	):
 
-	if not challenge_manager.has_method("prepare_challenge"):
-		push_error("BOSS: prepare_challenge nao encontrado.")
-		state = BossState.EXHAUSTED
-		waiting_for_challenge = true
-		return
+		boss_visual.call(
+			"freeze_boss"
+		)
 
-	challenge_manager.call(
-		"prepare_challenge",
-		type,
-		challenge_index
+
+	var challenge_type: String = (
+		challenge_order[
+			challenge_index
+		]
 	)
 
-	if not challenge_manager.has_method("start_current_challenge"):
-		push_error("BOSS: start_current_challenge nao encontrado.")
-		state = BossState.EXHAUSTED
-		waiting_for_challenge = true
-		return
 
-	challenge_manager.call("start_current_challenge")
-	print("BOSS: Desafio iniciado com sucesso.")
+	print(
+		"BOSS: desafio ",
+		challenge_index + 1,
+		"/",
+		TOTAL_CHALLENGES,
+		" = ",
+		challenge_type
+	)
 
+
+	if challenge_manager.has_method(
+		"prepare_challenge"
+	):
+
+		challenge_manager.call(
+			"prepare_challenge",
+			challenge_type,
+			challenge_index
+		)
+
+
+	if challenge_manager.has_method(
+		"start_current_challenge"
+	):
+
+		challenge_manager.call(
+			"start_current_challenge"
+		)
+
+
+# ============================================================
+# FIM DO DESAFIO
+# ============================================================
 
 func _on_challenge_finished(
 	correct: bool,
 	_challenge_type: String
 ) -> void:
+
 	if state != BossState.CHALLENGE:
 		return
 
+
+	# ========================================================
+	# ACERTO
+	# ========================================================
+
 	if correct:
-		if is_instance_valid(boss_visual):
-			if boss_visual.has_method("take_boss_damage"):
-				boss_visual.call(
-					"take_boss_damage",
-					DAMAGE_PER_SUCCESS
-				)
+
+		if (
+			is_instance_valid(boss_visual)
+			and
+			boss_visual.has_method(
+				"take_boss_damage"
+			)
+		):
+
+			boss_visual.call(
+				"take_boss_damage",
+				DAMAGE_PER_SUCCESS
+			)
+
 
 		_update_health_from_boss()
 
-		if current_health <= 0:
-			_on_boss_defeated()
-			return
 
 		challenge_index += 1
-		_unlock_player()
+
+
+		# ----------------------------------------------------
+		# 5 DESAFIOS COMPLETADOS
+		# ----------------------------------------------------
+
+		if challenge_index >= TOTAL_CHALLENGES:
+
+			if current_health <= 0:
+
+				_on_boss_defeated()
+
+				return
+
+
+		# ----------------------------------------------------
+		# VOLTA PARA A LUTA
+		# ----------------------------------------------------
+
+		_set_player_can_move(true)
+
 		_start_chase()
+
 		return
 
-	# Errou: não perde vida, mas volta para a perseguição.
-	_unlock_player()
+
+	# ========================================================
+	# ERRO / TEMPO ESGOTADO
+	# ========================================================
+
+	_set_player_can_move(true)
+
 	_start_chase()
 
 
 # ============================================================
-# VIDA / MORTE
+# VIDA
 # ============================================================
 
 func _on_boss_health_changed(
 	current: int,
 	_maximum: int
 ) -> void:
+
 	current_health = current
+
 	_update_health_ui()
 
 
 func _update_health_from_boss() -> void:
+
 	if not is_instance_valid(boss_visual):
 		return
 
-	if boss_visual.has_method("get_current_health"):
+
+	if boss_visual.has_method(
+		"get_current_health"
+	):
+
 		current_health = int(
-			boss_visual.call("get_current_health")
+			boss_visual.call(
+				"get_current_health"
+			)
 		)
-	else:
-		current_health = max(
-			0,
-			current_health - DAMAGE_PER_SUCCESS
-		)
+
 
 	_update_health_ui()
 
 
+# ============================================================
+# DERROTA
+# ============================================================
+
 func _on_boss_defeated() -> void:
+
 	if state == BossState.VICTORY:
 		return
 
+
 	state = BossState.VICTORY
+
 	waiting_for_challenge = false
 
+
+	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
+	_set_boss_stomp_enabled(false)
+
 	_set_boss_prompt_visible(false)
 
-	if is_instance_valid(boss_visual):
-		if boss_visual.has_method("freeze_boss"):
-			boss_visual.call("freeze_boss")
 
-	if dialogue_controller != null and dialogue_controller.has_method(
-		"start_victory"
+	if (
+		is_instance_valid(boss_visual)
+		and
+		boss_visual.has_method(
+			"freeze_boss"
+		)
 	):
-		dialogue_controller.call("start_victory")
+
+		boss_visual.call(
+			"freeze_boss"
+		)
+
+
+	if (
+		dialogue_controller != null
+		and
+		dialogue_controller.has_method(
+			"start_victory"
+		)
+	):
+
+		dialogue_controller.call(
+			"start_victory"
+		)
+
 	else:
+
 		_finish_victory()
 
 
 func _on_victory_finished() -> void:
+
 	_finish_victory()
 
 
 func _finish_victory() -> void:
-	if is_instance_valid(boss_visual):
-		if boss_visual.has_method("queue_free"):
-			boss_visual.call_deferred("queue_free")
-		else:
-			boss_visual.queue_free()
 
+	_set_boss_prompt_visible(false)
 	_set_hud_visible(false)
 
 
+	if is_instance_valid(boss_visual):
+
+		boss_visual.call_deferred(
+			"queue_free"
+		)
+
+
 # ============================================================
-# PLAYER
+# PLAYER MOVIMENTO
 # ============================================================
 
-func _find_player() -> void:
-	var found: Node = get_tree().get_first_node_in_group("player")
-	if found is Node2D:
-		player = found as Node2D
+func _set_player_can_move(
+	enabled: bool
+) -> void:
 
-
-func _find_player_if_needed() -> void:
-	if is_instance_valid(player):
-		return
-	_find_player()
-
-
-func _on_body_entered(body: Node2D) -> void:
-	if body.is_in_group("player"):
-		player = body
-		player_inside = true
-
-		# Prompt da porta é separado dos prompts do boss.
-		# Aqui só mantemos a entrada normal.
-
-
-func _on_body_exited(body: Node2D) -> void:
-	if body == player:
-		player_inside = false
-
-
-func _unlock_player() -> void:
 	if not is_instance_valid(player):
+
 		_find_player_if_needed()
 
+
 	if not is_instance_valid(player):
+
 		return
 
-	if player.get("can_move") != null:
-		player.set("can_move", true)
 
-
-func _player_is_close_to_boss() -> bool:
-	if not is_instance_valid(player):
-		return false
-
-	if not is_instance_valid(boss_visual):
-		return false
-
-	return (
-		player.global_position.distance_to(
-			boss_visual.global_position
-		) <= CHALLENGE_INTERACTION_DISTANCE
+	var current_can_move = (
+		player.get(
+			"can_move"
+		)
 	)
 
 
+	if current_can_move != null:
+
+		player.set(
+			"can_move",
+			enabled
+		)
+
+
+	if (
+		not enabled
+		and
+		player.get(
+			"velocity"
+		) != null
+	):
+
+		player.set(
+			"velocity",
+			Vector2.ZERO
+		)
+
+
 # ============================================================
-# CONTROLES OFENSIVOS DO BOSS
+# CONTROLE DO BOSS
 # ============================================================
 
-func _set_boss_attack_enabled(enabled: bool) -> void:
+func _set_boss_attack_enabled(
+	enabled: bool
+) -> void:
+
 	if not is_instance_valid(boss_visual):
 		return
 
-	if boss_visual.has_method("set_attack_enabled"):
-		boss_visual.call("set_attack_enabled", enabled)
+
+	if boss_visual.has_method(
+		"set_attack_enabled"
+	):
+
+		boss_visual.call(
+			"set_attack_enabled",
+			enabled
+		)
 
 
-func _set_boss_stomp_enabled(enabled: bool) -> void:
+func _set_boss_damage_enabled(
+	enabled: bool
+) -> void:
+
 	if not is_instance_valid(boss_visual):
 		return
 
-	if boss_visual.has_method("set_stomp_enabled"):
-		boss_visual.call("set_stomp_enabled", enabled)
+
+	if boss_visual.has_method(
+		"set_damage_enabled"
+	):
+
+		boss_visual.call(
+			"set_damage_enabled",
+			enabled
+		)
 
 
-# ============================================================
-# DANO DO BOSS
-# ============================================================
+func _set_boss_stomp_enabled(
+	enabled: bool
+) -> void:
 
-func _set_boss_damage_enabled(enabled: bool) -> void:
 	if not is_instance_valid(boss_visual):
 		return
 
-	if boss_visual.has_method("set_damage_enabled"):
-		boss_visual.call("set_damage_enabled", enabled)
+
+	if boss_visual.has_method(
+		"set_stomp_enabled"
+	):
+
+		boss_visual.call(
+			"set_stomp_enabled",
+			enabled
+		)
 
 
 # ============================================================
-# PROMPT ACIMA DA CABEÇA
+# PROMPT
 # ============================================================
 
 func _create_boss_prompt() -> void:
-	if not is_instance_valid(boss_visual):
+
+	if boss_prompt != null:
 		return
 
-	boss_prompt = Panel.new()
-	boss_prompt.name = "BossChallengePrompt"
-	boss_prompt.position = Vector2(-135.0, -118.0)
-	boss_prompt.size = Vector2(270.0, 56.0)
-	boss_prompt.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	boss_prompt.z_index = 1000
 
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = PANEL
-	style.border_color = PURPLE
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(6)
-	boss_prompt.add_theme_stylebox_override(
-		"panel",
-		style
+	boss_prompt = Label.new()
+
+	boss_prompt.name = (
+		"BossPrompt"
 	)
 
-	boss_prompt_text = _make_label(
-		"[ E ] INICIAR DESAFIO",
-		12,
-		WHITE
+	boss_prompt.text = (
+		"[ E ] FALAR COM O CHEFE"
 	)
-	boss_prompt_text.position = Vector2(6.0, 4.0)
-	boss_prompt_text.size = Vector2(258.0, 27.0)
-	boss_prompt_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	boss_prompt_text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	boss_prompt.add_child(boss_prompt_text)
 
-	boss_prompt_timer = _make_label(
-		"10 s",
-		10,
-		MUTED
+	boss_prompt.mouse_filter = (
+		Control.MOUSE_FILTER_IGNORE
 	)
-	boss_prompt_timer.position = Vector2(6.0, 31.0)
-	boss_prompt_timer.size = Vector2(258.0, 18.0)
-	boss_prompt_timer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	boss_prompt_timer.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	boss_prompt.add_child(boss_prompt_timer)
 
-	boss_visual.add_child(boss_prompt)
+	boss_prompt.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	boss_prompt.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+	boss_prompt.size = Vector2(
+		180,
+		22
+	)
+
+	boss_prompt.position = Vector2(
+		-90,
+		-48
+	)
+
+	boss_prompt.add_theme_font_size_override(
+		"font_size",
+		8
+	)
+
+	boss_prompt.add_theme_color_override(
+		"font_color",
+		Color("#F8F5FF")
+	)
+
+	boss_prompt.add_theme_color_override(
+		"font_outline_color",
+		Color.BLACK
+	)
+
+	boss_prompt.add_theme_constant_override(
+		"outline_size",
+		2
+	)
+
+	boss_prompt.texture_filter = (
+		CanvasItem.TEXTURE_FILTER_NEAREST
+	)
+
+
+	_apply_font(
+		boss_prompt
+	)
+
+
+	if is_instance_valid(boss_visual):
+
+		boss_visual.add_child(
+			boss_prompt
+		)
+
+
 	boss_prompt.hide()
 
 
-func _update_exhausted_prompt() -> void:
+func _update_boss_prompt_position() -> void:
+
 	if boss_prompt == null:
 		return
 
-	var challenge_number: int = challenge_index + 1
-	var close: bool = _player_is_close_to_boss()
 
-	if challenge_number >= CHALLENGE_ORDER.size():
-		if close:
-			boss_prompt_text.text = "[ E ] DESAFIO FINAL"
-		else:
-			boss_prompt_text.text = "DESAFIO FINAL"
-	else:
-		if close:
-			boss_prompt_text.text = (
-				"[ E ] INICIAR DESAFIO %d" % challenge_number
-			)
-		else:
-			boss_prompt_text.text = "GUARDIAO EXAUSTO"
-
-	boss_prompt_timer.text = (
-		"%.0f s" % max(0.0, ceil(exhausted_time_left))
+	boss_prompt.position = Vector2(
+		-90,
+		-48
 	)
+
+
+func _update_exhausted_prompt() -> void:
+
+	if boss_prompt == null:
+
+		_create_boss_prompt()
+
+
+	if boss_prompt == null:
+		return
+
+
+	if state != BossState.EXHAUSTED:
+
+		boss_prompt.hide()
+
+		return
+
+
+	if not waiting_for_challenge:
+
+		boss_prompt.hide()
+
+		return
+
+
+	_update_boss_prompt_position()
+
+
+	boss_prompt.text = (
+		"[ E ] INICIAR DESAFIO %d/%d"
+		% [
+			challenge_index + 1,
+			TOTAL_CHALLENGES
+		]
+	)
+
 
 	boss_prompt.show()
 
@@ -778,8 +1689,20 @@ func _update_exhausted_prompt() -> void:
 func _set_boss_prompt_visible(
 	visible_value: bool
 ) -> void:
-	if boss_prompt != null:
-		boss_prompt.visible = visible_value
+
+	if boss_prompt == null:
+		return
+
+
+	if visible_value:
+
+		_update_boss_prompt_position()
+
+		boss_prompt.show()
+
+	else:
+
+		boss_prompt.hide()
 
 
 # ============================================================
@@ -787,125 +1710,498 @@ func _set_boss_prompt_visible(
 # ============================================================
 
 func _create_hud() -> void:
+
 	hud_canvas = CanvasLayer.new()
+
 	hud_canvas.layer = 100
-	add_child(hud_canvas)
+
+	add_child(
+		hud_canvas
+	)
+
+
+	# ========================================================
+	# PAINEL MAIOR
+	# ========================================================
 
 	hud_panel = Panel.new()
-	hud_panel.position = Vector2(70, 30)
-	hud_panel.size = Vector2(1160, 95)
+
+	hud_panel.position = (
+		HUD_POSITION
+	)
+
+	hud_panel.size = Vector2(
+		440,
+		100
+	)
+
+
 	hud_panel.add_theme_stylebox_override(
 		"panel",
 		_make_panel_style(
-			PANEL,
-			PURPLE,
+			Color("#120D1B"),
+			Color("#8E4EDB"),
 			2,
-			9
+			8
 		)
 	)
-	hud_canvas.add_child(hud_panel)
 
-	var name_label: Label = _make_label(
-		"GUARDIAO COGNITIVO",
-		18,
-		WHITE
+	hud_canvas.add_child(
+		hud_panel
 	)
-	name_label.position = Vector2(22, 12)
-	name_label.size = Vector2(300, 28)
-	hud_panel.add_child(name_label)
 
-	hud_phase = _make_label(
-		"ATAQUES 0 / 3",
+
+	# ========================================================
+	# NOME
+	# ========================================================
+
+	hud_name = _make_label(
+		"GUARDIÃO COGNITIVO",
+		14,
+		Color("#F8F5FF")
+	)
+
+	hud_name.position = Vector2(
 		12,
-		MUTED
+		8
 	)
-	hud_phase.position = Vector2(22, 44)
-	hud_phase.size = Vector2(280, 24)
-	hud_panel.add_child(hud_phase)
+
+	hud_name.size = Vector2(
+		230,
+		22
+	)
+
+	hud_panel.add_child(
+		hud_name
+	)
+
+
+	# ========================================================
+	# BARRA DE VIDA
+	# ========================================================
 
 	hud_bar = ProgressBar.new()
-	hud_bar.position = Vector2(320, 26)
-	hud_bar.size = Vector2(650, 32)
+
+	hud_bar.position = Vector2(
+		12,
+		38
+	)
+
+	hud_bar.size = Vector2(
+		290,
+		18
+	)
+
 	hud_bar.min_value = 0
-	hud_bar.max_value = MAX_HEALTH
-	hud_bar.value = MAX_HEALTH
+
+	hud_bar.max_value = (
+		MAX_HEALTH
+	)
+
+	hud_bar.value = (
+		MAX_HEALTH
+	)
+
 	hud_bar.show_percentage = false
+
+
 	hud_bar.add_theme_stylebox_override(
 		"background",
 		_make_panel_style(
 			Color("#251B31"),
 			Color("#3D2A51"),
 			1,
-			5
+			4
 		)
 	)
+
+
 	hud_bar.add_theme_stylebox_override(
 		"fill",
 		_make_panel_style(
-			PURPLE,
-			PURPLE_LIGHT,
+			Color("#8E4EDB"),
+			Color("#C39BFF"),
 			0,
-			5
+			4
 		)
 	)
-	hud_panel.add_child(hud_bar)
+
+
+	hud_panel.add_child(
+		hud_bar
+	)
+
+
+	# ========================================================
+	# VIDA
+	# ========================================================
 
 	hud_value = _make_label(
-		"120 / 120",
-		13,
-		PURPLE_LIGHT
+		"100 / 100",
+		11,
+		Color("#C39BFF")
 	)
-	hud_value.position = Vector2(990, 28)
-	hud_value.size = Vector2(145, 28)
-	hud_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	hud_panel.add_child(hud_value)
 
+	hud_value.position = Vector2(
+		315,
+		35
+	)
+
+	hud_value.size = Vector2(
+		110,
+		22
+	)
+
+	hud_value.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_RIGHT
+	)
+
+	hud_panel.add_child(
+		hud_value
+	)
+
+
+	# ========================================================
+	# DESAFIO
+	# ========================================================
+
+	hud_phase = _make_label(
+		"DESAFIO 1/5",
+		9,
+		Color("#BDB5C9")
+	)
+
+	hud_phase.position = Vector2(
+		12,
+		68
+	)
+
+	hud_phase.size = Vector2(
+		145,
+		18
+	)
+
+	hud_panel.add_child(
+		hud_phase
+	)
+
+
+	# ========================================================
+	# CANSANDO
+	# ========================================================
+
+	hud_fatigue_label = _make_label(
+		"CANSANDO:",
+		9,
+		Color("#BDB5C9")
+	)
+
+	hud_fatigue_label.position = Vector2(
+		190,
+		68
+	)
+
+	hud_fatigue_label.size = Vector2(
+		80,
+		18
+	)
+
+	hud_panel.add_child(
+		hud_fatigue_label
+	)
+
+
+	# ========================================================
+	# TEMPO
+	# ========================================================
+
+	hud_fatigue_value = _make_label(
+		"20 s",
+		9,
+		Color("#C39BFF")
+	)
+
+	hud_fatigue_value.position = Vector2(
+		270,
+		68
+	)
+
+	hud_fatigue_value.size = Vector2(
+		65,
+		18
+	)
+
+	hud_fatigue_value.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_RIGHT
+	)
+
+	hud_panel.add_child(
+		hud_fatigue_value
+	)
+
+
+# ============================================================
+# ATUALIZA VIDA
+# ============================================================
 
 func _update_health_ui() -> void:
+
 	if hud_bar != null:
-		hud_bar.value = current_health
+
+		hud_bar.value = (
+			current_health
+		)
+
 
 	if hud_value != null:
-		hud_value.text = "%d / %d" % [
-			current_health,
-			MAX_HEALTH
-		]
+
+		hud_value.text = (
+			"%d / %d"
+			% [
+				current_health,
+				MAX_HEALTH
+			]
+		)
+
 
 	_update_phase_ui()
+
+
 	boss_health_changed.emit(
 		current_health,
 		MAX_HEALTH
 	)
 
 
+# ============================================================
+# ATUALIZA HUD
+# ============================================================
+
 func _update_phase_ui() -> void:
+
 	if hud_phase == null:
 		return
 
-	if state == BossState.EXHAUSTED:
-		hud_phase.text = "GUARDIAO EXAUSTO"
-		return
 
-	var index: int = min(
-		challenge_index,
-		ATTACK_REQUIREMENTS.size() - 1
+	var number: int = (
+		challenge_index + 1
 	)
 
-	hud_phase.text = "ATAQUES %d / %d" % [
-		attack_count,
-		ATTACK_REQUIREMENTS[index]
-	]
 
+	# ========================================================
+	# LUTANDO
+	# ========================================================
+
+	if state == BossState.CHASE:
+
+		hud_phase.text = (
+			"DESAFIO %d/5"
+			% number
+		)
+
+
+		if hud_fatigue_value != null:
+
+			hud_fatigue_value.text = (
+				"%d s"
+				% int(
+					ceil(
+						fatigue_time_left
+					)
+				)
+			)
+
+
+		return
+
+
+	# ========================================================
+	# EXAUSTO
+	# ========================================================
+
+	if state == BossState.EXHAUSTED:
+
+		hud_phase.text = (
+			"INICIAR %d/5"
+			% number
+		)
+
+
+		if hud_fatigue_value != null:
+
+			hud_fatigue_value.text = (
+				"AGORA"
+			)
+
+
+		return
+
+
+	# ========================================================
+	# DESAFIO
+	# ========================================================
+
+	if state == BossState.CHALLENGE:
+
+		hud_phase.text = (
+			"DESAFIO %d/5"
+			% number
+		)
+
+
+		if hud_fatigue_value != null:
+
+			hud_fatigue_value.text = (
+				"PAUSADO"
+			)
+
+
+		return
+
+
+	# ========================================================
+	# WAITING
+	# ========================================================
+
+	if state == BossState.WAITING:
+
+		hud_phase.text = (
+			"AGUARDANDO"
+		)
+
+
+		if hud_fatigue_value != null:
+
+			hud_fatigue_value.text = (
+				"--"
+			)
+
+
+		return
+
+
+	# ========================================================
+	# DIALOGO
+	# ========================================================
+
+	if state == BossState.DIALOGUE:
+
+		hud_phase.text = (
+			"GUARDIÃO"
+		)
+
+
+		if hud_fatigue_value != null:
+
+			hud_fatigue_value.text = (
+				"--"
+			)
+
+
+		return
+
+
+	# ========================================================
+	# VITÓRIA
+	# ========================================================
+
+	if state == BossState.VICTORY:
+
+		hud_phase.text = (
+			"VITÓRIA"
+		)
+
+
+		if hud_fatigue_value != null:
+
+			hud_fatigue_value.text = (
+				"OK"
+			)
+
+
+# ============================================================
+# MOSTRAR / ESCONDER HUD
+# ============================================================
 
 func _set_hud_visible(
 	visible_value: bool
 ) -> void:
+
 	if hud_panel != null:
-		hud_panel.visible = visible_value
+
+		hud_panel.visible = (
+			visible_value
+		)
 
 
 # ============================================================
-# HELPERS
+# FONTE
+# ============================================================
+
+func _make_label(
+	text_value: String,
+	size: int,
+	color: Color
+) -> Label:
+
+	var label: Label = Label.new()
+
+	label.text = (
+		text_value
+	)
+
+	label.add_theme_font_size_override(
+		"font_size",
+		size
+	)
+
+	label.add_theme_color_override(
+		"font_color",
+		color
+	)
+
+	label.add_theme_color_override(
+		"font_outline_color",
+		Color.BLACK
+	)
+
+	label.add_theme_constant_override(
+		"outline_size",
+		2
+	)
+
+	label.texture_filter = (
+		CanvasItem.TEXTURE_FILTER_NEAREST
+	)
+
+	_apply_font(
+		label
+	)
+
+	return label
+
+
+func _apply_font(
+	control: Control
+) -> void:
+
+	var resource: Resource = (
+		load(
+			"res://assets/Fontes/Pixeloid_Font_1_0/"
+			+ "OpenType (.otf)/PixeloidSans-Bold.otf"
+		)
+	)
+
+	if resource != null:
+
+		control.add_theme_font_override(
+			"font",
+			resource
+		)
+
+
+# ============================================================
+# ESTILO
 # ============================================================
 
 func _make_panel_style(
@@ -914,46 +2210,25 @@ func _make_panel_style(
 	width: int,
 	radius: int
 ) -> StyleBoxFlat:
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = background
-	style.border_color = border
-	style.set_border_width_all(width)
-	style.set_corner_radius_all(radius)
+
+	var style: StyleBoxFlat = (
+		StyleBoxFlat.new()
+	)
+
+	style.bg_color = (
+		background
+	)
+
+	style.border_color = (
+		border
+	)
+
+	style.set_border_width_all(
+		width
+	)
+
+	style.set_corner_radius_all(
+		radius
+	)
+
 	return style
-
-
-func _make_label(
-	text_value: String,
-	size: int,
-	color: Color
-) -> Label:
-	var label: Label = Label.new()
-	label.text = text_value
-	label.add_theme_font_size_override(
-		"font_size",
-		size
-	)
-	label.add_theme_color_override(
-		"font_color",
-		color
-	)
-	label.add_theme_color_override(
-		"font_outline_color",
-		Color.BLACK
-	)
-	label.add_theme_constant_override(
-		"outline_size",
-		3
-	)
-	label.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_apply_font(label)
-	return label
-
-
-func _apply_font(control: Control) -> void:
-	var resource: Resource = load(FONT_PATH)
-	if resource != null:
-		control.add_theme_font_override(
-			"font",
-			resource
-		)

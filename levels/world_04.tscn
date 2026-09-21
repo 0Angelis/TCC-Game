@@ -18,6 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://v8t8gb21badr" path="res://assets/Seasonal Tilesets/3 - Tropics/Tropics_entities (16 x 16).png" id="14_7t2or"]
 [ext_resource type="Texture2D" uid="uid://0m0l8wowb4bt" path="res://assets/Seasonal Tilesets/5 - Misc. universal tiles/Blocks (16 x 16).png" id="15_lrawj"]
 [ext_resource type="Texture2D" uid="uid://cyoo8yqgfd6n2" path="res://assets/Sunny-land-files/Assets/environment/Background/props.png" id="16_nhbrh"]
+[ext_resource type="PackedScene" uid="uid://dpq0gsu7dovqm" path="res://actors/boss.tscn" id="19_x5xw5"]
 [ext_resource type="Script" uid="uid://dm8vlqypgerju" path="res://scripts/boss.gd" id="20_x5xw5"]
 [ext_resource type="PackedScene" uid="uid://bbn2y2xyd8qva" path="res://actors/player.tscn" id="27_s3w5o"]
 [ext_resource type="Texture2D" uid="uid://cn6sn6rhuo85t" path="res://assets/mapa 04/Dark Gothic Castle.png" id="28_x5xw5"]
@@ -1159,8 +1160,8 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_5t4lp"]
-radius = 11.0
-height = 36.0
+radius = 37.0
+height = 86.0
 
 [sub_resource type="AnimatedTexture" id="AnimatedTexture_ii4fh"]
 frames = 4
@@ -1328,6 +1329,9 @@ scale = Vector2(0.019, 0.019)
 sprite_frames = SubResource("SpriteFrames_4e1o6")
 autoplay = "default"
 
+[node name="boss inimigo" parent="." unique_id=1594912533 instance=ExtResource("19_x5xw5")]
+position = Vector2(1079, 686)
+
 [node name="BOSS" type="Area2D" parent="." unique_id=949318761]
 position = Vector2(-1, 0)
 script = ExtResource("20_x5xw5")
@@ -1340,7 +1344,6 @@ shape = SubResource("CapsuleShape2D_5t4lp")
 position = Vector2(1146, 688)
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=395750549]
-visible = false
 
 [node name="control" type="Control" parent="HUD" unique_id=386732112]
 layout_mode = 3
@@ -1380,16 +1383,16 @@ layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
 offset_transform_enabled = true
-offset_transform_position = Vector2(10, 15)
+offset_transform_position = Vector2(10000, 15)
 offset_transform_position_ratio = Vector2(12, 0)
-offset_transform_scale = Vector2(6, 6)
+offset_transform_scale = Vector2(0.01, 0.01)
 offset_transform_visual_only = false
 texture = SubResource("AnimatedTexture_ii4fh")
 
 [node name="coins_counter" type="Label" parent="HUD/control/container/coins_container" unique_id=1297032903]
 layout_mode = 2
 offset_transform_enabled = true
-offset_transform_position = Vector2(0, 5)
+offset_transform_position = Vector2(10000, 5)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 8
 theme_override_fonts/font = ExtResource("34_mtj04")
@@ -1466,7 +1469,7 @@ layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 8
 offset_transform_enabled = true
-offset_transform_position = Vector2(350, 390)
+offset_transform_position = Vector2(323123230, 390)
 offset_transform_scale = Vector2(0.09, 0.09)
 
 [node name="raciocinio_icon" type="TextureRect" parent="HUD/control/container/raciocinio_container" unique_id=378541524]

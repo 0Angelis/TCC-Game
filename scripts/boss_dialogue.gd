@@ -36,36 +36,46 @@ var boss: Node2D = null
 var waiting: bool = false
 var active_dialogue: String = ""
 
+
 func setup(boss_node: Node2D) -> void:
 	boss = boss_node
 
+
 func start_intro() -> void:
-	if boss == null or waiting:
+	if waiting:
+		return
+	if not is_instance_valid(boss):
 		return
 	if DialogManager.is_message_active:
 		return
 
 	active_dialogue = "intro"
 	waiting = true
+
 	DialogManager.start_message(
 		boss.global_position + Vector2(0.0, -25.0),
 		INTRO_LINES,
 		self
 	)
 
+
 func start_victory() -> void:
-	if boss == null or waiting:
+	if waiting:
+		return
+	if not is_instance_valid(boss):
 		return
 	if DialogManager.is_message_active:
 		return
 
 	active_dialogue = "victory"
 	waiting = true
+
 	DialogManager.start_message(
 		boss.global_position + Vector2(0.0, -25.0),
 		VICTORY_LINES,
 		self
 	)
+
 
 func _process(_delta: float) -> void:
 	if not waiting:
@@ -74,14 +84,19 @@ func _process(_delta: float) -> void:
 		return
 
 	waiting = false
+
 	if active_dialogue == "intro":
 		intro_finished.emit()
 	elif active_dialogue == "victory":
 		victory_finished.emit()
+
 	active_dialogue = ""
 
+
 func force_close() -> void:
-	if waiting and DialogManager.is_message_active and DialogManager.current_source == self:
-		DialogManager.close_message()
+	if waiting and DialogManager.is_message_active:
+		if DialogManager.current_source == self:
+			DialogManager.close_message()
+
 	waiting = false
 	active_dialogue = ""

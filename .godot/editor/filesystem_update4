@@ -1,0 +1,10 @@
+res://scripts/boss.gd
+res://scripts/bossinimigo.gd
+res://scripts/boss_challenge_manager.gd
+res://scripts/boss_dialogue.gd
+res://levels/world_04.tscn
+res://tema/new_theme.tres
+res://shaders/transition.gdshader
+res://frag/frag_atencao.tres
+res://frag/frag_memoria.tres
+res://frag/frag_raciocinio.tres
