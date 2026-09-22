@@ -2330,6 +2330,13 @@ func _defeat() -> void:
 
 	is_dead = true
 
+	# ========================================================
+	# RECOMPENSA POR DERROTAR O BOSS
+	# ========================================================
+	Globals.score += 20000
+
+	print("BOSS DERROTADO! +20000 SCORE | SCORE: ", Globals.score)
+
 	can_move = false
 
 	attack_enabled = false

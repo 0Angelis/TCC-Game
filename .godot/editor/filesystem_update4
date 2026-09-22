@@ -11,3 +11,4 @@ res://levels/world_00.tscn
 res://levels/world_04.tscn
 res://scripts/boss_dialogue.gd
 res://scripts/player.gd
+res://scripts/boss_challenge_manager.gd

@@ -116,6 +116,27 @@ var memory_buttons: Array[Button] = []
 var logic_answer: int = 0
 
 var attention_answer: String = ""
+var last_attention_answer: String = ""
+
+# Cores usadas nos desafios de atenção.
+# Cada desafio sempre mostra apenas UMA alternativa de cada cor.
+const ATTENTION_COLORS: Array[String] = [
+	"VERMELHO",
+	"AZUL",
+	"VERDE",
+	"AMARELO",
+	"ROXO",
+	"LARANJA"
+]
+
+const ATTENTION_COLOR_VALUES: Dictionary = {
+	"VERMELHO": Color("#F04B58"),
+	"AZUL": Color("#55A8FF"),
+	"VERDE": Color("#78E08F"),
+	"AMARELO": Color("#FFD166"),
+	"ROXO": Color("#B47CFF"),
+	"LARANJA": Color("#FF9F43")
+}
 
 var memory_sequence: Array[String] = []
 
@@ -1362,40 +1383,7 @@ func _on_logic_answer(
 
 func _build_attention_red() -> void:
 
-	instruction_label.text = (
-		"Ignore a palavra. Clique na COR do texto."
-	)
-
-	attention_answer = (
-		"VERMELHO"
-	)
-
-	var word: Label = _label(
-		"VERDE",
-		50,
-		Color("#F04B58")
-	)
-
-	word.custom_minimum_size = Vector2(
-		850,
-		120
-	)
-
-	word.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_CENTER
-	)
-
-	word.vertical_alignment = (
-		VERTICAL_ALIGNMENT_CENTER
-	)
-
-	challenge_body.add_child(
-		word
-	)
-
-	_create_attention_buttons()
-
-	input_locked = false
+	_build_attention_stroop()
 
 
 # ============================================================
@@ -1404,35 +1392,83 @@ func _build_attention_red() -> void:
 
 func _build_attention_blue() -> void:
 
-	instruction_label.text = (
-		"Leia a COR do texto, nao a palavra."
+	_build_attention_stroop()
+
+
+# ============================================================
+# STROOP DINAMICO
+# ============================================================
+
+func _build_attention_stroop() -> void:
+
+	# A cada rodada o desafio muda para não ficar repetitivo.
+	# O correto nunca repete a resposta da rodada anterior,
+	# quando houver outra opção disponível.
+
+	var possible_answers: Array[String] = (
+		ATTENTION_COLORS.duplicate()
 	)
 
-	attention_answer = (
-		"AZUL"
+	if (
+		last_attention_answer != ""
+		and
+		possible_answers.size() > 1
+	):
+		possible_answers.erase(last_attention_answer)
+
+	possible_answers.shuffle()
+
+	attention_answer = possible_answers[0]
+	last_attention_answer = attention_answer
+
+	# Escolhe uma palavra diferente da cor correta.
+	var wrong_words: Array[String] = (
+		ATTENTION_COLORS.duplicate()
 	)
 
-	var word: Label = _label(
-		"AMARELO",
-		50,
-		Color("#55A8FF")
+	wrong_words.erase(attention_answer)
+	wrong_words.shuffle()
+
+	var word: String = wrong_words[0]
+
+	# Pequenas variações de instrução para deixar o desafio
+	# mais vivo sem mudar a regra.
+	var instructions: Array[String] = [
+		"ATENCAO: clique na COR da tinta, nao na palavra!",
+		"NAO LEIA! observe apenas a cor do texto.",
+		"QUAL E A COR? ignore o significado da palavra!"
+	]
+	instructions.shuffle()
+
+	instruction_label.text = instructions[0]
+
+	var word_label: Label = _label(
+		word,
+		58,
+		ATTENTION_COLOR_VALUES[attention_answer]
 	)
 
-	word.custom_minimum_size = Vector2(
+	word_label.custom_minimum_size = Vector2(
 		850,
-		120
+		135
 	)
 
-	word.horizontal_alignment = (
+	word_label.horizontal_alignment = (
 		HORIZONTAL_ALIGNMENT_CENTER
 	)
 
-	word.vertical_alignment = (
+	word_label.vertical_alignment = (
 		VERTICAL_ALIGNMENT_CENTER
 	)
 
+	# Um pequeno destaque visual no texto.
+	word_label.add_theme_constant_override(
+		"outline_size",
+		5
+	)
+
 	challenge_body.add_child(
-		word
+		word_label
 	)
 
 	_create_attention_buttons()
@@ -1442,12 +1478,33 @@ func _build_attention_blue() -> void:
 
 func _create_attention_buttons() -> void:
 
+	var answer_pool: Array[String] = (
+		ATTENTION_COLORS.duplicate()
+	)
+
+	# Garante que a resposta correta apareca.
+	if not answer_pool.has(attention_answer):
+		answer_pool.append(attention_answer)
+
+	# Escolhe 3 distratores diferentes da resposta.
+	answer_pool.shuffle()
+
 	var names: Array[String] = [
-		"VERMELHO",
-		"AZUL",
-		"VERDE",
-		"AMARELO"
+		attention_answer
 	]
+
+	for color_name: String in answer_pool:
+
+		if color_name == attention_answer:
+			continue
+
+		if names.has(color_name):
+			continue
+
+		names.append(color_name)
+
+		if names.size() >= 4:
+			break
 
 	names.shuffle()
 
@@ -1475,8 +1532,25 @@ func _create_attention_buttons() -> void:
 		var button: Button = (
 			_make_button(
 				name,
-				17
+				16
 			)
+		)
+
+		# Cada botao fica com a propria cor para facilitar
+		# a identificacao visual, sem repetir botoes.
+		button.add_theme_color_override(
+			"font_color",
+			ATTENTION_COLOR_VALUES[name]
+		)
+
+		button.add_theme_color_override(
+			"font_hover_color",
+			Color.WHITE
+		)
+
+		button.add_theme_color_override(
+			"font_pressed_color",
+			Color.WHITE
 		)
 
 		button.pressed.connect(
