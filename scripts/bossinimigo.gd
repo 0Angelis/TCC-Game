@@ -6,6 +6,7 @@ extends CharacterBody2D
 # ============================================================
 
 signal boss_attack_started
+signal boss_hit_player
 signal boss_health_changed(current: int, maximum: int)
 signal boss_defeated
 
@@ -1448,6 +1449,8 @@ func _apply_dash_damage() -> void:
 	)
 
 
+	boss_hit_player.emit()
+
 	damage_cooldown = (
 		DAMAGE_COOLDOWN
 	)
@@ -1675,6 +1678,8 @@ func _apply_contact_damage() -> void:
 		)
 	)
 
+
+	boss_hit_player.emit()
 
 	damage_cooldown = DAMAGE_COOLDOWN
 
@@ -2329,13 +2334,6 @@ func _defeat() -> void:
 
 
 	is_dead = true
-
-	# ========================================================
-	# RECOMPENSA POR DERROTAR O BOSS
-	# ========================================================
-	Globals.score += 20000
-
-	print("BOSS DERROTADO! +20000 SCORE | SCORE: ", Globals.score)
 
 	can_move = false
 
