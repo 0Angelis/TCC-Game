@@ -5,11 +5,9 @@ extends Area2D
 # ============================================================
 
 signal boss_health_changed(
-	current_health: int, 
+	current_health: int,
 	maximum_health: int
 )
-
-signal boss_hit_player
 
 
 # ============================================================
@@ -1061,26 +1059,6 @@ func _connect_signals() -> void:
 					)
 				)
 
-		if boss_visual.has_signal(
-			"boss_hit_player"
-		):
-
-			if not boss_visual.is_connected(
-				"boss_hit_player",
-				Callable(
-					self,
-					"_on_boss_hit_player"
-				)
-			):
-
-				boss_visual.connect(
-					"boss_hit_player",
-					Callable(
-						self,
-						"_on_boss_hit_player"
-					)
-				)
-
 
 		if boss_visual.has_signal(
 			"boss_defeated"
@@ -1334,7 +1312,7 @@ func _start_exhausted() -> void:
 	):
 
 		boss_visual.call(
-			"freeze_boss"
+			"freeze_boss_after_landing"
 		)
 
 
@@ -1427,12 +1405,12 @@ func _start_current_challenge() -> void:
 		is_instance_valid(boss_visual)
 		and
 		boss_visual.has_method(
-			"freeze_boss"
+			"freeze_boss_after_landing"
 		)
 	):
 
 		boss_visual.call(
-			"freeze_boss"
+			"freeze_boss_after_landing"
 		)
 
 
@@ -1527,33 +1505,6 @@ func _on_challenge_finished(
 	_set_player_can_move(true)
 
 	_start_chase()
-
-
-# ============================================================
-# BOSS ACERTOU O PLAYER
-# ============================================================
-
-func _on_boss_hit_player() -> void:
-
-	if state != BossState.CHASE:
-		return
-
-	# Cada golpe confirmado do boss reduz 1 segundo
-	# do tempo restante para ele ficar cansado.
-	fatigue_time_left = max(
-		fatigue_time_left - 1.0,
-		0.0
-	)
-
-	_update_phase_ui()
-
-	print(
-		"BOSS ACERTOU! -1s DE CANSACO | RESTA: ",
-		fatigue_time_left
-	)
-
-	if fatigue_time_left <= 0.0:
-		_start_exhausted()
 
 
 # ============================================================

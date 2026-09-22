@@ -97,7 +97,7 @@ var damage_cooldown: float = 0.0
 # PULO
 # ============================================================
 
-const JUMP_FORCE: float = -320.0
+const JUMP_FORCE: float = -330.0
 const JUMP_HORIZONTAL_SPEED: float = 100.0
 
 var jump_cooldown: float = 0.0
@@ -331,7 +331,16 @@ func _physics_process(delta: float) -> void:
 
 	if waiting_for_landing_lock:
 
+		# O boss precisa continuar com a física ATIVA
+		# mesmo estando com can_move = false.
+		# Assim a gravidade continua funcionando e ele
+		# não fica preso no ar quando o desafio aparece.
+		can_move = false
+
 		velocity.x = 0.0
+
+		if not is_on_floor():
+			velocity += get_gravity() * delta
 
 		move_and_slide()
 
@@ -2055,6 +2064,10 @@ func freeze_boss_after_landing() -> void:
 
 	_reset_attack_state()
 
+	# Garante que a física continue ativa enquanto
+	# o boss termina uma queda.
+	set_physics_process(true)
+
 	# Se já está no chão, congela imediatamente.
 	if is_on_floor():
 
@@ -2070,7 +2083,8 @@ func freeze_boss_after_landing() -> void:
 
 		return
 
-	# Se está no ar, deixa a gravidade terminar a queda.
+	# Se está no ar, deixa a gravidade terminar
+	# a queda antes de congelar.
 	waiting_for_landing_lock = true
 
 	can_move = false
