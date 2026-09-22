@@ -183,10 +183,10 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_licrn"]
-size = Vector2(20, 25)
+size = Vector2(20, 29)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_iqnvl"]
-size = Vector2(19, 4.96875)
+size = Vector2(7, 4.96875)
 
 [node name="boss inimigo" type="CharacterBody2D" unique_id=1594912533]
 collision_layer = 4
@@ -198,7 +198,7 @@ sprite_frames = SubResource("SpriteFrames_hbmxn")
 animation = &"pular"
 
 [node name="collision" type="CollisionShape2D" parent="." unique_id=2014787163]
-position = Vector2(0, 2.5)
+position = Vector2(0, 0.5)
 shape = SubResource("RectangleShape2D_licrn")
 
 [node name="RayCast2D" type="RayCast2D" parent="." unique_id=1046423272]
@@ -209,6 +209,6 @@ collision_mask = 3
 [node name="Area2D" type="Area2D" parent="." unique_id=1129572895]
 
 [node name="hitbox" type="CollisionShape2D" parent="Area2D" unique_id=1940875292]
-position = Vector2(0, -9.515625)
+position = Vector2(0.5, 2)
 shape = SubResource("RectangleShape2D_iqnvl")
 debug_color = Color(0.97, 0.048500013, 0.46317485, 0.21960784)

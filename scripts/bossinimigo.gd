@@ -1,28 +1,9 @@
 extends CharacterBody2D
 
-# ============================================================
-# BOSS INIMIGO
-# ============================================================
-# Responsável por:
-# - movimento
-# - perseguição
-# - sprint
-# - pulo
-# - ataque
-# - dano no player
-# - receber dano
-# - modo enfurecido
-# - pisão
-# - animações
-#
-# O boss.gd continua responsável por:
-# - diálogo
-# - tempo de luta
-# - desafios
-# - ordem dos desafios
-# - vida da batalha
-# ============================================================
 
+# ============================================================
+# BOSS FINAL - GUARDIAO COGNITIVO
+# ============================================================
 
 signal boss_attack_started
 signal boss_health_changed(current: int, maximum: int)
@@ -30,95 +11,83 @@ signal boss_defeated
 
 
 # ============================================================
-# CONFIGURAÇÃO DO SPRITE
+# SPRITE
 # ============================================================
 
 const SPRITE_FACES_RIGHT: bool = false
 
 
 # ============================================================
-# MOVIMENTO NORMAL
+# MOVIMENTO
 # ============================================================
 
-const WALK_SPEED: float = 62.0
-const CHASE_SPEED: float = 78.0
+const WALK_SPEED: float = 40.0
+const CHASE_SPEED: float = 72.0
+const RAGE_SPEED: float = 104.0
 
-const ACCELERATION: float = 210.0
-const DECELERATION: float = 250.0
+const ACCELERATION: float = 260.0
+const RAGE_ACCELERATION: float = 360.0
+const DECELERATION: float = 320.0
 
-const DETECTION_DISTANCE: float = 600.0
-
-
-# ============================================================
-# SPRINT
-# ============================================================
-
-const SPRINT_SPEED: float = 122.0
-
-const SPRINT_MIN_TIME: float = 0.45
-const SPRINT_MAX_TIME: float = 0.85
-
-const SPRINT_COOLDOWN_MIN: float = 1.8
-const SPRINT_COOLDOWN_MAX: float = 3.4
-
-const SPRINT_START_DISTANCE_MIN: float = 55.0
-const SPRINT_START_DISTANCE_MAX: float = 260.0
-
-const SPRINT_CHANCE: float = 0.018
-
-
-var sprint_active: bool = false
-var sprint_time_left: float = 0.0
-var sprint_cooldown: float = 1.5
+const DETECTION_DISTANCE: float = 900.0
+const STOP_DISTANCE: float = 30.0
 
 
 # ============================================================
-# MODO ENFURECIDO
+# SURTO
 # ============================================================
 
-const ENRAGED_HEALTH_RATIO: float = 0.50
+const RAGE_INTERVAL: float = 10.0
+const RAGE_DURATION: float = 3.0
 
-const ENRAGED_CHASE_SPEED: float = 92.0
-const ENRAGED_SPRINT_SPEED: float = 140.0
-
-# IMPORTANTE:
-# ESTA CONSTANTE EXISTE SOMENTE UMA VEZ.
-const ENRAGED_JUMP_COOLDOWN: float = 0.48
-
+var rage_timer: float = RAGE_INTERVAL
+var rage_time_left: float = 0.0
 var enraged: bool = false
 
 
 # ============================================================
-# ATAQUE
+# DASH
 # ============================================================
 
-const ATTACK_TRIGGER_DISTANCE: float = 50.0
+const ATTACK_TRIGGER_DISTANCE: float = 62.0
+const ATTACK_START_DISTANCE: float = 68.0
 
-const ATTACK_HIT_DISTANCE: float = 60.0
+const ATTACK_VERTICAL_DISTANCE: float = 38.0
 
-const ATTACK_VERTICAL_DISTANCE: float = 46.0
+const ATTACK_PREPARE_TIME: float = 0.22
+const ATTACK_DASH_TIME: float = 0.30
+const ATTACK_DASH_SPEED: float = 172.0
 
-const ATTACK_COOLDOWN: float = 0.95
+const ATTACK_RECOVERY_TIME: float = 0.32
+const ATTACK_COOLDOWN: float = 1.20
 
-const ATTACK_DURATION: float = 0.50
+
+# ============================================================
+# CONTATO DO DASH
+# ============================================================
+
+const DASH_CONTACT_HORIZONTAL: float = 27.0
+const DASH_CONTACT_VERTICAL: float = 28.0
+
 
 var attack_cooldown: float = 0.0
-var attack_timer: float = 0.0
+var attack_prepare_timer: float = 0.0
+var attack_dash_timer: float = 0.0
+var attack_recovery_timer: float = 0.0
 
 var is_attacking: bool = false
 var attack_hit_done: bool = false
-
-var attack_locked_until_leave: bool = false
+var attack_direction: int = 1
 
 
 # ============================================================
 # DANO
 # ============================================================
 
-const DAMAGE_COOLDOWN: float = 0.65
+const DAMAGE_COOLDOWN: float = 0.70
 
-const KNOCKBACK_X: float = 120.0
-const KNOCKBACK_Y: float = -45.0
+const KNOCKBACK_X: float = 115.0
+const KNOCKBACK_Y: float = -50.0
 
 var damage_cooldown: float = 0.0
 
@@ -127,27 +96,52 @@ var damage_cooldown: float = 0.0
 # PULO
 # ============================================================
 
-const JUMP_FORCE: float = -335.0
-
-const JUMP_COOLDOWN: float = 0.62
-
-const EDGE_JUMP_SPEED: float = 72.0
-
-const PLAYER_HEIGHT_TO_JUMP: float = 28.0
-
-const EDGE_FOLLOW_DISTANCE: float = 300.0
+const JUMP_FORCE: float = -320.0
+const JUMP_HORIZONTAL_SPEED: float = 100.0
 
 var jump_cooldown: float = 0.0
+const JUMP_COOLDOWN: float = 0.55
+
+const PLAYER_ABOVE_HEIGHT: float = 42.0
+const PLAYER_ABOVE_DISTANCE: float = 420.0
+
+
+# ============================================================
+# DETECCAO DE OBSTACULO
+# ============================================================
+
+const OBSTACLE_DISTANCE: float = 70.0
+
+const OBSTACLE_LOW_Y: float = -4.0
+const OBSTACLE_MIDDLE_Y: float = -16.0
+const OBSTACLE_HIGH_Y: float = -28.0
+const OBSTACLE_VERY_HIGH_Y: float = -40.0
+
+
+# ============================================================
+# PISAO / CABECA
+# ============================================================
+
+@export var stomp_damage: int = 20
+
+const STOMP_COOLDOWN: float = 0.75
+const STOMP_HORIZONTAL_DISTANCE: float = 27.0
+
+const STOMP_HEAD_Y: float = 34.0
+
+var stomp_cooldown: float = 0.0
+
+var previous_player_y: float = 0.0
+var previous_player_y_valid: bool = false
 
 
 # ============================================================
 # VIRADA
 # ============================================================
 
-const TURN_COOLDOWN: float = 0.08
+const TURN_COOLDOWN: float = 0.10
 
 var turn_cooldown: float = 0.0
-
 var direction: int = -1
 
 
@@ -155,69 +149,64 @@ var direction: int = -1
 # VIDA
 # ============================================================
 
-@export var max_health: int = 120
+@export var max_health: int = 100
 
-@export var stomp_damage: int = 999999
-
-var current_health: int = 120
-
-
-# ============================================================
-# REFERÊNCIAS
-# ============================================================
-
-var player: CharacterBody2D = null
+var current_health: int = 100
 
 
 # ============================================================
 # ESTADOS
 # ============================================================
 
-var can_move: bool = true
-
 var is_dead: bool = false
-
 var is_hurt: bool = false
 
+var can_move: bool = true
+var battle_controlled: bool = false
+
 var attack_enabled: bool = false
-
 var damage_enabled: bool = false
-
 var stomp_enabled: bool = false
 
 
 # ============================================================
-# CONTROLE
+# HURT
 # ============================================================
 
-var player_was_above: bool = false
+const HURT_DURATION: float = 0.18
 
-var stomp_invulnerability: float = 0.0
+var hurt_time_left: float = 0.0
+
+
+# ============================================================
+# FLASH
+# ============================================================
+
+const FLASH_DURATION: float = 0.08
+
+var flash_time_left: float = 0.0
+
+
+# ============================================================
+# PLAYER
+# ============================================================
+
+var player: CharacterBody2D = null
 
 
 # ============================================================
 # NODES
 # ============================================================
 
-@onready var animated_sprite: AnimatedSprite2D = (
-	$AnimatedSprite2D
-)
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
-@onready var collision: CollisionShape2D = (
-	$collision
-)
+@onready var collision: CollisionShape2D = $collision
 
-@onready var ray_cast: RayCast2D = (
-	$RayCast2D
-)
+@onready var ray_cast: RayCast2D = $RayCast2D
 
-@onready var hitbox_area: Area2D = (
-	$Area2D
-)
+@onready var hitbox_area: Area2D = $Area2D
 
-@onready var hitbox: CollisionShape2D = (
-	$Area2D/hitbox
-)
+@onready var hitbox: CollisionShape2D = $Area2D/hitbox
 
 
 # ============================================================
@@ -229,9 +218,7 @@ func _ready() -> void:
 	add_to_group("enemies")
 	add_to_group("boss")
 
-	motion_mode = (
-		CharacterBody2D.MOTION_MODE_GROUNDED
-	)
+	motion_mode = CharacterBody2D.MOTION_MODE_GROUNDED
 
 	up_direction = Vector2.UP
 
@@ -239,454 +226,304 @@ func _ready() -> void:
 
 	current_health = max_health
 
-	call_deferred(
-		"_find_player"
-	)
-
 	direction = -1
 
-	_set_facing(
-		direction
-	)
+	_reset_all_timers()
+	_reset_attack_state()
 
-	ray_cast.enabled = true
+	_set_facing(direction)
 
-	_update_ray_cast()
+	_find_player()
 
-	hitbox_area.monitoring = true
 
-	hitbox_area.monitorable = true
+	# ========================================================
+	# RAYCAST
+	# ========================================================
 
-	if not hitbox_area.body_entered.is_connected(
-		_on_hitbox_body_entered
+	if ray_cast != null:
+
+		ray_cast.enabled = true
+
+		_update_ray_cast()
+
+
+	# ========================================================
+	# HITBOX
+	# ========================================================
+
+	if hitbox_area != null:
+
+		hitbox_area.monitoring = true
+		hitbox_area.monitorable = true
+
+
+	if hitbox != null:
+
+		hitbox.disabled = false
+
+
+	# ========================================================
+	# SIGNAL
+	# ========================================================
+
+	if (
+		hitbox_area != null
+		and
+		not hitbox_area.body_entered.is_connected(
+			_on_hitbox_body_entered
+		)
 	):
 
 		hitbox_area.body_entered.connect(
 			_on_hitbox_body_entered
 		)
 
-	_play_animation(
-		"olhando"
-	)
 
-	print(
-		"BOSS INIMIGO: pronto."
-	)
+	_play_animation("olhando")
+
+
+	print("================================")
+	print("GUARDIAO COGNITIVO")
+	print("BOSS PRONTO")
+	print("VIDA: ", current_health, "/", max_health)
+	print("================================")
 
 
 # ============================================================
 # PHYSICS
 # ============================================================
 
-func _physics_process(
-	delta: float
-) -> void:
+func _physics_process(delta: float) -> void:
 
 	if is_dead:
+
 		return
 
-	_update_timers(
-		delta
-	)
 
-	_update_enraged_state()
+	_update_timers(delta)
 
-	# --------------------------------------------------------
+	_update_rage(delta)
+
+	_update_flash(delta)
+
+
+	# ========================================================
 	# GRAVIDADE
-	# --------------------------------------------------------
+	# ========================================================
 
 	if not is_on_floor():
 
-		velocity += (
-			get_gravity()
-			* delta
-		)
+		velocity += get_gravity() * delta
 
-	else:
+	elif velocity.y > 0.0:
 
 		velocity.y = 0.0
 
-	_update_player_vertical_state()
 
-	# --------------------------------------------------------
-	# HURT
-	# --------------------------------------------------------
-
-	if is_hurt:
-
-		velocity.x = move_toward(
-			velocity.x,
-			0.0,
-			DECELERATION * delta
-		)
-
-		move_and_slide()
-
-		_check_stomp_overlap()
-
-		_update_air_animation()
-
-		return
-
-	# --------------------------------------------------------
-	# CONGELADO
-	# --------------------------------------------------------
-
-	if not can_move:
-
-		velocity.x = move_toward(
-			velocity.x,
-			0.0,
-			DECELERATION * delta
-		)
-
-		_play_animation(
-			"olhando"
-		)
-
-		move_and_slide()
-
-		_check_stomp_overlap()
-
-		_update_air_animation()
-
-		return
-
-	# --------------------------------------------------------
-	# ATAQUE
-	# --------------------------------------------------------
-
-	if is_attacking:
-
-		_process_attack(
-			delta
-		)
-
-		_check_stomp_overlap()
-
-		_update_air_animation()
-
-		return
-
-	# --------------------------------------------------------
+	# ========================================================
 	# PLAYER
-	# --------------------------------------------------------
+	# ========================================================
 
-	if not is_instance_valid(
-		player
-	):
+	if not is_instance_valid(player):
 
 		_find_player()
 
-	if not is_instance_valid(
-		player
-	):
 
-		velocity.x = move_toward(
-			velocity.x,
-			0.0,
-			DECELERATION * delta
-		)
+	# ========================================================
+	# PISAO
+	# ========================================================
 
-		_play_animation(
-			"olhando"
-		)
+	if is_instance_valid(player):
 
-		move_and_slide()
+		_check_stomp()
 
-		return
 
-	# --------------------------------------------------------
-	# DISTÂNCIAS
-	# --------------------------------------------------------
+	# ========================================================
+	# HURT
+	# ========================================================
 
-	var distance_x: float = abs(
-		player.global_position.x
-		-
-		global_position.x
-	)
+	if is_hurt:
 
-	var distance_y: float = abs(
-		player.global_position.y
-		-
-		global_position.y
-	)
-
-	# --------------------------------------------------------
-	# ATAQUE
-	# --------------------------------------------------------
-
-	if (
-		attack_enabled
-		and
-		distance_x <= ATTACK_TRIGGER_DISTANCE
-		and
-		distance_y <= ATTACK_VERTICAL_DISTANCE
-		and
-		attack_cooldown <= 0.0
-	):
-
-		_face_player()
-
-		_stop_sprint()
-
-		_start_attack()
-
-		move_and_slide()
+		_process_hurt(delta)
 
 		return
 
-	# --------------------------------------------------------
-	# PULO
-	# --------------------------------------------------------
 
-	if (
-		is_on_floor()
-		and
-		_should_jump_to_player(
-			distance_x,
-			distance_y
-		)
-	):
+	# ========================================================
+	# FREEZE
+	# ========================================================
 
-		_jump_toward_player()
+	if not can_move:
 
-		move_and_slide()
-
-		_update_air_animation()
+		_process_frozen()
 
 		return
 
-	# --------------------------------------------------------
-	# RAYCAST
-	# --------------------------------------------------------
 
-	_update_ray_cast()
+	# ========================================================
+	# PREPARANDO DASH
+	# ========================================================
 
-	# --------------------------------------------------------
-	# BORDA
-	# --------------------------------------------------------
+	if attack_prepare_timer > 0.0:
 
-	if (
-		is_on_floor()
-		and
-		not ray_cast.is_colliding()
-	):
-
-		if _can_follow_over_edge():
-
-			_jump_from_edge_toward_player()
-
-		else:
-
-			_virar()
-
-		move_and_slide()
-
-		_update_air_animation()
+		_process_attack_prepare(delta)
 
 		return
 
-	# --------------------------------------------------------
-	# SPRINT
-	# --------------------------------------------------------
 
-	_update_sprint(
-		delta,
-		distance_x
-	)
+	# ========================================================
+	# DASH
+	# ========================================================
 
-	# --------------------------------------------------------
-	# PERSEGUIÇÃO
-	# --------------------------------------------------------
+	if is_attacking:
 
-	_chase_player(
-		delta
-	)
+		_process_attack_dash(delta)
 
-	move_and_slide()
+		return
 
-	_process_slide_collisions()
 
-	_update_air_animation()
+	# ========================================================
+	# RECUPERACAO
+	# ========================================================
 
-	# --------------------------------------------------------
-	# ANIMAÇÃO
-	# --------------------------------------------------------
+	if attack_recovery_timer > 0.0:
 
-	if (
-		is_on_floor()
-		and
-		abs(velocity.x) > 0.1
-	):
+		_process_attack_recovery(delta)
 
-		_play_animation(
-			"walking"
-		)
+		return
 
-	elif is_on_floor():
 
-		_play_animation(
-			"olhando"
-		)
+	# ========================================================
+	# SEM PLAYER
+	# ========================================================
+
+	if not is_instance_valid(player):
+
+		_process_idle(delta)
+
+		return
+
+
+	# ========================================================
+	# NO AR
+	# ========================================================
+
+	if not is_on_floor():
+
+		_process_air_follow(delta)
+
+		return
+
+
+	# ========================================================
+	# PERSEGUIR
+	# ========================================================
+
+	_process_follow_player(delta)
 
 
 # ============================================================
 # TIMERS
 # ============================================================
 
-func _update_timers(
-	delta: float
-) -> void:
+func _update_timers(delta: float) -> void:
 
 	if attack_cooldown > 0.0:
 
 		attack_cooldown -= delta
 
+
 	if damage_cooldown > 0.0:
 
 		damage_cooldown -= delta
+
 
 	if jump_cooldown > 0.0:
 
 		jump_cooldown -= delta
 
+
 	if turn_cooldown > 0.0:
 
 		turn_cooldown -= delta
 
-	if sprint_cooldown > 0.0:
 
-		sprint_cooldown -= delta
+	if stomp_cooldown > 0.0:
 
-	if stomp_invulnerability > 0.0:
+		stomp_cooldown -= delta
 
-		stomp_invulnerability -= delta
+
+	if hurt_time_left > 0.0:
+
+		hurt_time_left -= delta
 
 
 # ============================================================
-# MODO ENFURECIDO
+# SURTO
 # ============================================================
 
-func _update_enraged_state() -> void:
+func _update_rage(delta: float) -> void:
 
-	if max_health <= 0:
+	if enraged:
+
+		rage_time_left -= delta
+
+
+		if rage_time_left <= 0.0:
+
+			enraged = false
+
+			rage_time_left = 0.0
+
+			rage_timer = RAGE_INTERVAL
+
+
 		return
 
-	var health_ratio: float = (
-		float(current_health)
-		/
-		float(max_health)
-	)
 
-	if health_ratio <= ENRAGED_HEALTH_RATIO:
+	rage_timer -= delta
 
-		if not enraged:
 
-			enraged = true
+	if rage_timer <= 0.0:
 
-			print(
-				"BOSS: MODO ENFURECIDO!"
-			)
+		enraged = true
+
+		rage_time_left = RAGE_DURATION
+
+		rage_timer = RAGE_INTERVAL
+
+		print("BOSS: SURTO!")
+
+
+# ============================================================
+# FLASH
+# ============================================================
+
+func _update_flash(delta: float) -> void:
+
+	if animated_sprite == null:
+
+		return
+
+
+	if flash_time_left > 0.0:
+
+		animated_sprite.modulate = Color(
+			1.0,
+			0.65,
+			0.65,
+			1.0
+		)
+
+
+		flash_time_left -= delta
+
 
 	else:
 
-		enraged = false
+		if not is_hurt:
 
-
-# ============================================================
-# SPRINT
-# ============================================================
-
-func _update_sprint(
-	delta: float,
-	distance_x: float
-) -> void:
-
-	if sprint_active:
-
-		sprint_time_left -= delta
-
-		if sprint_time_left <= 0.0:
-
-			_stop_sprint()
-
-		return
-
-	if sprint_cooldown > 0.0:
-		return
-
-	if distance_x < SPRINT_START_DISTANCE_MIN:
-		return
-
-	if distance_x > SPRINT_START_DISTANCE_MAX:
-		return
-
-	var chance: float = (
-		SPRINT_CHANCE
-	)
-
-	if enraged:
-
-		chance *= 1.65
-
-	if randf() <= chance:
-
-		_start_sprint()
-
-
-func _start_sprint() -> void:
-
-	if sprint_active:
-		return
-
-	if is_attacking:
-		return
-
-	if is_hurt:
-		return
-
-	sprint_active = true
-
-	sprint_time_left = randf_range(
-		SPRINT_MIN_TIME,
-		SPRINT_MAX_TIME
-	)
-
-	sprint_cooldown = randf_range(
-		SPRINT_COOLDOWN_MIN,
-		SPRINT_COOLDOWN_MAX
-	)
-
-	if enraged:
-
-		sprint_time_left *= 1.10
-
-	print(
-		"BOSS: SPRINT!"
-	)
-
-
-func _stop_sprint() -> void:
-
-	sprint_active = false
-
-
-func _get_current_chase_speed() -> float:
-
-	if sprint_active:
-
-		if enraged:
-
-			return ENRAGED_SPRINT_SPEED
-
-		return SPRINT_SPEED
-
-	if enraged:
-
-		return ENRAGED_CHASE_SPEED
-
-	return CHASE_SPEED
+			animated_sprite.modulate = Color.WHITE
 
 
 # ============================================================
@@ -695,141 +532,82 @@ func _get_current_chase_speed() -> float:
 
 func _find_player() -> void:
 
+	if not is_inside_tree():
+
+		return
+
+
 	var players: Array[Node] = (
-		get_tree().get_nodes_in_group(
-			"player"
-		)
+		get_tree().get_nodes_in_group("player")
 	)
+
 
 	for candidate: Node in players:
 
 		if candidate is CharacterBody2D:
 
-			player = (
-				candidate
-				as CharacterBody2D
-			)
+			player = candidate as CharacterBody2D
+
+			if not previous_player_y_valid:
+
+				previous_player_y = player.global_position.y
+
+				previous_player_y_valid = true
 
 			return
+
 
 	player = null
 
 
-func _update_player_vertical_state() -> void:
-
-	if not is_instance_valid(
-		player
-	):
-
-		player_was_above = false
-
-		return
-
-	player_was_above = (
-		player.global_position.y
-		<
-		global_position.y - 5.0
-	)
-
-
 # ============================================================
-# DECIDIR PULO
+# PERSEGUICAO
 # ============================================================
 
-func _should_jump_to_player(
-	distance_x: float,
-	distance_y: float
-) -> bool:
-
-	if not is_on_floor():
-		return false
-
-	if jump_cooldown > 0.0:
-		return false
-
-	if not is_instance_valid(
-		player
-	):
-
-		return false
-
-	if (
-		distance_x < 24.0
-		and
-		distance_y < 24.0
-	):
-
-		return false
-
-	if (
-		player.global_position.y
-		<
-		global_position.y - PLAYER_HEIGHT_TO_JUMP
-	):
-
-		if distance_x <= EDGE_FOLLOW_DISTANCE:
-
-			return true
-
-	if (
-		distance_y > 22.0
-		and
-		distance_x <= 210.0
-	):
-
-		return true
-
-	if enraged:
-
-		if (
-			distance_x <= 190.0
-			and
-			distance_y > 18.0
-		):
-
-			if randf() < 0.20:
-
-				return true
-
-	return false
-
-
-# ============================================================
-# CHASE
-# ============================================================
-
-func _chase_player(
+func _process_follow_player(
 	delta: float
 ) -> void:
 
-	if not is_instance_valid(
-		player
-	):
+	if not is_instance_valid(player):
 
 		return
 
-	var difference: float = (
+
+	var difference_x: float = (
 		player.global_position.x
 		-
 		global_position.x
 	)
 
-	var target_direction: int = (
-		direction
+
+	var difference_y: float = (
+		player.global_position.y
+		-
+		global_position.y
 	)
 
-	# Deadzone para não ficar tremendo.
-	if difference > 9.0:
 
-		target_direction = 1
+	var distance_x: float = abs(
+		difference_x
+	)
 
-	elif difference < -9.0:
+
+	var distance_y: float = abs(
+		difference_y
+	)
+
+
+	# ========================================================
+	# DIRECAO
+	# ========================================================
+
+	var target_direction: int = 1
+
+
+	if difference_x < 0.0:
 
 		target_direction = -1
 
-	# --------------------------------------------------------
-	# VIRADA
-	# --------------------------------------------------------
 
 	if (
 		target_direction != direction
@@ -839,152 +617,716 @@ func _chase_player(
 
 		direction = target_direction
 
-		_set_facing(
-			direction
-		)
+		_set_facing(direction)
 
-		turn_cooldown = (
-			TURN_COOLDOWN
-		)
+		turn_cooldown = TURN_COOLDOWN
 
 		_update_ray_cast()
 
-	# --------------------------------------------------------
-	# VELOCIDADE
-	# --------------------------------------------------------
 
-	var target_speed: float = (
-		_get_current_chase_speed()
+	# ========================================================
+	# ATAQUE
+	# ========================================================
+
+	if (
+		attack_enabled
+		and
+		attack_cooldown <= 0.0
+		and
+		not is_attacking
+		and
+		attack_prepare_timer <= 0.0
+		and
+		distance_x <= ATTACK_TRIGGER_DISTANCE
+		and
+		distance_y <= ATTACK_VERTICAL_DISTANCE
+	):
+
+		_start_attack()
+
+		return
+
+
+	# ========================================================
+	# PULO: PAREDE / OBSTACULO
+	# ========================================================
+
+	if (
+		is_on_floor()
+		and
+		jump_cooldown <= 0.0
+		and
+		(
+			is_on_wall()
+			or
+			_is_obstacle_ahead()
+		)
+	):
+
+		_start_jump()
+
+		return
+
+
+	# ========================================================
+	# PULO PARA ALCANCAR O PLAYER
+	# ========================================================
+
+	var player_above: bool = (
+		player.global_position.y
+		<
+		global_position.y - PLAYER_ABOVE_HEIGHT
 	)
+
+
+	var player_far: bool = (
+		distance_x > 110.0
+	)
+
+
+	var height_difference: bool = (
+		distance_y > 55.0
+	)
+
+
+	if (
+		is_on_floor()
+		and
+		jump_cooldown <= 0.0
+		and
+		distance_x <= PLAYER_ABOVE_DISTANCE
+		and
+		(
+			player_above
+			or
+			(
+				player_far
+				and
+				height_difference
+			)
+		)
+	):
+
+		_start_jump()
+
+		return
+
+
+	# ========================================================
+	# MUITO PERTO
+	# ========================================================
+
+	if distance_x <= STOP_DISTANCE:
+
+		velocity.x = move_toward(
+			velocity.x,
+			0.0,
+			DECELERATION * delta
+		)
+
+		_face_player()
+
+		_play_animation("olhando")
+
+		move_and_slide()
+
+		return
+
+
+	# ========================================================
+	# VELOCIDADE
+	# ========================================================
+
+	var speed: float = (
+		RAGE_SPEED
+		if enraged
+		else CHASE_SPEED
+	)
+
+
+	var acceleration: float = (
+		RAGE_ACCELERATION
+		if enraged
+		else ACCELERATION
+	)
+
 
 	velocity.x = move_toward(
 		velocity.x,
-		direction * target_speed,
-		ACCELERATION * delta
+		direction * speed,
+		acceleration * delta
 	)
 
 
-# ============================================================
-# ATAQUE
-# ============================================================
+	move_and_slide()
 
-func _start_attack() -> void:
 
-	if not attack_enabled:
+	# ========================================================
+	# SE BATEU NA PAREDE
+	# ========================================================
+
+	if (
+		is_on_wall()
+		and
+		is_on_floor()
+		and
+		jump_cooldown <= 0.0
+	):
+
+		_start_jump()
+
 		return
+
+
+	_update_ground_animation()
+
+
+# ============================================================
+# DETECTAR OBSTACULO
+# ============================================================
+
+func _is_obstacle_ahead() -> bool:
+
+	if not is_inside_tree():
+
+		return false
+
+
+	var space_state: PhysicsDirectSpaceState2D = (
+		get_world_2d().direct_space_state
+	)
+
+
+	var heights: Array[float] = [
+		OBSTACLE_LOW_Y,
+		OBSTACLE_MIDDLE_Y,
+		OBSTACLE_HIGH_Y,
+		OBSTACLE_VERY_HIGH_Y
+	]
+
+
+	for height: float in heights:
+
+		var start: Vector2 = Vector2(
+			global_position.x
+			+
+			float(direction) * 5.0,
+			global_position.y
+			+
+			height
+		)
+
+
+		var finish: Vector2 = Vector2(
+			global_position.x
+			+
+			float(direction)
+			*
+			OBSTACLE_DISTANCE,
+			global_position.y
+			+
+			height
+		)
+
+
+		var query: PhysicsRayQueryParameters2D = (
+			PhysicsRayQueryParameters2D.create(
+				start,
+				finish
+			)
+		)
+
+
+		# Enxerga qualquer collision layer.
+		query.collision_mask = 0xFFFFFFFF
+
+		query.collide_with_bodies = true
+
+		query.collide_with_areas = false
+
+
+		var excluded: Array[RID] = [
+			get_rid()
+		]
+
+
+		if is_instance_valid(player):
+
+			excluded.append(
+				player.get_rid()
+			)
+
+
+		query.exclude = excluded
+
+
+		var result: Dictionary = (
+			space_state.intersect_ray(query)
+		)
+
+
+		if result.is_empty():
+
+			continue
+
+
+		var collider: Object = (
+			result.get("collider")
+		)
+
+
+		if collider == null:
+
+			continue
+
+
+		if collider == player:
+
+			continue
+
+
+		return true
+
+
+	return false
+
+
+# ============================================================
+# PULO
+# ============================================================
+
+func _start_jump() -> void:
+
+	if not is_on_floor():
+
+		return
+
+
+	if jump_cooldown > 0.0:
+
+		return
+
+
+	if is_hurt:
+
+		return
+
 
 	if is_attacking:
+
 		return
 
-	if attack_cooldown > 0.0:
+
+	jump_cooldown = JUMP_COOLDOWN
+
+
+	var jump_direction: float = (
+		float(direction)
+	)
+
+
+	# Se o player existir, pula em direção a ele.
+	# Se não existir, pula na direção atual.
+	if is_instance_valid(player):
+
+		if player.global_position.x < global_position.x:
+
+			jump_direction = -1.0
+
+		elif player.global_position.x > global_position.x:
+
+			jump_direction = 1.0
+
+
+	_set_facing(
+		int(jump_direction)
+	)
+
+
+	# ========================================================
+	# IMPULSO VERTICAL
+	# ========================================================
+
+	velocity.y = JUMP_FORCE
+
+
+	# ========================================================
+	# IMPULSO HORIZONTAL
+	# ========================================================
+
+	var horizontal_speed: float = (
+		JUMP_HORIZONTAL_SPEED
+	)
+
+
+	if enraged:
+
+		horizontal_speed = 180.0
+
+
+	velocity.x = (
+		jump_direction
+		*
+		horizontal_speed
+	)
+
+
+	_play_animation("pular")
+
+
+	print(
+		"BOSS: PULO! velocity=",
+		velocity
+	)
+
+
+	# ========================================================
+	# IMPORTANTE
+	#
+	# O movimento é aplicado IMEDIATAMENTE.
+	# ========================================================
+
+	move_and_slide()
+
+
+# ============================================================
+# MOVIMENTO NO AR
+# ============================================================
+
+func _process_air_follow(
+	delta: float
+) -> void:
+
+	if not is_instance_valid(player):
+
+		move_and_slide()
+
+		_update_air_animation()
+
 		return
 
-	_face_player()
 
-	_stop_sprint()
-
-	is_attacking = true
-
-	attack_hit_done = false
-
-	attack_timer = (
-		ATTACK_DURATION
+	var difference_x: float = (
+		player.global_position.x
+		-
+		global_position.x
 	)
 
-	attack_cooldown = (
-		ATTACK_COOLDOWN
-	)
 
-	velocity.x = 0.0
-
-	_play_animation(
-		"ataque"
-	)
-
-	boss_attack_started.emit()
+	var air_direction: float = 0.0
 
 
-func _process_attack(
+	if difference_x > 8.0:
+
+		air_direction = 1.0
+
+	elif difference_x < -8.0:
+
+		air_direction = -1.0
+
+
+	if air_direction != 0.0:
+
+		var air_speed: float = (
+			RAGE_SPEED
+			if enraged
+			else JUMP_HORIZONTAL_SPEED
+		)
+
+
+		velocity.x = move_toward(
+			velocity.x,
+			air_direction * air_speed,
+			ACCELERATION * delta
+		)
+
+
+		_set_facing(
+			int(air_direction)
+		)
+
+
+	move_and_slide()
+
+
+	_update_air_animation()
+
+
+# ============================================================
+# IDLE
+# ============================================================
+
+func _process_idle(
 	delta: float
 ) -> void:
 
 	velocity.x = move_toward(
 		velocity.x,
 		0.0,
-		500.0 * delta
+		DECELERATION * delta
 	)
 
-	# --------------------------------------------------------
-	# MOMENTO DO HIT
-	# --------------------------------------------------------
-
-	if not attack_hit_done:
-
-		if (
-			attack_timer
-			<=
-			ATTACK_DURATION * 0.55
-		):
-
-			if _player_is_in_attack_hit_range():
-
-				dar_dano_no_player(
-					player
-				)
-
-			attack_hit_done = true
-
-	attack_timer -= delta
 
 	move_and_slide()
 
-	_check_stomp_overlap()
 
-	_update_air_animation()
+	_play_animation("olhando")
 
-	# --------------------------------------------------------
-	# FIM DO ATAQUE
-	# --------------------------------------------------------
 
-	if attack_timer <= 0.0:
+# ============================================================
+# FREEZE
+# ============================================================
+
+func _process_frozen() -> void:
+
+	velocity = Vector2.ZERO
+
+	_reset_attack_state()
+
+	_play_animation("olhando")
+
+
+# ============================================================
+# INICIAR ATAQUE
+# ============================================================
+
+func _start_attack() -> void:
+
+	if not attack_enabled:
+
+		return
+
+
+	if attack_cooldown > 0.0:
+
+		return
+
+
+	if is_attacking:
+
+		return
+
+
+	if not is_instance_valid(player):
+
+		return
+
+
+	_face_player()
+
+
+	attack_direction = direction
+
+
+	attack_prepare_timer = (
+		ATTACK_PREPARE_TIME
+	)
+
+
+	attack_hit_done = false
+
+
+	velocity.x = 0.0
+
+
+	_play_animation("ataque")
+
+
+# ============================================================
+# PREPARACAO DO DASH
+# ============================================================
+
+func _process_attack_prepare(
+	delta: float
+) -> void:
+
+	if not is_instance_valid(player):
+
+		attack_prepare_timer = 0.0
+
+		return
+
+
+	var distance_x: float = abs(
+		player.global_position.x
+		-
+		global_position.x
+	)
+
+
+	var distance_y: float = abs(
+		player.global_position.y
+		-
+		global_position.y
+	)
+
+
+	if (
+		distance_x
+		>
+		ATTACK_START_DISTANCE + 20.0
+		or
+		distance_y
+		>
+		ATTACK_VERTICAL_DISTANCE + 12.0
+	):
+
+		attack_prepare_timer = 0.0
+
+		_play_animation("walking")
+
+		return
+
+
+	_face_player()
+
+
+	velocity.x = 0.0
+
+
+	attack_prepare_timer -= delta
+
+
+	move_and_slide()
+
+
+	if attack_prepare_timer <= 0.0:
+
+		_begin_dash()
+
+
+# ============================================================
+# INICIAR DASH
+# ============================================================
+
+func _begin_dash() -> void:
+
+	if not is_instance_valid(player):
+
+		attack_prepare_timer = 0.0
+
+		return
+
+
+	var distance_x: float = abs(
+		player.global_position.x
+		-
+		global_position.x
+	)
+
+
+	var distance_y: float = abs(
+		player.global_position.y
+		-
+		global_position.y
+	)
+
+
+	if (
+		distance_x
+		>
+		ATTACK_START_DISTANCE
+		or
+		distance_y
+		>
+		ATTACK_VERTICAL_DISTANCE + 5.0
+	):
+
+		attack_prepare_timer = 0.0
+
+		return
+
+
+	attack_prepare_timer = 0.0
+
+	attack_dash_timer = (
+		ATTACK_DASH_TIME
+	)
+
+	attack_cooldown = (
+		ATTACK_COOLDOWN
+	)
+
+	attack_hit_done = false
+
+	is_attacking = true
+
+
+	velocity.x = (
+		float(attack_direction)
+		*
+		ATTACK_DASH_SPEED
+	)
+
+
+	boss_attack_started.emit()
+
+
+	print("BOSS: DASH!")
+
+
+# ============================================================
+# EXECUTAR DASH
+# ============================================================
+
+func _process_attack_dash(
+	delta: float
+) -> void:
+
+	velocity.x = (
+		float(attack_direction)
+		*
+		ATTACK_DASH_SPEED
+	)
+
+
+	move_and_slide()
+
+
+	if (
+		not attack_hit_done
+		and
+		_dash_touched_player()
+	):
+
+		_apply_dash_damage()
+
+
+	attack_dash_timer -= delta
+
+
+	if attack_dash_timer <= 0.0:
 
 		is_attacking = false
 
-		attack_locked_until_leave = false
+		attack_dash_timer = 0.0
 
-		if is_dead:
-			return
+		attack_hit_done = false
 
-		if is_on_floor():
+		attack_recovery_timer = (
+			ATTACK_RECOVERY_TIME
+		)
 
-			_play_animation(
-				"walking"
-			)
-
-		else:
-
-			_play_animation(
-				"pular"
-			)
+		velocity.x = 0.0
 
 
 # ============================================================
-# HIT RANGE
+# CONTATO REAL DO DASH
 # ============================================================
 
-func _player_is_in_attack_hit_range() -> bool:
+func _dash_touched_player() -> bool:
 
-	if not is_instance_valid(
-		player
-	):
+	if not is_instance_valid(player):
 
 		return false
+
 
 	var horizontal_distance: float = abs(
 		player.global_position.x
 		-
 		global_position.x
 	)
+
 
 	var vertical_distance: float = abs(
 		player.global_position.y
@@ -992,91 +1334,325 @@ func _player_is_in_attack_hit_range() -> bool:
 		global_position.y
 	)
 
-	return (
+
+	if (
 		horizontal_distance
-		<=
-		ATTACK_HIT_DISTANCE
-		and
+		>
+		DASH_CONTACT_HORIZONTAL
+	):
+
+		return false
+
+
+	if (
 		vertical_distance
-		<=
-		ATTACK_VERTICAL_DISTANCE
+		>
+		DASH_CONTACT_VERTICAL
+	):
+
+		return false
+
+
+	var relative_x: float = (
+		player.global_position.x
+		-
+		global_position.x
 	)
 
 
+	if attack_direction > 0:
+
+		if relative_x < -3.0:
+
+			return false
+
+	else:
+
+		if relative_x > 3.0:
+
+			return false
+
+
+	return true
+
+
 # ============================================================
-# DANO NO PLAYER
+# DANO DO DASH
 # ============================================================
 
-func dar_dano_no_player(
-	body: Node2D
-) -> void:
+func _apply_dash_damage() -> void:
 
 	if not damage_enabled:
+
 		return
+
 
 	if is_dead:
+
 		return
+
 
 	if damage_cooldown > 0.0:
-		return
-
-	if (
-		body == null
-		or
-		not is_instance_valid(
-			body
-		)
-	):
 
 		return
 
-	if not body.is_in_group(
-		"player"
-	):
+
+	if not is_instance_valid(player):
 
 		return
 
-	# Não acerta por baixo.
-	if (
-		body.global_position.y
-		<
-		global_position.y - 8.0
-	):
+
+	if not player.has_method("take_damage"):
 
 		return
 
-	if not body.has_method(
-		"take_damage"
-	):
 
-		return
-
-	var knockback_direction: float = 1.0
-
-	if (
-		body.global_position.x
-		<
-		global_position.x
-	):
-
-		knockback_direction = -1.0
-
-	body.take_damage(
+	player.take_damage(
 		Vector2(
-			knockback_direction
+			float(attack_direction)
 			*
 			KNOCKBACK_X,
 			KNOCKBACK_Y
 		)
 	)
 
+
 	damage_cooldown = (
 		DAMAGE_COOLDOWN
 	)
 
 
+	attack_hit_done = true
+
+
+	print("BOSS: DASH ACERTOU!")
+
+
 # ============================================================
-# HITBOX
+# PISAO
+# ============================================================
+
+func _check_stomp() -> void:
+
+	if not stomp_enabled:
+
+		_update_previous_player_y()
+
+		return
+
+
+	if stomp_cooldown > 0.0:
+
+		_update_previous_player_y()
+
+		return
+
+
+	if not is_instance_valid(player):
+
+		_update_previous_player_y()
+
+		return
+
+
+	var current_y: float = (
+		player.global_position.y
+	)
+
+
+	if not previous_player_y_valid:
+
+		previous_player_y = current_y
+
+		previous_player_y_valid = true
+
+		return
+
+
+	var player_velocity_y: float = (
+		player.velocity.y
+	)
+
+
+	if player_velocity_y <= 15.0:
+
+		previous_player_y = current_y
+
+		return
+
+
+	var horizontal_distance: float = abs(
+		player.global_position.x
+		-
+		global_position.x
+	)
+
+
+	if (
+		horizontal_distance
+		>
+		STOMP_HORIZONTAL_DISTANCE
+	):
+
+		previous_player_y = current_y
+
+		return
+
+
+	var head_y: float = (
+		global_position.y
+		-
+		STOMP_HEAD_Y
+	)
+
+
+	var was_above: bool = (
+		previous_player_y
+		<
+		head_y
+	)
+
+
+	var reached_head: bool = (
+		current_y
+		>=
+		head_y
+	)
+
+
+	if not was_above or not reached_head:
+
+		previous_player_y = current_y
+
+		return
+
+
+	if current_y > global_position.y + 5.0:
+
+		previous_player_y = current_y
+
+		return
+
+
+	_apply_stomp_damage()
+
+
+	previous_player_y = current_y
+
+
+# ============================================================
+# SALVAR Y DO PLAYER
+# ============================================================
+
+func _update_previous_player_y() -> void:
+
+	if not is_instance_valid(player):
+
+		return
+
+
+	previous_player_y = (
+		player.global_position.y
+	)
+
+	previous_player_y_valid = true
+
+
+# ============================================================
+# APLICAR PISAO
+# ============================================================
+
+func _apply_stomp_damage() -> void:
+
+	if not is_instance_valid(player):
+
+		return
+
+
+	if not damage_enabled:
+
+		return
+
+
+	if not stomp_enabled:
+
+		return
+
+
+	if stomp_cooldown > 0.0:
+
+		return
+
+
+	stomp_cooldown = (
+		STOMP_COOLDOWN
+	)
+
+
+	take_boss_damage(
+		stomp_damage
+	)
+
+
+	player.velocity.y = -260.0
+
+
+	print(
+		"BOSS: PISAO RECEBIDO!"
+	)
+
+
+# ============================================================
+# DANO POR CONTATO
+# ============================================================
+
+func _apply_contact_damage() -> void:
+
+	if not damage_enabled:
+
+		return
+
+
+	if is_dead:
+
+		return
+
+
+	if damage_cooldown > 0.0:
+
+		return
+
+
+	if not is_instance_valid(player):
+
+		return
+
+
+	if not player.has_method("take_damage"):
+
+		return
+
+
+	# Dano imediato ao encostar no boss.
+	# Não depende da animação de ataque.
+	player.take_damage(
+		Vector2(
+			float(direction)
+			*
+			KNOCKBACK_X,
+			KNOCKBACK_Y
+		)
+	)
+
+
+	damage_cooldown = DAMAGE_COOLDOWN
+
+
+	print("BOSS: DANO POR CONTATO!")
+
+
+# ============================================================
+# HITBOX CALLBACK
 # ============================================================
 
 func _on_hitbox_body_entered(
@@ -1084,479 +1660,224 @@ func _on_hitbox_body_entered(
 ) -> void:
 
 	if is_dead:
-		return
-
-	if not body.is_in_group(
-		"player"
-	):
 
 		return
 
-	_check_single_stomp(
-		body
-	)
 
 	if not damage_enabled:
-		return
-
-	if is_attacking:
-		return
-
-	if _is_player_above_boss(
-		body
-	):
 
 		return
 
-	dar_dano_no_player(
-		body
-	)
+
+	if not is_instance_valid(player):
+
+		return
+
+
+	# Só o player pode receber dano aqui.
+	if body != player:
+
+		return
+
+
+	# Encostou no boss = dano imediato.
+	_apply_contact_damage()
 
 
 # ============================================================
-# PISÃO
+# RECUPERACAO
 # ============================================================
 
-func _check_stomp_overlap() -> void:
-
-	if is_dead:
-		return
-
-	if stomp_invulnerability > 0.0:
-		return
-
-	var bodies: Array[Node2D] = (
-		hitbox_area.get_overlapping_bodies()
-	)
-
-	for body: Node2D in bodies:
-
-		if body.is_in_group(
-			"player"
-		):
-
-			_check_single_stomp(
-				body
-			)
-
-			return
-
-
-func _check_single_stomp(
-	body: Node2D
+func _process_attack_recovery(
+	delta: float
 ) -> void:
 
-	if not stomp_enabled:
-		return
-
-	if is_dead:
-		return
-
-	if stomp_invulnerability > 0.0:
-		return
-
-	if not body.is_in_group(
-		"player"
-	):
-
-		return
-
-	if not _is_player_above_boss(
-		body
-	):
-
-		return
-
-	var horizontal_distance: float = abs(
-		body.global_position.x
-		-
-		global_position.x
+	velocity.x = move_toward(
+		velocity.x,
+		0.0,
+		DECELERATION * delta
 	)
 
-	if horizontal_distance > 46.0:
-		return
 
-	var player_vertical_speed: float = 0.0
+	attack_recovery_timer -= delta
 
-	if body.get(
-		"velocity"
-	) != null:
 
-		var player_velocity: Vector2 = (
-			body.get("velocity")
-			as Vector2
+	move_and_slide()
+
+
+	if attack_recovery_timer <= 0.0:
+
+		attack_recovery_timer = 0.0
+
+		_play_animation(
+			"walking"
 		)
-
-		player_vertical_speed = (
-			player_velocity.y
-		)
-
-	if player_vertical_speed > 140.0:
-		return
-
-	stomp_invulnerability = 0.65
-
-	take_boss_damage(
-		max_health
-	)
-
-
-func _is_player_above_boss(
-	body: Node2D
-) -> bool:
-
-	return (
-		body.global_position.y
-		<
-		global_position.y - 8.0
-	)
-
-
-# ============================================================
-# RECEBER DANO
-# ============================================================
-
-func take_boss_damage(
-	amount: int = 1
-) -> void:
-
-	if is_dead:
-		return
-
-	if amount <= 0:
-		return
-
-	current_health -= amount
-
-	current_health = max(
-		current_health,
-		0
-	)
-
-	boss_health_changed.emit(
-		current_health,
-		max_health
-	)
-
-	_play_hurt()
-
-	if current_health <= 0:
-
-		_defeat()
-
-
-func hurt() -> void:
-
-	take_boss_damage(
-		1
-	)
 
 
 # ============================================================
 # HURT
 # ============================================================
 
-func _play_hurt() -> void:
+func _start_hurt() -> void:
 
-	if is_dead or is_hurt:
+	if is_dead:
+
 		return
+
 
 	is_hurt = true
 
-	is_attacking = false
+	hurt_time_left = (
+		HURT_DURATION
+	)
 
-	attack_timer = 0.0
 
-	_stop_sprint()
+	_reset_attack_state()
+
 
 	velocity.x = 0.0
+
 
 	_play_animation(
 		"hurt"
 	)
 
-	animated_sprite.modulate = Color(
-		1.0,
-		0.55,
-		0.55,
-		1.0
+
+	flash_time_left = (
+		FLASH_DURATION
 	)
 
-	await get_tree().create_timer(
-		0.20
-	).timeout
+
+func _process_hurt(
+	delta: float
+) -> void:
+
+	velocity.x = move_toward(
+		velocity.x,
+		0.0,
+		DECELERATION * delta
+	)
+
+
+	move_and_slide()
+
+
+	if hurt_time_left <= 0.0:
+
+		is_hurt = false
+
+		flash_time_left = 0.0
+
+		if animated_sprite != null:
+
+			animated_sprite.modulate = Color.WHITE
+
+
+		_update_ground_animation()
+
+
+# ============================================================
+# ANIMACAO
+# ============================================================
+
+func _update_ground_animation() -> void:
 
 	if is_dead:
+
 		return
 
-	animated_sprite.modulate = (
-		Color.WHITE
-	)
 
-	is_hurt = false
+	if is_hurt:
 
-	if is_on_floor():
+		return
+
+
+	if is_attacking:
+
+		return
+
+
+	if not is_on_floor():
+
+		_play_animation(
+			"pular"
+		)
+
+		return
+
+
+	if abs(velocity.x) > 4.0:
+
+		_play_animation(
+			"walking"
+		)
+
+	else:
 
 		_play_animation(
 			"olhando"
 		)
 
-	else:
+
+func _update_air_animation() -> void:
+
+	if is_dead:
+
+		return
+
+
+	if is_hurt:
+
+		return
+
+
+	if is_attacking:
+
+		return
+
+
+	if not is_on_floor():
 
 		_play_animation(
 			"pular"
 		)
 
 
-# ============================================================
-# MORTE
-# ============================================================
+func _play_animation(
+	animation_name: String
+) -> void:
 
-func _defeat() -> void:
+	if animated_sprite == null:
 
-	if is_dead:
 		return
 
-	is_dead = true
 
-	can_move = false
+	if animated_sprite.sprite_frames == null:
 
-	damage_enabled = false
-
-	is_hurt = false
-
-	is_attacking = false
-
-	_stop_sprint()
-
-	velocity = Vector2.ZERO
-
-	_play_animation(
-		"hurt"
-	)
-
-	await get_tree().create_timer(
-		0.25
-	).timeout
-
-	var tween: Tween = (
-		create_tween()
-	)
-
-	tween.set_parallel(
-		true
-	)
-
-	tween.tween_property(
-		animated_sprite,
-		"modulate:a",
-		0.0,
-		0.35
-	)
-
-	tween.tween_property(
-		animated_sprite,
-		"scale",
-		Vector2(
-			0.82,
-			0.82
-		),
-		0.35
-	)
-
-	await tween.finished
-
-	boss_defeated.emit()
-
-
-# ============================================================
-# PULO
-# ============================================================
-
-func _jump_toward_player() -> void:
-
-	if jump_cooldown > 0.0:
 		return
 
-	if not is_on_floor():
-		return
 
-	var cooldown_value: float = (
-		ENRAGED_JUMP_COOLDOWN
-		if enraged
-		else JUMP_COOLDOWN
-	)
-
-	jump_cooldown = (
-		cooldown_value
-	)
-
-	var target_direction: float = 1.0
-
-	if is_instance_valid(
-		player
-	):
-
-		if (
-			player.global_position.x
-			<
-			global_position.x
-		):
-
-			target_direction = -1.0
-
-	_set_facing(
-		int(target_direction)
-	)
-
-	velocity.y = (
-		JUMP_FORCE
-	)
-
-	velocity.x = (
-		target_direction
-		*
-		EDGE_JUMP_SPEED
-	)
-
-	_stop_sprint()
-
-	_play_animation(
-		"pular"
-	)
-
-
-func _jump_from_edge_toward_player() -> void:
-
-	_jump_toward_player()
-
-
-func _can_follow_over_edge() -> bool:
-
-	if not is_instance_valid(
-		player
-	):
-
-		return false
-
-	var horizontal_distance: float = abs(
-		player.global_position.x
-		-
-		global_position.x
-	)
-
-	return (
-		horizontal_distance
-		<=
-		EDGE_FOLLOW_DISTANCE
-	)
-
-
-# ============================================================
-# COLISÕES
-# ============================================================
-
-func _process_slide_collisions() -> void:
-
-	for i: int in range(
-		get_slide_collision_count()
-	):
-
-		var collision_data: KinematicCollision2D = (
-			get_slide_collision(i)
-		)
-
-		var collider: Object = (
-			collision_data.get_collider()
-		)
-
-		var normal: Vector2 = (
-			collision_data.get_normal()
-		)
-
-		if collider == null:
-			continue
-
-		if collider.is_in_group(
-			"enemies"
-		):
-
-			if collider != self:
-
-				_virar()
-
-			break
-
-		if abs(normal.x) > 0.5:
-
-			_virar()
-
-			break
-
-
-# ============================================================
-# VIRAR
-# ============================================================
-
-func _virar() -> void:
-
-	if (
-		is_dead
-		or
-		is_hurt
-		or
-		is_attacking
+	if not animated_sprite.sprite_frames.has_animation(
+		animation_name
 	):
 
 		return
 
-	if turn_cooldown > 0.0:
-		return
 
-	turn_cooldown = (
-		TURN_COOLDOWN
-	)
+	if animated_sprite.animation == animation_name:
 
-	direction *= -1
+		if not animated_sprite.is_playing():
 
-	_set_facing(
-		direction
-	)
-
-	_update_ray_cast()
-
-
-# ============================================================
-# VIRAR PARA PLAYER
-# ============================================================
-
-func _face_player() -> void:
-
-	if not is_instance_valid(
-		player
-	):
+			animated_sprite.play(
+				animation_name
+			)
 
 		return
 
-	var difference: float = (
-		player.global_position.x
-		-
-		global_position.x
+
+	animated_sprite.play(
+		animation_name
 	)
-
-	if difference < 0.0:
-
-		_set_facing(
-			-1
-		)
-
-	else:
-
-		_set_facing(
-			1
-		)
-
-	_update_ray_cast()
 
 
 # ============================================================
@@ -1573,6 +1894,12 @@ func _set_facing(
 		else 1
 	)
 
+
+	if animated_sprite == null:
+
+		return
+
+
 	if SPRITE_FACES_RIGHT:
 
 		animated_sprite.flip_h = (
@@ -1586,81 +1913,47 @@ func _set_facing(
 		)
 
 
-# ============================================================
-# RAYCAST
-# ============================================================
+func _face_player() -> void:
+
+	if not is_instance_valid(player):
+
+		return
+
+
+	if (
+		player.global_position.x
+		<
+		global_position.x
+	):
+
+		_set_facing(
+			-1
+		)
+
+	else:
+
+		_set_facing(
+			1
+		)
+
+
+	_update_ray_cast()
+
 
 func _update_ray_cast() -> void:
 
 	if ray_cast == null:
+
 		return
+
 
 	ray_cast.target_position = Vector2(
-		float(direction) * 18.0,
-		24.0
+		float(direction) * 24.0,
+		18.0
 	)
+
 
 	ray_cast.force_raycast_update()
-
-
-# ============================================================
-# ANIMAÇÃO NO AR
-# ============================================================
-
-func _update_air_animation() -> void:
-
-	if (
-		is_dead
-		or
-		is_hurt
-		or
-		is_attacking
-	):
-
-		return
-
-	if not is_on_floor():
-
-		_play_animation(
-			"pular"
-		)
-
-
-# ============================================================
-# ANIMAÇÃO
-# ============================================================
-
-func _play_animation(
-	name: String
-) -> void:
-
-	if animated_sprite == null:
-		return
-
-	if animated_sprite.sprite_frames == null:
-		return
-
-	if not animated_sprite.sprite_frames.has_animation(
-		name
-	):
-
-		return
-
-	if animated_sprite.animation == name:
-
-		if not animated_sprite.is_playing():
-
-			animated_sprite.play(
-				name
-			)
-
-		return
-
-	animated_sprite.stop()
-
-	animated_sprite.play(
-		name
-	)
 
 
 # ============================================================
@@ -1673,15 +1966,10 @@ func set_attack_enabled(
 
 	attack_enabled = enabled
 
+
 	if not enabled:
 
-		is_attacking = false
-
-		attack_timer = 0.0
-
-		attack_hit_done = false
-
-		_stop_sprint()
+		_reset_attack_state()
 
 
 func set_damage_enabled(
@@ -1690,9 +1978,11 @@ func set_damage_enabled(
 
 	damage_enabled = enabled
 
+
 	if hitbox_area != null:
 
 		hitbox_area.monitoring = true
+
 		hitbox_area.monitorable = true
 
 
@@ -1713,11 +2003,7 @@ func freeze_boss() -> void:
 
 	velocity = Vector2.ZERO
 
-	is_attacking = false
-
-	attack_timer = 0.0
-
-	_stop_sprint()
+	_reset_attack_state()
 
 	_play_animation(
 		"olhando"
@@ -1727,9 +2013,13 @@ func freeze_boss() -> void:
 func unfreeze_boss() -> void:
 
 	if is_dead:
+
 		return
 
+
 	can_move = true
+
+	battle_controlled = false
 
 	call_deferred(
 		"_find_player"
@@ -1746,19 +2036,122 @@ func parar_boss() -> void:
 	freeze_boss()
 
 
+func ativar_controle_da_batalha() -> void:
+
+	battle_controlled = true
+
+	can_move = true
+
+	_find_player()
+
+
+func liberar_controle_da_batalha() -> void:
+
+	if is_dead:
+
+		return
+
+
+	battle_controlled = false
+
+	can_move = true
+
+	_find_player()
+
+
 # ============================================================
 # VIDA
 # ============================================================
 
+func take_boss_damage(
+	amount: int = 1
+) -> void:
+
+	if is_dead:
+
+		return
+
+
+	if amount <= 0:
+
+		return
+
+
+	current_health = max(
+		current_health - amount,
+		0
+	)
+
+
+	boss_health_changed.emit(
+		current_health,
+		max_health
+	)
+
+
+	print(
+		"BOSS TOMOU DANO: ",
+		amount,
+		" | VIDA: ",
+		current_health,
+		"/",
+		max_health
+	)
+
+
+	if current_health <= 0:
+
+		_defeat()
+
+		return
+
+
+	_start_hurt()
+
+
+func hurt() -> void:
+
+	take_boss_damage(
+		1
+	)
+
+
 func set_boss_health(
 	value: int
 ) -> void:
+
+	if is_dead:
+
+		return
+
 
 	current_health = clamp(
 		value,
 		0,
 		max_health
 	)
+
+
+	boss_health_changed.emit(
+		current_health,
+		max_health
+	)
+
+
+	if current_health <= 0:
+
+		_defeat()
+
+
+func reset_boss_health() -> void:
+
+	if is_dead:
+
+		return
+
+
+	current_health = max_health
+
 
 	boss_health_changed.emit(
 		current_health,
@@ -1774,3 +2167,191 @@ func get_current_health() -> int:
 func get_max_health() -> int:
 
 	return max_health
+
+
+func get_health_percent() -> float:
+
+	if max_health <= 0:
+
+		return 0.0
+
+
+	return (
+		float(current_health)
+		/
+		float(max_health)
+	)
+
+
+func reset_visual() -> void:
+
+	if animated_sprite == null:
+
+		return
+
+
+	animated_sprite.modulate = Color.WHITE
+
+
+	_play_animation(
+		"olhando"
+	)
+
+
+# ============================================================
+# RESET ATAQUE
+# ============================================================
+
+func _reset_attack_state() -> void:
+
+	is_attacking = false
+
+	attack_hit_done = false
+
+	attack_prepare_timer = 0.0
+
+	attack_dash_timer = 0.0
+
+	attack_recovery_timer = 0.0
+
+
+func _reset_all_timers() -> void:
+
+	rage_timer = RAGE_INTERVAL
+
+	rage_time_left = 0.0
+
+	enraged = false
+
+	attack_cooldown = 0.0
+
+	attack_prepare_timer = 0.0
+
+	attack_dash_timer = 0.0
+
+	attack_recovery_timer = 0.0
+
+	damage_cooldown = 0.0
+
+	jump_cooldown = 0.0
+
+	turn_cooldown = 0.0
+
+	stomp_cooldown = 0.0
+
+	hurt_time_left = 0.0
+
+	flash_time_left = 0.0
+
+
+# ============================================================
+# MORTE
+# ============================================================
+
+func _defeat() -> void:
+
+	if is_dead:
+
+		return
+
+
+	is_dead = true
+
+	can_move = false
+
+	attack_enabled = false
+
+	damage_enabled = false
+
+	stomp_enabled = false
+
+	velocity = Vector2.ZERO
+
+	_reset_attack_state()
+
+
+	# Desativa colisão.
+	if collision != null:
+
+		collision.set_deferred(
+			"disabled",
+			true
+		)
+
+
+	if hitbox_area != null:
+
+		hitbox_area.set_deferred(
+			"monitoring",
+			false
+		)
+
+
+	_play_animation(
+		"hurt"
+	)
+
+
+	# Pequena pausa antes do fade.
+	await get_tree().create_timer(
+		0.20
+	).timeout
+
+
+	if not is_instance_valid(
+		animated_sprite
+	):
+
+		boss_defeated.emit()
+
+		return
+
+
+	var original_scale: Vector2 = (
+		animated_sprite.scale
+	)
+
+
+	var target_scale: Vector2 = (
+		original_scale * 0.72
+	)
+
+
+	var tween: Tween = (
+		create_tween()
+	)
+
+
+	tween.set_parallel(true)
+
+
+	tween.set_trans(
+		Tween.TRANS_QUAD
+	)
+
+
+	tween.set_ease(
+		Tween.EASE_IN
+	)
+
+
+	tween.tween_property(
+		animated_sprite,
+		"modulate:a",
+		0.0,
+		0.75
+	)
+
+
+	tween.tween_property(
+		animated_sprite,
+		"scale",
+		target_scale,
+		0.75
+	)
+
+
+	await tween.finished
+
+
+	boss_defeated.emit()

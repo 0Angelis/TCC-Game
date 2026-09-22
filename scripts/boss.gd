@@ -3,27 +3,6 @@ extends Area2D
 # ============================================================
 # BOSS.GD - BATALHA FINAL
 # ============================================================
-#
-# REGRAS:
-# - boss começa com 100 HP
-# - existem 5 desafios
-# - cada desafio correto causa 20 de dano
-# - 5 acertos derrotam o boss
-# - boss luta por 20 segundos antes de cansar
-# - jogador aperta E para iniciar o desafio
-#
-# DESAFIOS:
-# - existe apenas 1 desafio de raciocínio
-# - os outros são atenção / memória
-# - a posição do desafio de raciocínio é aleatória
-#
-# HUD:
-# - fica na região onde estavam as moedas
-# - maior que a versão anterior
-# - ainda pequeno o suficiente para não cobrir a tela
-#
-# ============================================================
-
 
 signal boss_health_changed(
 	current_health: int,
@@ -32,7 +11,7 @@ signal boss_health_changed(
 
 
 # ============================================================
-# CONFIGURAÇÃO DA BATALHA
+# CONFIGURAÇÃO
 # ============================================================
 
 const MAX_HEALTH: int = 100
@@ -50,14 +29,10 @@ const CHALLENGE_DISTANCE: float = 130.0
 # ============================================================
 # POSIÇÃO DO HUD
 # ============================================================
-#
-# Aumente/diminua o segundo valor para mover para cima/baixo.
-#
-# ============================================================
 
 const HUD_POSITION: Vector2 = Vector2(
-	11.0,
-	11.0
+	12.0,
+	12.0
 )
 
 
@@ -65,13 +40,10 @@ const HUD_POSITION: Vector2 = Vector2(
 # DESAFIOS
 # ============================================================
 
-# ÚNICO DESAFIO DE RACIOCÍNIO
 const LOGIC_CHALLENGE: String = (
 	"sequence_double"
 )
 
-
-# Desafios que aparecem com mais frequência.
 const FUN_CHALLENGE_POOL: Array[String] = [
 	"attention_red",
 	"attention_blue",
@@ -102,7 +74,6 @@ enum BossState {
 	VICTORY
 }
 
-
 var state: BossState = BossState.WAITING
 
 
@@ -111,6 +82,8 @@ var state: BossState = BossState.WAITING
 # ============================================================
 
 var player: Node2D = null
+
+var player_was_frozen_for_dialogue: bool = false
 
 
 # ============================================================
@@ -180,59 +153,34 @@ func _ready() -> void:
 	collision_layer = 0
 	collision_mask = 1
 
+	# ========================================================
+	# MUITO IMPORTANTE:
+	# O BOSS COMEÇA SEM PODER DAR DANO.
+	# ========================================================
 
-	# --------------------------------------------------------
-	# ORDEM DOS DESAFIOS
-	# --------------------------------------------------------
+	_set_boss_attack_enabled(false)
+	_set_boss_damage_enabled(false)
+	_set_boss_stomp_enabled(false)
+
+
+	# ========================================================
+	# PREPARAÇÃO
+	# ========================================================
 
 	_build_challenge_order()
 
-
-	# --------------------------------------------------------
-	# PLAYER
-	# --------------------------------------------------------
-
 	_find_player()
-
-
-	# --------------------------------------------------------
-	# BOSS
-	# --------------------------------------------------------
 
 	_spawn_existing_boss()
 
-
-	# --------------------------------------------------------
-	# CONTROLLERS
-	# --------------------------------------------------------
-
 	_create_or_get_controllers()
-
-
-	# --------------------------------------------------------
-	# PROMPT
-	# --------------------------------------------------------
 
 	_create_boss_prompt()
 
-
-	# --------------------------------------------------------
-	# HUD
-	# --------------------------------------------------------
-
 	_create_hud()
-
-
-	# --------------------------------------------------------
-	# SINAIS
-	# --------------------------------------------------------
 
 	_connect_signals()
 
-
-	# --------------------------------------------------------
-	# CHALLENGE MANAGER
-	# --------------------------------------------------------
 
 	if (
 		challenge_manager != null
@@ -248,14 +196,6 @@ func _ready() -> void:
 		)
 
 
-	# --------------------------------------------------------
-	# ESTADO INICIAL DO BOSS
-	# --------------------------------------------------------
-
-	_set_boss_attack_enabled(false)
-	_set_boss_damage_enabled(false)
-	_set_boss_stomp_enabled(false)
-
 	_set_boss_prompt_visible(false)
 	_set_hud_visible(false)
 
@@ -265,21 +205,30 @@ func _ready() -> void:
 	print(
 		"================================"
 	)
+
 	print(
 		"BOSS FINAL INICIADO"
 	)
+
 	print(
 		"VIDA: ",
 		MAX_HEALTH
 	)
+
 	print(
 		"DESAFIOS: ",
 		TOTAL_CHALLENGES
 	)
+
 	print(
 		"ORDEM: ",
 		challenge_order
 	)
+
+	print(
+		"DANO DO BOSS: DESATIVADO"
+	)
+
 	print(
 		"================================"
 	)
@@ -337,7 +286,6 @@ func _unhandled_input(
 	if key_event.echo:
 		return
 
-
 	var is_e: bool = (
 		key_event.keycode == KEY_E
 		or
@@ -349,7 +297,7 @@ func _unhandled_input(
 
 
 	# ========================================================
-	# FALAR COM O CHEFE
+	# FALAR
 	# ========================================================
 
 	if (
@@ -370,7 +318,7 @@ func _unhandled_input(
 
 
 	# ========================================================
-	# INICIAR DESAFIO
+	# DESAFIO
 	# ========================================================
 
 	if (
@@ -458,17 +406,124 @@ func _is_player_close_to_boss(
 
 
 # ============================================================
+# CONGELAR PINGUIM NO DIÁLOGO
+# ============================================================
+
+func _freeze_player_for_dialogue() -> void:
+
+	if not is_instance_valid(player):
+		return
+
+	if player_was_frozen_for_dialogue:
+		return
+
+	player_was_frozen_for_dialogue = true
+
+
+	if "velocity" in player:
+
+		var current_velocity = (
+			player.get(
+				"velocity"
+			)
+		)
+
+		if current_velocity is Vector2:
+
+			player.set(
+				"velocity",
+				Vector2.ZERO
+			)
+
+
+	if "can_move" in player:
+
+		player.set(
+			"can_move",
+			false
+		)
+
+
+	player.set_process(false)
+	player.set_physics_process(false)
+
+
+	_stop_all_player_animations(
+		player
+	)
+
+
+func _unfreeze_player_after_dialogue() -> void:
+
+	if not is_instance_valid(player):
+		return
+
+	if not player_was_frozen_for_dialogue:
+		return
+
+
+	player.set_process(true)
+	player.set_physics_process(true)
+
+
+	if "can_move" in player:
+
+		player.set(
+			"can_move",
+			true
+		)
+
+
+	if "velocity" in player:
+
+		var current_velocity = (
+			player.get(
+				"velocity"
+			)
+		)
+
+		if current_velocity is Vector2:
+
+			player.set(
+				"velocity",
+				Vector2.ZERO
+			)
+
+
+	player_was_frozen_for_dialogue = false
+
+
+func _stop_all_player_animations(
+	node: Node
+) -> void:
+
+	if node == null:
+		return
+
+
+	if node is AnimatedSprite2D:
+
+		var animated: AnimatedSprite2D = (
+			node as AnimatedSprite2D
+		)
+
+		animated.stop()
+
+
+	for child: Node in node.get_children():
+
+		_stop_all_player_animations(
+			child
+		)
+
+
+# ============================================================
 # ORDEM DOS DESAFIOS
 # ============================================================
 
 func _build_challenge_order() -> void:
 
 	challenge_order.clear()
-
-
-	# --------------------------------------------------------
-	# 4 desafios de atenção / memória
-	# --------------------------------------------------------
 
 	var fun_pool: Array[String] = (
 		FUN_CHALLENGE_POOL.duplicate()
@@ -483,7 +538,6 @@ func _build_challenge_order() -> void:
 			fun_pool.duplicate()
 		)
 
-		# Evita repetir o mesmo imediatamente.
 		if (
 			fun_selected.size() > 0
 			and
@@ -496,6 +550,7 @@ func _build_challenge_order() -> void:
 				]
 			)
 
+
 		var selected: String = (
 			possible.pick_random()
 		)
@@ -504,10 +559,6 @@ func _build_challenge_order() -> void:
 			selected
 		)
 
-
-	# --------------------------------------------------------
-	# 1 DESAFIO DE RACIOCÍNIO EM POSIÇÃO ALEATÓRIA
-	# --------------------------------------------------------
 
 	var logic_position: int = (
 		randi_range(
@@ -547,7 +598,7 @@ func _build_challenge_order() -> void:
 
 
 # ============================================================
-# SPAWN DO BOSS
+# SPAWN
 # ============================================================
 
 func _spawn_existing_boss() -> void:
@@ -559,10 +610,6 @@ func _spawn_existing_boss() -> void:
 	)
 
 
-	# --------------------------------------------------------
-	# PROCURA NO GRUPO
-	# --------------------------------------------------------
-
 	if existing == null:
 
 		var candidates: Array[Node] = (
@@ -570,6 +617,7 @@ func _spawn_existing_boss() -> void:
 				"boss"
 			)
 		)
+
 
 		for candidate: Node in candidates:
 
@@ -580,10 +628,6 @@ func _spawn_existing_boss() -> void:
 				break
 
 
-	# --------------------------------------------------------
-	# CRIA CASO NÃO EXISTA
-	# --------------------------------------------------------
-
 	if existing == null:
 
 		var boss_scene: PackedScene = (
@@ -592,6 +636,7 @@ func _spawn_existing_boss() -> void:
 			)
 			as PackedScene
 		)
+
 
 		if boss_scene == null:
 
@@ -602,20 +647,26 @@ func _spawn_existing_boss() -> void:
 
 			return
 
+
 		existing = (
 			boss_scene.instantiate()
 		)
 
+
 		if existing == null:
+
 			return
+
 
 		existing.name = (
 			"boss inimigo"
 		)
 
+
 		get_parent().add_child(
 			existing
 		)
+
 
 		if existing is Node2D:
 
@@ -627,10 +678,6 @@ func _spawn_existing_boss() -> void:
 				_get_spawn_position()
 			)
 
-
-	# --------------------------------------------------------
-	# VERIFICA TIPO
-	# --------------------------------------------------------
 
 	if not (
 		existing is CharacterBody2D
@@ -647,6 +694,7 @@ func _spawn_existing_boss() -> void:
 		existing as CharacterBody2D
 	)
 
+
 	boss_visual.global_position = (
 		_get_spawn_position()
 	)
@@ -659,10 +707,6 @@ func _spawn_existing_boss() -> void:
 	)
 
 
-	# --------------------------------------------------------
-	# SPRITE
-	# --------------------------------------------------------
-
 	boss_sprite = (
 		boss_visual.get_node_or_null(
 			"AnimatedSprite2D"
@@ -670,26 +714,12 @@ func _spawn_existing_boss() -> void:
 		as AnimatedSprite2D
 	)
 
+
 	if boss_sprite != null:
 
 		boss_sprite.visible = true
 		boss_sprite.modulate = Color.WHITE
 
-		if (
-			boss_sprite.sprite_frames != null
-			and
-			boss_sprite.sprite_frames.has_animation(
-				"olhando"
-			)
-		):
-
-			boss_sprite.stop()
-			boss_sprite.frame = 0
-
-
-	# --------------------------------------------------------
-	# VIDA
-	# --------------------------------------------------------
 
 	if boss_visual.has_method(
 		"set_boss_health"
@@ -700,6 +730,10 @@ func _spawn_existing_boss() -> void:
 			MAX_HEALTH
 		)
 
+
+	# ========================================================
+	# GARANTE QUE O BOSS COMEÇA SEM DANO
+	# ========================================================
 
 	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
@@ -737,15 +771,12 @@ func _get_spawn_position() -> Vector2:
 
 func _create_or_get_controllers() -> void:
 
-	# --------------------------------------------------------
-	# DIALOGUE
-	# --------------------------------------------------------
-
 	dialogue_controller = (
 		get_node_or_null(
 			"BossDialogue"
 		)
 	)
+
 
 	if dialogue_controller == null:
 
@@ -755,6 +786,7 @@ func _create_or_get_controllers() -> void:
 			"BossDialogue"
 		)
 
+
 		var dialogue_script: Script = (
 			load(
 				"res://scripts/boss_dialogue.gd"
@@ -762,26 +794,25 @@ func _create_or_get_controllers() -> void:
 			as Script
 		)
 
+
 		if dialogue_script != null:
 
 			dialogue_controller.set_script(
 				dialogue_script
 			)
 
+
 		add_child(
 			dialogue_controller
 		)
 
-
-	# --------------------------------------------------------
-	# CHALLENGE MANAGER
-	# --------------------------------------------------------
 
 	challenge_manager = (
 		get_node_or_null(
 			"BossChallengeManager"
 		)
 	)
+
 
 	if challenge_manager == null:
 
@@ -791,6 +822,7 @@ func _create_or_get_controllers() -> void:
 			"BossChallengeManager"
 		)
 
+
 		var challenge_script: Script = (
 			load(
 				"res://scripts/"
@@ -799,20 +831,18 @@ func _create_or_get_controllers() -> void:
 			as Script
 		)
 
+
 		if challenge_script != null:
 
 			challenge_manager.set_script(
 				challenge_script
 			)
 
+
 		add_child(
 			challenge_manager
 		)
 
-
-	# --------------------------------------------------------
-	# SETUP DO DIALOGUE
-	# --------------------------------------------------------
 
 	if (
 		dialogue_controller != null
@@ -833,10 +863,6 @@ func _create_or_get_controllers() -> void:
 # ============================================================
 
 func _connect_signals() -> void:
-
-	# --------------------------------------------------------
-	# DIALOGUE
-	# --------------------------------------------------------
 
 	if dialogue_controller != null:
 
@@ -874,10 +900,6 @@ func _connect_signals() -> void:
 			)
 
 
-	# --------------------------------------------------------
-	# CHALLENGE
-	# --------------------------------------------------------
-
 	if challenge_manager != null:
 
 		if not challenge_manager.is_connected(
@@ -896,10 +918,6 @@ func _connect_signals() -> void:
 				)
 			)
 
-
-	# --------------------------------------------------------
-	# BOSS
-	# --------------------------------------------------------
 
 	if boss_visual != null:
 
@@ -984,13 +1002,14 @@ func _process_waiting() -> void:
 
 
 # ============================================================
-# INTRO
+# COMEÇA DIÁLOGO
 # ============================================================
 
 func _start_intro() -> void:
 
 	if fight_started:
 		return
+
 
 	if state != BossState.WAITING:
 		return
@@ -1004,7 +1023,19 @@ func _start_intro() -> void:
 	_set_boss_prompt_visible(false)
 	_set_hud_visible(false)
 
+
+	# --------------------------------------------------------
+	# PLAYER PARADO
+	# --------------------------------------------------------
+
 	_set_player_can_move(false)
+
+	_freeze_player_for_dialogue()
+
+
+	# --------------------------------------------------------
+	# BOSS SEM DANO
+	# --------------------------------------------------------
 
 	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
@@ -1014,7 +1045,9 @@ func _start_intro() -> void:
 	if (
 		is_instance_valid(boss_visual)
 		and
-		boss_visual.has_method("freeze_boss")
+		boss_visual.has_method(
+			"freeze_boss"
+		)
 	):
 
 		boss_visual.call(
@@ -1039,7 +1072,13 @@ func _start_intro() -> void:
 		_on_intro_finished()
 
 
+# ============================================================
+# DIÁLOGO ACABOU
+# ============================================================
+
 func _on_intro_finished() -> void:
+
+	_unfreeze_player_after_dialogue()
 
 	_set_hud_visible(true)
 
@@ -1049,12 +1088,13 @@ func _on_intro_finished() -> void:
 
 
 # ============================================================
-# LUTA
+# COMEÇA COMBATE
 # ============================================================
 
 func _start_chase() -> void:
 
 	if state == BossState.VICTORY:
+
 		return
 
 
@@ -1066,7 +1106,13 @@ func _start_chase() -> void:
 
 
 	_set_boss_attack_enabled(true)
+
+	# ========================================================
+	# AQUI O BOSS VOLTA A PODER DAR DANO
+	# ========================================================
+
 	_set_boss_damage_enabled(true)
+
 	_set_boss_stomp_enabled(false)
 
 	_set_boss_prompt_visible(false)
@@ -1093,6 +1139,7 @@ func _process_chase(
 ) -> void:
 
 	if state != BossState.CHASE:
+
 		return
 
 
@@ -1109,12 +1156,13 @@ func _process_chase(
 
 
 # ============================================================
-# EXAUSTÃO
+# BOSS CANSOU
 # ============================================================
 
 func _start_exhausted() -> void:
 
 	if state != BossState.CHASE:
+
 		return
 
 
@@ -1126,6 +1174,11 @@ func _start_exhausted() -> void:
 		EXHAUSTED_TIME
 	)
 
+
+	# ========================================================
+	# DURANTE A ESPERA DO DESAFIO:
+	# BOSS NÃO PODE DAR DANO
+	# ========================================================
 
 	_set_boss_attack_enabled(false)
 	_set_boss_damage_enabled(false)
@@ -1154,6 +1207,7 @@ func _process_exhausted(
 ) -> void:
 
 	if state != BossState.EXHAUSTED:
+
 		return
 
 
@@ -1189,6 +1243,7 @@ func _process_exhausted(
 func _start_current_challenge() -> void:
 
 	if state != BossState.EXHAUSTED:
+
 		return
 
 
@@ -1200,10 +1255,12 @@ func _start_current_challenge() -> void:
 
 
 	if challenge_manager == null:
+
 		return
 
 
 	if challenge_index >= TOTAL_CHALLENGES:
+
 		return
 
 
@@ -1211,6 +1268,11 @@ func _start_current_challenge() -> void:
 
 	state = BossState.CHALLENGE
 
+
+	# ========================================================
+	# DURANTE O DESAFIO:
+	# BOSS NÃO CAUSA DANO
+	# ========================================================
 
 	_set_boss_prompt_visible(false)
 
@@ -1281,12 +1343,9 @@ func _on_challenge_finished(
 ) -> void:
 
 	if state != BossState.CHALLENGE:
+
 		return
 
-
-	# ========================================================
-	# ACERTO
-	# ========================================================
 
 	if correct:
 
@@ -1306,13 +1365,8 @@ func _on_challenge_finished(
 
 		_update_health_from_boss()
 
-
 		challenge_index += 1
 
-
-		# ----------------------------------------------------
-		# 5 DESAFIOS COMPLETADOS
-		# ----------------------------------------------------
 
 		if challenge_index >= TOTAL_CHALLENGES:
 
@@ -1323,20 +1377,12 @@ func _on_challenge_finished(
 				return
 
 
-		# ----------------------------------------------------
-		# VOLTA PARA A LUTA
-		# ----------------------------------------------------
-
 		_set_player_can_move(true)
 
 		_start_chase()
 
 		return
 
-
-	# ========================================================
-	# ERRO / TEMPO ESGOTADO
-	# ========================================================
 
 	_set_player_can_move(true)
 
@@ -1359,7 +1405,10 @@ func _on_boss_health_changed(
 
 func _update_health_from_boss() -> void:
 
-	if not is_instance_valid(boss_visual):
+	if not is_instance_valid(
+		boss_visual
+	):
+
 		return
 
 
@@ -1378,12 +1427,13 @@ func _update_health_from_boss() -> void:
 
 
 # ============================================================
-# DERROTA
+# MORTE
 # ============================================================
 
 func _on_boss_defeated() -> void:
 
 	if state == BossState.VICTORY:
+
 		return
 
 
@@ -1396,7 +1446,11 @@ func _on_boss_defeated() -> void:
 	_set_boss_damage_enabled(false)
 	_set_boss_stomp_enabled(false)
 
+
 	_set_boss_prompt_visible(false)
+
+
+	_unfreeze_player_after_dialogue()
 
 
 	if (
@@ -1437,10 +1491,15 @@ func _on_victory_finished() -> void:
 func _finish_victory() -> void:
 
 	_set_boss_prompt_visible(false)
+
 	_set_hud_visible(false)
 
+	_unfreeze_player_after_dialogue()
 
-	if is_instance_valid(boss_visual):
+
+	if is_instance_valid(
+		boss_visual
+	):
 
 		boss_visual.call_deferred(
 			"queue_free"
@@ -1455,24 +1514,21 @@ func _set_player_can_move(
 	enabled: bool
 ) -> void:
 
-	if not is_instance_valid(player):
+	if not is_instance_valid(
+		player
+	):
 
 		_find_player_if_needed()
 
 
-	if not is_instance_valid(player):
+	if not is_instance_valid(
+		player
+	):
 
 		return
 
 
-	var current_can_move = (
-		player.get(
-			"can_move"
-		)
-	)
-
-
-	if current_can_move != null:
+	if "can_move" in player:
 
 		player.set(
 			"can_move",
@@ -1483,15 +1539,22 @@ func _set_player_can_move(
 	if (
 		not enabled
 		and
-		player.get(
-			"velocity"
-		) != null
+		"velocity" in player
 	):
 
-		player.set(
-			"velocity",
-			Vector2.ZERO
+		var current_velocity = (
+			player.get(
+				"velocity"
+			)
 		)
+
+
+		if current_velocity is Vector2:
+
+			player.set(
+				"velocity",
+				Vector2.ZERO
+			)
 
 
 # ============================================================
@@ -1502,7 +1565,10 @@ func _set_boss_attack_enabled(
 	enabled: bool
 ) -> void:
 
-	if not is_instance_valid(boss_visual):
+	if not is_instance_valid(
+		boss_visual
+	):
+
 		return
 
 
@@ -1520,7 +1586,10 @@ func _set_boss_damage_enabled(
 	enabled: bool
 ) -> void:
 
-	if not is_instance_valid(boss_visual):
+	if not is_instance_valid(
+		boss_visual
+	):
+
 		return
 
 
@@ -1538,7 +1607,10 @@ func _set_boss_stomp_enabled(
 	enabled: bool
 ) -> void:
 
-	if not is_instance_valid(boss_visual):
+	if not is_instance_valid(
+		boss_visual
+	):
+
 		return
 
 
@@ -1559,6 +1631,7 @@ func _set_boss_stomp_enabled(
 func _create_boss_prompt() -> void:
 
 	if boss_prompt != null:
+
 		return
 
 
@@ -1624,7 +1697,9 @@ func _create_boss_prompt() -> void:
 	)
 
 
-	if is_instance_valid(boss_visual):
+	if is_instance_valid(
+		boss_visual
+	):
 
 		boss_visual.add_child(
 			boss_prompt
@@ -1637,6 +1712,7 @@ func _create_boss_prompt() -> void:
 func _update_boss_prompt_position() -> void:
 
 	if boss_prompt == null:
+
 		return
 
 
@@ -1654,6 +1730,7 @@ func _update_exhausted_prompt() -> void:
 
 
 	if boss_prompt == null:
+
 		return
 
 
@@ -1691,6 +1768,7 @@ func _set_boss_prompt_visible(
 ) -> void:
 
 	if boss_prompt == null:
+
 		return
 
 
@@ -1720,10 +1798,6 @@ func _create_hud() -> void:
 	)
 
 
-	# ========================================================
-	# PAINEL MAIOR
-	# ========================================================
-
 	hud_panel = Panel.new()
 
 	hud_panel.position = (
@@ -1745,6 +1819,7 @@ func _create_hud() -> void:
 			8
 		)
 	)
+
 
 	hud_canvas.add_child(
 		hud_panel
@@ -1777,7 +1852,7 @@ func _create_hud() -> void:
 
 
 	# ========================================================
-	# BARRA DE VIDA
+	# BARRA
 	# ========================================================
 
 	hud_bar = ProgressBar.new()
@@ -1793,14 +1868,8 @@ func _create_hud() -> void:
 	)
 
 	hud_bar.min_value = 0
-
-	hud_bar.max_value = (
-		MAX_HEALTH
-	)
-
-	hud_bar.value = (
-		MAX_HEALTH
-	)
+	hud_bar.max_value = MAX_HEALTH
+	hud_bar.value = MAX_HEALTH
 
 	hud_bar.show_percentage = false
 
@@ -1897,7 +1966,7 @@ func _create_hud() -> void:
 	)
 
 	hud_fatigue_label.position = Vector2(
-		190,
+		175,
 		68
 	)
 
@@ -1922,17 +1991,17 @@ func _create_hud() -> void:
 	)
 
 	hud_fatigue_value.position = Vector2(
-		270,
+		250,
 		68
 	)
 
 	hud_fatigue_value.size = Vector2(
-		65,
+		55,
 		18
 	)
 
 	hud_fatigue_value.horizontal_alignment = (
-		HORIZONTAL_ALIGNMENT_RIGHT
+		HORIZONTAL_ALIGNMENT_LEFT
 	)
 
 	hud_panel.add_child(
@@ -1941,7 +2010,7 @@ func _create_hud() -> void:
 
 
 # ============================================================
-# ATUALIZA VIDA
+# VIDA HUD
 # ============================================================
 
 func _update_health_ui() -> void:
@@ -1974,7 +2043,7 @@ func _update_health_ui() -> void:
 
 
 # ============================================================
-# ATUALIZA HUD
+# HUD FASE
 # ============================================================
 
 func _update_phase_ui() -> void:
@@ -1987,10 +2056,6 @@ func _update_phase_ui() -> void:
 		challenge_index + 1
 	)
 
-
-	# ========================================================
-	# LUTANDO
-	# ========================================================
 
 	if state == BossState.CHASE:
 
@@ -2015,10 +2080,6 @@ func _update_phase_ui() -> void:
 		return
 
 
-	# ========================================================
-	# EXAUSTO
-	# ========================================================
-
 	if state == BossState.EXHAUSTED:
 
 		hud_phase.text = (
@@ -2036,10 +2097,6 @@ func _update_phase_ui() -> void:
 
 		return
 
-
-	# ========================================================
-	# DESAFIO
-	# ========================================================
 
 	if state == BossState.CHALLENGE:
 
@@ -2059,10 +2116,6 @@ func _update_phase_ui() -> void:
 		return
 
 
-	# ========================================================
-	# WAITING
-	# ========================================================
-
 	if state == BossState.WAITING:
 
 		hud_phase.text = (
@@ -2079,10 +2132,6 @@ func _update_phase_ui() -> void:
 
 		return
 
-
-	# ========================================================
-	# DIALOGO
-	# ========================================================
 
 	if state == BossState.DIALOGUE:
 
@@ -2101,10 +2150,6 @@ func _update_phase_ui() -> void:
 		return
 
 
-	# ========================================================
-	# VITÓRIA
-	# ========================================================
-
 	if state == BossState.VICTORY:
 
 		hud_phase.text = (
@@ -2120,7 +2165,7 @@ func _update_phase_ui() -> void:
 
 
 # ============================================================
-# MOSTRAR / ESCONDER HUD
+# HUD VISÍVEL
 # ============================================================
 
 func _set_hud_visible(
@@ -2174,9 +2219,11 @@ func _make_label(
 		CanvasItem.TEXTURE_FILTER_NEAREST
 	)
 
+
 	_apply_font(
 		label
 	)
+
 
 	return label
 
@@ -2191,6 +2238,7 @@ func _apply_font(
 			+ "OpenType (.otf)/PixeloidSans-Bold.otf"
 		)
 	)
+
 
 	if resource != null:
 
@@ -2215,6 +2263,7 @@ func _make_panel_style(
 		StyleBoxFlat.new()
 	)
 
+
 	style.bg_color = (
 		background
 	)
@@ -2230,5 +2279,6 @@ func _make_panel_style(
 	style.set_corner_radius_all(
 		radius
 	)
+
 
 	return style

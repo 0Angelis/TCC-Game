@@ -977,7 +977,6 @@ limit_bottom = 800
 position_smoothing_enabled = true
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
-visible = false
 script = ExtResource("36_4m7jx")
 
 [node name="color_rect" type="ColorRect" parent="transition" unique_id=1131400237]
@@ -990,7 +989,6 @@ grow_vertical = 2
 script = ExtResource("38_r0cko")
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=1591967619]
-visible = false
 
 [node name="control" type="Control" parent="HUD" unique_id=1423453452]
 layout_mode = 3

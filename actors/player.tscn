@@ -225,7 +225,6 @@ collision_layer = 0
 collision_mask = 4
 
 [node name="collision" type="CollisionShape2D" parent="hurtbox" unique_id=988811623]
-position = Vector2(-0.5, -1)
 shape = SubResource("RectangleShape2D_esgq3")
 debug_color = Color(0.88573563, 0.2946573, 0.40368244, 0.41960785)
 

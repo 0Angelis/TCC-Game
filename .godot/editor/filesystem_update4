@@ -1,10 +1,11 @@
 res://scripts/boss.gd
-res://scripts/bossinimigo.gd
-res://scripts/boss_challenge_manager.gd
-res://scripts/boss_dialogue.gd
-res://levels/world_04.tscn
+res://actors/boss.tscn
 res://tema/new_theme.tres
 res://shaders/transition.gdshader
 res://frag/frag_atencao.tres
 res://frag/frag_memoria.tres
 res://frag/frag_raciocinio.tres
+res://scripts/bossinimigo.gd
+res://actors/player.tscn
+res://levels/world_00.tscn
+res://levels/world_04.tscn
