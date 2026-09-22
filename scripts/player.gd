@@ -1103,6 +1103,51 @@ func play_dance() -> void:
 
 
 # ==========================================
+# ANIMAÇÃO APÓS INTERAÇÃO / DIÁLOGO
+# ==========================================
+
+func restaurar_animacao_normal() -> void:
+	if is_dead:
+		return
+
+	showing_warning = false
+
+	if taking_damage:
+		animation.play("hurt")
+		return
+
+	if celebrating:
+		animation.play("vitoria")
+		return
+
+	if not is_on_floor():
+		if velocity.y > 0.0:
+			animation.play("falling")
+		else:
+			animation.play("jump")
+		return
+
+	if abs(velocity.x) > 1.0:
+		animation.play("run")
+	else:
+		animation.play("idle")
+
+
+func finalizar_queda_dialogo() -> void:
+	if is_dead:
+		return
+
+	velocity.x = 0.0
+
+	if is_on_floor():
+		velocity.y = 0.0
+		animation.stop()
+		animation.play("idle")
+	else:
+		restaurar_animacao_normal()
+
+
+# ==========================================
 # MORTE
 # ==========================================
 

@@ -36,6 +36,18 @@ var boss: Node2D = null
 var waiting: bool = false
 var active_dialogue: String = ""
 
+# O texto do diálogo fica próximo da cabeça do boss.
+const DIALOGUE_OFFSET: Vector2 = Vector2(
+	0.0,
+	-8.0
+)
+
+# Guarda a última posição conhecida do boss.
+# É importante para o diálogo de vitória continuar
+# mesmo depois que o boss desaparecer.
+var last_boss_dialogue_position: Vector2 = Vector2.ZERO
+var has_last_boss_dialogue_position: bool = false
+
 
 func setup(boss_node: Node2D) -> void:
 	boss = boss_node
@@ -49,11 +61,19 @@ func start_intro() -> void:
 	if DialogManager.is_message_active:
 		return
 
+	last_boss_dialogue_position = (
+		boss.global_position
+		+
+		DIALOGUE_OFFSET
+	)
+
+	has_last_boss_dialogue_position = true
+
 	active_dialogue = "intro"
 	waiting = true
 
 	DialogManager.start_message(
-		boss.global_position + Vector2(0.0, -25.0),
+		last_boss_dialogue_position,
 		INTRO_LINES,
 		self
 	)
@@ -62,16 +82,29 @@ func start_intro() -> void:
 func start_victory() -> void:
 	if waiting:
 		return
-	if not is_instance_valid(boss):
-		return
+
 	if DialogManager.is_message_active:
+		return
+
+	# O boss pode já ter desaparecido.
+	# Nesse caso, usamos a última posição conhecida.
+	if is_instance_valid(boss):
+		last_boss_dialogue_position = (
+			boss.global_position
+			+
+			DIALOGUE_OFFSET
+		)
+
+		has_last_boss_dialogue_position = true
+
+	elif not has_last_boss_dialogue_position:
 		return
 
 	active_dialogue = "victory"
 	waiting = true
 
 	DialogManager.start_message(
-		boss.global_position + Vector2(0.0, -25.0),
+		last_boss_dialogue_position,
 		VICTORY_LINES,
 		self
 	)

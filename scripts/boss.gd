@@ -84,6 +84,7 @@ var state: BossState = BossState.WAITING
 var player: Node2D = null
 
 var player_was_frozen_for_dialogue: bool = false
+var player_waiting_for_dialogue_landing: bool = false
 
 
 # ============================================================
@@ -250,7 +251,7 @@ func _process(
 			_process_waiting()
 
 		BossState.DIALOGUE:
-			pass
+			_process_dialogue_landing()
 
 		BossState.CHASE:
 			_process_chase(delta)
@@ -420,6 +421,46 @@ func _freeze_player_for_dialogue() -> void:
 	player_was_frozen_for_dialogue = true
 
 
+	# --------------------------------------------------------
+	# SE O PINGUIM ESTIVER NO AR:
+	# NÃO CORTA A QUEDA.
+	# --------------------------------------------------------
+
+	var player_body: CharacterBody2D = (
+		player
+		if player is CharacterBody2D
+		else null
+	)
+
+	if (
+		player_body != null
+		and
+		not player_body.is_on_floor()
+	):
+
+		player_waiting_for_dialogue_landing = true
+
+		# Para somente o movimento horizontal.
+		# A gravidade e a animação de queda continuam.
+		player_body.velocity.x = 0.0
+
+		if "can_move" in player:
+			player.set(
+				"can_move",
+				false
+			)
+
+		return
+
+
+	# --------------------------------------------------------
+	# SE JÁ ESTÁ NO CHÃO:
+	# congela imediatamente.
+	# --------------------------------------------------------
+
+	player_waiting_for_dialogue_landing = false
+
+
 	if "velocity" in player:
 
 		var current_velocity = (
@@ -448,9 +489,76 @@ func _freeze_player_for_dialogue() -> void:
 	player.set_physics_process(false)
 
 
-	_stop_all_player_animations(
+	if player.has_method(
+		"finalizar_queda_dialogo"
+	):
+
+		player.call(
+			"finalizar_queda_dialogo"
+		)
+
+	else:
+
+		_stop_all_player_animations(
+			player
+		)
+
+
+func _process_dialogue_landing() -> void:
+
+	if not player_waiting_for_dialogue_landing:
+		return
+
+	if not is_instance_valid(player):
+		player_waiting_for_dialogue_landing = false
+		return
+
+	var player_body: CharacterBody2D = (
 		player
+		if player is CharacterBody2D
+		else null
 	)
+
+	if player_body == null:
+		player_waiting_for_dialogue_landing = false
+		return
+
+	# Ainda está caindo.
+	if not player_body.is_on_floor():
+		player_body.velocity.x = 0.0
+		return
+
+	# --------------------------------------------------------
+	# TERMINOU A QUEDA.
+	# Agora sim congela completamente.
+	# --------------------------------------------------------
+
+	player_waiting_for_dialogue_landing = false
+
+	player_body.velocity = Vector2.ZERO
+
+	if "can_move" in player:
+		player.set(
+			"can_move",
+			false
+		)
+
+	player.set_process(false)
+	player.set_physics_process(false)
+
+	if player.has_method(
+		"finalizar_queda_dialogo"
+	):
+
+		player.call(
+			"finalizar_queda_dialogo"
+		)
+
+	else:
+
+		_stop_all_player_animations(
+			player
+		)
 
 
 func _unfreeze_player_after_dialogue() -> void:
@@ -490,7 +598,17 @@ func _unfreeze_player_after_dialogue() -> void:
 			)
 
 
+	if player.has_method(
+		"restaurar_animacao_normal"
+	):
+
+		player.call(
+			"restaurar_animacao_normal"
+		)
+
+
 	player_was_frozen_for_dialogue = false
+	player_waiting_for_dialogue_landing = false
 
 
 func _stop_all_player_animations(
@@ -1189,12 +1307,12 @@ func _start_exhausted() -> void:
 		is_instance_valid(boss_visual)
 		and
 		boss_visual.has_method(
-			"freeze_boss"
+			"freeze_boss_after_landing"
 		)
 	):
 
 		boss_visual.call(
-			"freeze_boss"
+			"freeze_boss_after_landing"
 		)
 
 
@@ -1450,20 +1568,24 @@ func _on_boss_defeated() -> void:
 	_set_boss_prompt_visible(false)
 
 
-	_unfreeze_player_after_dialogue()
+	# O player estava travado durante o desafio.
+	# Ao derrotar o boss, ele precisa voltar a andar.
+	_set_player_can_move(true)
+
+	if is_instance_valid(player):
+
+		if player.has_method(
+			"restaurar_animacao_normal"
+		):
+
+			player.call(
+				"restaurar_animacao_normal"
+			)
 
 
-	if (
-		is_instance_valid(boss_visual)
-		and
-		boss_visual.has_method(
-			"freeze_boss"
-		)
-	):
-
-		boss_visual.call(
-			"freeze_boss"
-		)
+	# NÃO congelamos o boss aqui.
+	# Ele já está morto e mantendo a animação "hurt"
+	# até o fim do diálogo.
 
 
 	if (
@@ -1490,13 +1612,27 @@ func _on_victory_finished() -> void:
 
 func _finish_victory() -> void:
 
+	# Esta função só é chamada quando o BossDialogue
+	# informa que todas as mensagens acabaram.
 	_set_boss_prompt_visible(false)
 
 	_set_hud_visible(false)
 
-	_unfreeze_player_after_dialogue()
+	_set_player_can_move(true)
+
+	if is_instance_valid(player):
+
+		if player.has_method(
+			"restaurar_animacao_normal"
+		):
+
+			player.call(
+				"restaurar_animacao_normal"
+			)
 
 
+	# O boss só some AGORA, depois que o último
+	# texto de derrota foi lido/fechado.
 	if is_instance_valid(
 		boss_visual
 	):
@@ -1551,10 +1687,22 @@ func _set_player_can_move(
 
 		if current_velocity is Vector2:
 
-			player.set(
-				"velocity",
-				Vector2.ZERO
-			)
+			# Quando o player estiver no ar,
+			# não mata a velocidade vertical.
+			# Assim ele termina a queda normalmente.
+			if player is CharacterBody2D and not player.is_on_floor():
+
+				player.set(
+					"velocity",
+					Vector2(0.0, current_velocity.y)
+				)
+
+			else:
+
+				player.set(
+					"velocity",
+					Vector2.ZERO
+				)
 
 
 # ============================================================
@@ -1752,7 +1900,7 @@ func _update_exhausted_prompt() -> void:
 
 
 	boss_prompt.text = (
-		"[ E ] INICIAR DESAFIO %d/%d"
+		"[ E ] INICIAR DESAFIO"
 		% [
 			challenge_index + 1,
 			TOTAL_CHALLENGES

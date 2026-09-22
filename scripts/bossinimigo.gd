@@ -164,6 +164,10 @@ var is_hurt: bool = false
 var can_move: bool = true
 var battle_controlled: bool = false
 
+# Quando o boss precisa ser congelado enquanto ainda está no ar,
+# ele termina a queda antes de ficar parado.
+var waiting_for_landing_lock: bool = false
+
 var attack_enabled: bool = false
 var damage_enabled: bool = false
 var stomp_enabled: bool = false
@@ -318,6 +322,33 @@ func _physics_process(delta: float) -> void:
 	elif velocity.y > 0.0:
 
 		velocity.y = 0.0
+
+
+	# ========================================================
+	# TERMINAR QUEDA ANTES DE CONGELAR
+	# ========================================================
+
+	if waiting_for_landing_lock:
+
+		velocity.x = 0.0
+
+		move_and_slide()
+
+		if is_on_floor():
+
+			waiting_for_landing_lock = false
+			can_move = false
+			velocity = Vector2.ZERO
+
+			_reset_attack_state()
+
+			_play_animation("olhando")
+
+		else:
+
+			_update_air_animation()
+
+		return
 
 
 	# ========================================================
@@ -1999,6 +2030,8 @@ func set_stomp_enabled(
 
 func freeze_boss() -> void:
 
+	waiting_for_landing_lock = false
+
 	can_move = false
 
 	velocity = Vector2.ZERO
@@ -2010,12 +2043,48 @@ func freeze_boss() -> void:
 	)
 
 
+func freeze_boss_after_landing() -> void:
+
+	if is_dead:
+		return
+
+	_reset_attack_state()
+
+	# Se já está no chão, congela imediatamente.
+	if is_on_floor():
+
+		waiting_for_landing_lock = false
+
+		can_move = false
+
+		velocity = Vector2.ZERO
+
+		_play_animation(
+			"olhando"
+		)
+
+		return
+
+	# Se está no ar, deixa a gravidade terminar a queda.
+	waiting_for_landing_lock = true
+
+	can_move = false
+
+	velocity.x = 0.0
+
+	_play_animation(
+		"pular"
+	)
+
+
 func unfreeze_boss() -> void:
 
 	if is_dead:
 
 		return
 
+
+	waiting_for_landing_lock = false
 
 	can_move = true
 
@@ -2038,6 +2107,8 @@ func parar_boss() -> void:
 
 func ativar_controle_da_batalha() -> void:
 
+	waiting_for_landing_lock = false
+
 	battle_controlled = true
 
 	can_move = true
@@ -2051,6 +2122,8 @@ func liberar_controle_da_batalha() -> void:
 
 		return
 
+
+	waiting_for_landing_lock = false
 
 	battle_controlled = false
 
@@ -2265,12 +2338,16 @@ func _defeat() -> void:
 
 	stomp_enabled = false
 
+	waiting_for_landing_lock = false
+
 	velocity = Vector2.ZERO
 
 	_reset_attack_state()
 
 
-	# Desativa colisão.
+	# Desativa colisão, mas MANTÉM O BOSS VISÍVEL.
+	# Ele só vai desaparecer depois que o diálogo
+	# de derrota terminar completamente.
 	if collision != null:
 
 		collision.set_deferred(
@@ -2287,71 +2364,13 @@ func _defeat() -> void:
 		)
 
 
+	# Mantém a animação de dano/morte na tela
+	# enquanto o jogador lê a mensagem.
 	_play_animation(
 		"hurt"
 	)
 
 
-	# Pequena pausa antes do fade.
-	await get_tree().create_timer(
-		0.20
-	).timeout
-
-
-	if not is_instance_valid(
-		animated_sprite
-	):
-
-		boss_defeated.emit()
-
-		return
-
-
-	var original_scale: Vector2 = (
-		animated_sprite.scale
-	)
-
-
-	var target_scale: Vector2 = (
-		original_scale * 0.72
-	)
-
-
-	var tween: Tween = (
-		create_tween()
-	)
-
-
-	tween.set_parallel(true)
-
-
-	tween.set_trans(
-		Tween.TRANS_QUAD
-	)
-
-
-	tween.set_ease(
-		Tween.EASE_IN
-	)
-
-
-	tween.tween_property(
-		animated_sprite,
-		"modulate:a",
-		0.0,
-		0.75
-	)
-
-
-	tween.tween_property(
-		animated_sprite,
-		"scale",
-		target_scale,
-		0.75
-	)
-
-
-	await tween.finished
-
-
+	# Avisa imediatamente o controlador da batalha.
+	# O boss continua visível até _finish_victory().
 	boss_defeated.emit()
