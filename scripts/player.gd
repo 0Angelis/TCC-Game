@@ -406,6 +406,13 @@ func _physics_process(delta: float) -> void:
 
 			animation.play("warning")
 
+	# Quando can_move fica falso durante o desafio,
+	# não deixamos o restante do código escolher
+	# idle/run/jump/falling a cada frame.
+	elif not can_move:
+
+		animation.stop()
+
 	elif moving_down and is_on_floor():
 
 		if animation.animation != "arrastar":

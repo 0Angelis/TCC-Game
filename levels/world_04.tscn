@@ -182,6 +182,7 @@ texture = ExtResource("6_cu7iq")
 7:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 9:1/0 = 0
 9:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+9:1/0/physics_layer_0/polygon_0/one_way = true
 10:1/0 = 0
 10:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 11:1/0 = 0
@@ -231,6 +232,7 @@ texture = ExtResource("6_cu7iq")
 8:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 9:5/0 = 0
 9:5/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+9:5/0/physics_layer_0/polygon_0/one_way = true
 14:5/0 = 0
 16:5/0 = 0
 20:5/0 = 0
@@ -1794,7 +1796,7 @@ position = Vector2(2000, 689)
 shape = SubResource("CapsuleShape2D_5t4lp")
 
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("27_s3w5o")]
-position = Vector2(2099, 688)
+position = Vector2(1944, 690)
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=395750549]
 

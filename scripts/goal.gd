@@ -773,7 +773,9 @@ func _get_next_level() -> String:
 	# loja -> world_02
 	# world_02 -> loja
 	# loja -> world_03
-	# world_03 -> loja final
+	# world_03 -> loja
+	# loja -> world_04
+	# world_04 -> world_05
 
 	if scene_path.contains("world_00"):
 
@@ -812,10 +814,14 @@ func _get_next_level() -> String:
 			2:
 				return "res://levels/world_03.tscn"
 
+			# =================================================
+			# CORREÇÃO:
+			# ÚLTIMA LOJA -> WORLD 04
+			# =================================================
 			3:
-				return ""
+				return "res://levels/world_04.tscn"
 
-			_: 
+			_:
 				return ""
 
 
@@ -943,7 +949,10 @@ func _on_body_entered(
 
 	var destination := _get_next_level()
 
-	# A última loja é o destino final.
+	# =====================================================
+	# DESTINO NÃO DEFINIDO
+	# =====================================================
+
 	if destination == "":
 
 		var current_scene := get_tree().current_scene
@@ -968,6 +977,7 @@ func _on_body_entered(
 	# =====================================================
 	# Isso é salvo imediatamente ao tocar no portal.
 	# Assim a mesma loja sabe para qual mundo voltar.
+
 	var route_scene := get_tree().current_scene
 
 	if route_scene != null:
@@ -985,6 +995,7 @@ func _on_body_entered(
 		elif route_path.contains("world_03"):
 
 			Globals.last_world_before_shop = 3
+
 
 	# =====================================================
 	# BLOQUEIA DUPLA ENTRADA
@@ -2056,6 +2067,7 @@ func _close_result_screen() -> void:
 	# para voltar ao saldo que existia antes do mapa atual.
 
 	Globals.coins_before_level = Globals.coins
+
 
 	# =====================================================
 	# RESET SCORE / DADOS DA FASE

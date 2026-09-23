@@ -2898,7 +2898,7 @@ sprite_frames = SubResource("SpriteFrames_sob1t")
 autoplay = "default"
 
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("35_p0jlc")]
-position = Vector2(1277.9999, 658)
+position = Vector2(37.000122, 650)
 scale = Vector2(0.99999994, 0.99999994)
 
 [node name="warning_sign2" type="Node2D" parent="." unique_id=1280712285]

@@ -827,8 +827,8 @@ func open_credits():
 	)
 
 
-	print(
-		"Tela de créditos ainda será criada."
+	get_tree().change_scene_to_file(
+		"res://scenes/credits.tscn"
 	)
 
 
