@@ -1959,7 +1959,7 @@ limit_bottom = 720
 position_smoothing_enabled = true
 
 [node name="goal" parent="." unique_id=1383269650 instance=ExtResource("47_43ve4")]
-position = Vector2(294, 760)
+position = Vector2(2332, 661)
 next_level = "uid://2lrgxc7earf0"
 
 [node name="warning_sing3" type="Node2D" parent="." unique_id=500888970]
