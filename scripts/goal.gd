@@ -101,6 +101,9 @@ const RETRO_GOLD := Color("#F5D56A")
 
 const RETRO_BLACK := Color("#0A0610")
 
+# Controle do Boss Final do World-04.
+const BOSS_DEFEATED_META: String = "world_04_boss_defeated"
+
 
 # =========================================================
 # READY
@@ -532,6 +535,7 @@ func get_current_world() -> int:
 
 		return 3
 
+
 	if path.contains(
 		"world_04"
 	):
@@ -539,7 +543,29 @@ func get_current_world() -> int:
 		return 4
 
 
+	if path.contains(
+		"world_05"
+	):
+
+		return 5
+
+
 	return 0
+
+
+# =========================================================
+# STATUS DO BOSS FINAL
+# =========================================================
+
+func _is_boss_defeated() -> bool:
+
+	return get_tree().has_meta(
+		BOSS_DEFEATED_META
+	) and bool(
+		get_tree().get_meta(
+			BOSS_DEFEATED_META
+		)
+	)
 
 
 # =========================================================
@@ -561,9 +587,6 @@ func get_required_fragments() -> int:
 
 		3:
 			return 3
-
-		4:
-			return 0
 
 
 	return 0
@@ -591,10 +614,6 @@ func get_fragment_count() -> int:
 
 			return Globals.memoria_fragments
 
-		4:
-
-			return 0
-
 
 	return 0
 
@@ -620,10 +639,6 @@ func get_fragment_name() -> String:
 		3:
 
 			return "Memória"
-
-		4:
-
-			return "Fragmentos"
 
 
 	return "Fragmentos"
@@ -758,8 +773,7 @@ func _get_next_level() -> String:
 	# loja -> world_02
 	# world_02 -> loja
 	# loja -> world_03
-	# world_03 -> loja
-	# loja -> world_04 (boss final)
+	# world_03 -> loja final
 
 	if scene_path.contains("world_00"):
 
@@ -777,6 +791,14 @@ func _get_next_level() -> String:
 
 		return "res://levels/loja.tscn"
 
+	if scene_path.contains("world_04"):
+
+		if _is_boss_defeated():
+
+			return "res://levels/world_05.tscn"
+
+		return ""
+
 	if (
 		scene_path.ends_with("/loja.tscn")
 		or scene_path.ends_with("\\loja.tscn")
@@ -791,7 +813,7 @@ func _get_next_level() -> String:
 				return "res://levels/world_03.tscn"
 
 			3:
-				return "res://levels/world_04.tscn"
+				return ""
 
 			_: 
 				return ""
@@ -841,6 +863,28 @@ func _on_body_entered(
 	var current := (
 		get_fragment_count()
 	)
+
+
+	# =====================================================
+	# WORLD 04 — BOSS FINAL
+	# =====================================================
+	# O portal do World-04 fica bloqueado enquanto o boss
+	# nao tiver sido derrotado. Depois da vitoria, ele leva
+	# diretamente para o World-05.
+
+	if world == 4:
+
+		if not _is_boss_defeated():
+
+			_show_portal_message(
+				"Derrote o Guardião Cognitivo primeiro!"
+			)
+
+			return
+
+		_show_portal_message(
+			"PORTAL LIBERADO!"
+		)
 
 
 	# =====================================================

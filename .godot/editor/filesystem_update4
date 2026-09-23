@@ -8,3 +8,5 @@ res://levels/world_05.tscn
 res://scripts/credits.gd
 res://scripts/final.gd
 res://scenes/credits.tscn
+res://scripts/boss.gd
+res://scripts/goal.gd
