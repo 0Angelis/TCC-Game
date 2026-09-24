@@ -1157,13 +1157,13 @@ script = ExtResource("33_cqhpb")
 dialog_texts = Array[String](["Mais um dia tranquilo no meu lar...", "Aqui sempre foi um lugar seguro. nada de estranho acontece por aqui.", "eu conheço cada cantinho desse lugar..."])
 
 [node name="alert_sign" type="Sprite2D" parent="warning_sign" unique_id=67411152]
-position = Vector2(0, -13)
+position = Vector2(0, -16)
 texture = ExtResource("34_xocbo")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
 
 [node name="alert_sign2" type="Sprite2D" parent="warning_sign" unique_id=773080834]
-position = Vector2(-7.0929527e-06, -9.999989)
+position = Vector2(-7.0929527e-06, -12.999989)
 scale = Vector2(0.028708138, 0.02791062)
 texture = ExtResource("35_2fxo8")
 region_rect = Rect2(0, 0, 16, 16)
@@ -1182,8 +1182,7 @@ script = ExtResource("33_cqhpb")
 dialog_texts = Array[String](["Opa... o que são isso?", "Inimigos? não tinha nada disso por essa área..."])
 
 [node name="alert_sign" type="Sprite2D" parent="warning_sign2" unique_id=1809968280]
-visible = false
-position = Vector2(0, -13)
+position = Vector2(0, -17)
 texture = ExtResource("34_xocbo")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)
@@ -1203,7 +1202,7 @@ script = ExtResource("33_cqhpb")
 dialog_texts = Array[String](["Alguma coisa parece diferente.", "Espera... o que é aquilo?"])
 
 [node name="alert_sign" type="Sprite2D" parent="warning_sign3" unique_id=1978760898]
-position = Vector2(0, -13)
+position = Vector2(0, -16)
 texture = ExtResource("34_xocbo")
 region_enabled = true
 region_rect = Rect2(0, 0, 16, 16)

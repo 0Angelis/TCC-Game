@@ -2683,7 +2683,7 @@ sprite_frames = SubResource("SpriteFrames_443h2")
 autoplay = "default"
 
 [node name="goal" parent="." unique_id=1383269650 instance=ExtResource("17_qcc4m")]
-position = Vector2(1965, 636)
+position = Vector2(1971, 643)
 next_level = "uid://bwceyn2b0ln4k"
 
 [node name="FINAL" type="Area2D" parent="." unique_id=1663279095]
@@ -2904,7 +2904,7 @@ scale = Vector2(0.99999994, 0.99999994)
 [node name="warning_sign2" type="Node2D" parent="." unique_id=1280712285]
 position = Vector2(582, 660)
 script = ExtResource("36_q6tsl")
-dialog_texts = Array[String](["Eu reconheço esse lugar... essas lembranças estão voltando."])
+dialog_texts = Array[String](["Eu reconheço esse lugar... "])
 
 [node name="alert_sign" type="Sprite2D" parent="warning_sign2" unique_id=1809968280]
 visible = false

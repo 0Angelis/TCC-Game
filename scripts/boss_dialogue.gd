@@ -6,45 +6,55 @@ signal victory_finished
 const INTRO_LINES: Array[String] = [
 	"GUARDIAO: Entao... voce finalmente chegou.",
 	"GUARDIAO: Eu estava esperando por voce.",
-	"PLAYER: Onde estao minhas memorias?",
-	"GUARDIAO: Voce chama de memoria aquilo que deixou para tras durante sua jornada.",
-	"PLAYER: Foi voce quem tirou elas de mim?",
-	"GUARDIAO: Eu apenas guardei o que voce ainda nao estava pronto para recuperar.",
-	"GUARDIAO: Em cada mundo, voce aprendeu uma parte do caminho.",
-	"GUARDIAO: Aprendeu a raciocinar. Aprendeu a prestar atencao. Aprendeu a lembrar.",
-	"GUARDIAO: Mas aprender nao basta.",
-	"PLAYER: Entao o que eu preciso fazer?",
-	"GUARDIAO: Me derrotar.",
-	"GUARDIAO: Mas voce nao vai vencer usando apenas forca.",
-	"GUARDIAO: Eu vou cansar voce. Vou pressionar suas escolhas. Vou testar tudo o que aprendeu.",
-	"GUARDIAO: Quando eu cair, suas memorias serao devolvidas.",
-	"GUARDIAO: Ate la... sobreviva.",
-	"GUARDIAO: Venha. Vamos descobrir se voce realmente se lembra de quem e."
+	"PINGUIM: Onde estao minhas memorias?",
+	"GUARDIAO: Voce ja recuperou grande parte delas durante sua jornada.",
+	"PINGUIM: Raciocinio... atencao... memoria...",
+	"PINGUIM: Eu passei por tudo isso para chegar ate aqui.",
+	"GUARDIAO: Exatamente.",
+	"GUARDIAO: Cada mundo devolveu uma parte do que voce perdeu.",
+	"GUARDIAO: No primeiro, voce recuperou seu raciocinio.",
+	"GUARDIAO: No segundo, sua atencao.",
+	"GUARDIAO: E no terceiro... sua memoria.",
+	"PINGUIM: Entao por que eu ainda nao consigo lembrar quem eu sou?",
+	"GUARDIAO: Porque suas memorias voltaram... mas a verdade ainda permanece escondida.",
+	"PINGUIM: E voce sabe quem eu sou?",
+	"GUARDIAO: Sei.",
+	"PINGUIM: Entao me conte.",
+	"GUARDIAO: Nao posso.",
+	"PINGUIM: Por que?",
+	"GUARDIAO: Porque essa resposta esta dentro de voce.",
+	"GUARDIAO: Eu sou apenas o ultimo obstaculo entre voce e suas lembrancas.",
+	"PINGUIM: Entao e voce que esta me impedindo de lembrar?",
+	"GUARDIAO: Nao estou impedindo.",
+	"GUARDIAO: Estou testando se voce esta pronto.",
+	"PINGUIM: Entao eu vou descobrir a verdade.",
+	"GUARDIAO: Venha, Pinguim.",
+	"GUARDIAO: Derrote-me... e talvez voce finalmente descubra quem realmente eh."
 ]
 
 const VICTORY_LINES: Array[String] = [
 	"GUARDIAO: Eu... fui derrotado.",
-	"GUARDIAO: Entao voce realmente aprendeu.",
-	"PLAYER: Minhas memorias... agora.",
-	"GUARDIAO: Elas nunca estiveram perdidas.",
-	"GUARDIAO: Raciocinio. Atencao. Memoria.",
-	"GUARDIAO: Tudo o que voce buscava estava sendo reconstruido dentro de voce.",
-	"GUARDIAO: Agora e hora de lembrar."
+	"PINGUIM: Agora me diga... quem eu sou?",
+	"GUARDIAO: Voce ja recuperou seu raciocinio.",
+	"GUARDIAO: Recuperou sua atencao.",
+	"GUARDIAO: Recuperou sua memoria.",
+	"GUARDIAO: E agora recuperou a ultima parte que faltava.",
+	"PINGUIM: Entao... eu finalmente me lembro.",
+	"GUARDIAO: Sim.",
+	"GUARDIAO: Nada mais esta escondido.",
+	"PINGUIM: Eu me lembro de quem sou.",
+	"PINGUIM: E agora... posso voltar para casa."
 ]
 
 var boss: Node2D = null
 var waiting: bool = false
 var active_dialogue: String = ""
 
-# O texto do diálogo fica próximo da cabeça do boss.
 const DIALOGUE_OFFSET: Vector2 = Vector2(
 	0.0,
 	-8.0
 )
 
-# Guarda a última posição conhecida do boss.
-# É importante para o diálogo de vitória continuar
-# mesmo depois que o boss desaparecer.
 var last_boss_dialogue_position: Vector2 = Vector2.ZERO
 var has_last_boss_dialogue_position: bool = false
 
@@ -86,8 +96,6 @@ func start_victory() -> void:
 	if DialogManager.is_message_active:
 		return
 
-	# O boss pode já ter desaparecido.
-	# Nesse caso, usamos a última posição conhecida.
 	if is_instance_valid(boss):
 		last_boss_dialogue_position = (
 			boss.global_position

@@ -1755,7 +1755,7 @@ layer_1/tile_data = PackedInt32Array(2883584, 65549, 1, 2883585, 131085, 1, 2883
 position = Vector2(180, 566)
 
 [node name="atention" type="AnimatedSprite2D" parent="atention" unique_id=1223506415]
-position = Vector2(-20, 127)
+position = Vector2(12, 129)
 scale = Vector2(0.019, 0.019)
 sprite_frames = SubResource("SpriteFrames_4e1o6")
 autoplay = "default"
@@ -1796,7 +1796,7 @@ position = Vector2(2000, 689)
 shape = SubResource("CapsuleShape2D_5t4lp")
 
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("27_s3w5o")]
-position = Vector2(60, 693)
+position = Vector2(70, 693)
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=395750549]
 
@@ -1968,7 +1968,7 @@ next_level = "uid://2lrgxc7earf0"
 position = Vector2(783.00006, 693)
 scale = Vector2(0.964, 0.964)
 script = ExtResource("48_r5tsm")
-dialog_texts = Array[String](["Àquele que chegou até aqui: ", "Prepare-se para enfrentar o Guardião Cognitivo. Somente ao derrotá-lo você poderá recuperar sua memória e retornar para casa."])
+dialog_texts = Array[String](["Àquele que chegou até aqui : ", "Prepare-se para enfrentar o Guardião Cognitivo. Somente ao derrotá-lo você poderá recuperar sua memória e retornar para casa."])
 
 [node name="alert_sign" type="Sprite2D" parent="warning_sing3" unique_id=633395979]
 visible = false
@@ -1988,9 +1988,9 @@ position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_fexhl")
 
 [node name="warning_sign" type="Node2D" parent="." unique_id=1064601445]
-position = Vector2(160, 687)
+position = Vector2(192, 689)
 script = ExtResource("48_r5tsm")
-dialog_texts = Array[String](["Humm...", "Agora estou em uma caverna.", "Será que estou mais perto de recuperar minha memória?", "Preciso descobrir como voltar pra casa."])
+dialog_texts = Array[String](["Então é aqui...", "Depois de tudo que enfrentei, finalmente cheguei ao mundo do Guardião Cognitivo.", "Minhas memórias estão quase completas, mas ainda não consigo entender quem eu realmente sou.", "Talvez ele seja a última peça que falta.", "Se eu derrotá-lo... talvez finalmente descubra toda a verdade."])
 
 [node name="alert_sign" type="Sprite2D" parent="warning_sign" unique_id=2084562465]
 position = Vector2(0, -13)

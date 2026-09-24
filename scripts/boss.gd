@@ -39,8 +39,6 @@ const FUN_CHALLENGE_POOL: Array[String] = [
 	"attention_red",
 	"attention_blue",
 	"memory_numbers",
-	"memory_words",
-	"attention_red",
 	"memory_words"
 ]
 # ============================================================
@@ -441,55 +439,45 @@ func _stop_all_player_animations(
 # ============================================================
 func _build_challenge_order() -> void:
 	challenge_order.clear()
-	var fun_pool: Array[String] = (
+
+	# Temos exatamente 5 desafios:
+	# 1 de raciocinio + 2 de atencao (Stroop) + 2 de memoria.
+	var fun_selected: Array[String] = (
 		FUN_CHALLENGE_POOL.duplicate()
 	)
-	var fun_selected: Array[String] = []
-	while fun_selected.size() < 4:
-		var possible: Array[String] = (
-			fun_pool.duplicate()
-		)
-		if (
-			fun_selected.size() > 0
-			and
-			possible.size() > 1
-		):
-			possible.erase(
-				fun_selected[
-					fun_selected.size() - 1
-				]
-			)
-		var selected: String = (
-			possible.pick_random()
-		)
-		fun_selected.append(
-			selected
-		)
+
+	# Embaralha os 4 desafios sem repetir nenhum.
+	fun_selected.shuffle()
+
+	# Coloca o desafio de raciocinio em uma posicao aleatoria.
 	var logic_position: int = (
 		randi_range(
 			0,
 			TOTAL_CHALLENGES - 1
 		)
 	)
+
 	var fun_index: int = 0
+
 	for i: int in range(
 		TOTAL_CHALLENGES
 	):
+
 		if i == logic_position:
 			challenge_order.append(
 				LOGIC_CHALLENGE
 			)
 		else:
 			challenge_order.append(
-				fun_selected[
-					fun_index
-				]
+				fun_selected[fun_index]
 			)
 			fun_index += 1
+
 	print(
 		"BOSS: ordem sorteada = ",
 		challenge_order
 	)
+
 # ============================================================
 # SPAWN
 # ============================================================

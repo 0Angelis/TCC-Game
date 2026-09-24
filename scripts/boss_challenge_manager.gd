@@ -116,6 +116,7 @@ var memory_buttons: Array[Button] = []
 var logic_answer: int = 0
 
 var attention_answer: String = ""
+var attention_word: String = ""
 var last_attention_answer: String = ""
 
 # Cores usadas nos desafios de atenção.
@@ -1401,45 +1402,46 @@ func _build_attention_blue() -> void:
 
 func _build_attention_stroop() -> void:
 
-	# A cada rodada o desafio muda para não ficar repetitivo.
-	# O correto nunca repete a resposta da rodada anterior,
-	# quando houver outra opção disponível.
+	# A cor escrita sempre pertence a ATTENTION_COLORS.
+	# A cor da tinta tambem pertence a mesma lista.
+	# Assim, tanto a palavra quanto a resposta sempre
+	# existem nas alternativas do desafio.
+	var colors: Array[String] = ATTENTION_COLORS.duplicate()
+	colors.shuffle()
 
-	var possible_answers: Array[String] = (
-		ATTENTION_COLORS.duplicate()
-	)
+	attention_answer = colors[0]
 
+	# Evita repetir a mesma resposta da rodada anterior.
 	if (
 		last_attention_answer != ""
 		and
-		possible_answers.size() > 1
+		attention_answer == last_attention_answer
+		and
+		colors.size() > 1
 	):
-		possible_answers.erase(last_attention_answer)
+		attention_answer = colors[1]
 
-	possible_answers.shuffle()
-
-	attention_answer = possible_answers[0]
 	last_attention_answer = attention_answer
 
-	# Escolhe uma palavra diferente da cor correta.
-	var wrong_words: Array[String] = (
-		ATTENTION_COLORS.duplicate()
-	)
+	# A palavra sera diferente da cor da tinta,
+	# mantendo o efeito Stroop.
+	var words: Array[String] = ATTENTION_COLORS.duplicate()
+	words.erase(attention_answer)
+	words.shuffle()
 
-	wrong_words.erase(attention_answer)
-	wrong_words.shuffle()
+	var word: String = words[0]
 
-	var word: String = wrong_words[0]
+	# Guarda a palavra para coloca-la obrigatoriamente
+	# entre as alternativas.
+	attention_word = word
 
-	# Pequenas variações de instrução para deixar o desafio
-	# mais vivo sem mudar a regra.
 	var instructions: Array[String] = [
 		"ATENCAO: clique na COR da tinta, nao na palavra!",
 		"NAO LEIA! observe apenas a cor do texto.",
 		"QUAL E A COR? ignore o significado da palavra!"
 	]
-	instructions.shuffle()
 
+	instructions.shuffle()
 	instruction_label.text = instructions[0]
 
 	var word_label: Label = _label(
@@ -1461,7 +1463,6 @@ func _build_attention_stroop() -> void:
 		VERTICAL_ALIGNMENT_CENTER
 	)
 
-	# Um pequeno destaque visual no texto.
 	word_label.add_theme_constant_override(
 		"outline_size",
 		5
@@ -1482,21 +1483,22 @@ func _create_attention_buttons() -> void:
 		ATTENTION_COLORS.duplicate()
 	)
 
-	# Garante que a resposta correta apareca.
-	if not answer_pool.has(attention_answer):
-		answer_pool.append(attention_answer)
-
-	# Escolhe 3 distratores diferentes da resposta.
-	answer_pool.shuffle()
-
+	# A cor da tinta e a palavra escrita sao obrigatorias.
+	# Portanto, a palavra nunca ficara fora das alternativas.
 	var names: Array[String] = [
-		attention_answer
+		attention_answer,
+		attention_word
 	]
 
-	for color_name: String in answer_pool:
+	# A palavra ja e diferente da tinta, mas esta protecao
+	# evita qualquer duplicacao caso a regra seja alterada futuramente.
+	if attention_answer == attention_word:
+		names = [attention_answer]
 
-		if color_name == attention_answer:
-			continue
+	answer_pool.shuffle()
+
+	# Completa ate quatro alternativas sem repetir nenhuma.
+	for color_name: String in answer_pool:
 
 		if names.has(color_name):
 			continue
@@ -1536,8 +1538,7 @@ func _create_attention_buttons() -> void:
 			)
 		)
 
-		# Cada botao fica com a propria cor para facilitar
-		# a identificacao visual, sem repetir botoes.
+		# Cada botao continua mostrando sua propria cor.
 		button.add_theme_color_override(
 			"font_color",
 			ATTENTION_COLOR_VALUES[name]

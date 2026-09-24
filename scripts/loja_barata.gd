@@ -18,7 +18,7 @@ extends Area2D
 # CONFIGURAÇÃO
 # =========================================================
 
-const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 80.0)
+const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 95.0)
 const OFFSET_AVISO: Vector2 = Vector2(-45.0, -42.0)
 
 const DISTANCIA_MAXIMA_INTERACAO: float = 100.0
@@ -336,10 +336,10 @@ func abrir_conversa() -> void:
 	var falas: Array[String] = [
 		"psiu... chega ai.",
 		"tenho uma oferta que voce nunca viu antes.",
-		"AS 7 SAIAS DE FILO!",
+		"AS 7 SAIAS DE FILÓ!",
 		"isso mesmo! 7 saias! uma mais estilosa que a outra.",
 		"so hoje por %d moedas!" % PRECO_SAIAS_FILO,
-		"confia na barata... voce vai receber AS 7 SAIAS!"
+		"confia aqui na barata..."
 	]
 
 	var posicao: Vector2 = (
@@ -625,7 +625,7 @@ func criar_menu() -> void:
 	# -----------------------------------------------------
 
 	subtitulo = criar_label(
-		"OFERTA IMPERDIVEL",
+		"A BARATA DIZ QUE TEM",
 		9,
 		Color("#C18ADB")
 	)
@@ -649,19 +649,19 @@ func criar_menu() -> void:
 	# -----------------------------------------------------
 
 	icone_item = criar_label(
-		"7 SAIAS",
-		18,
+		"7 SAIAS DE FILÓ",
+		15,
 		Color("#F0A0FF")
 	)
 
 	icone_item.position = Vector2(
 		0.0,
-		84.0
+		88.0
 	)
 
 	icone_item.size = Vector2(
 		600.0,
-		45.0
+		38.0
 	)
 
 	icone_item.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -680,7 +680,7 @@ func criar_menu() -> void:
 
 	nome_item.position = Vector2(
 		0.0,
-		145.0
+		138.0
 	)
 
 	nome_item.size = Vector2(
@@ -704,7 +704,7 @@ func criar_menu() -> void:
 
 	preco.position = Vector2(
 		0.0,
-		172.0
+		165.0
 	)
 
 	preco.size = Vector2(
@@ -728,7 +728,7 @@ func criar_menu() -> void:
 
 	moedas.position = Vector2(
 		0.0,
-		198.0
+		191.0
 	)
 
 	moedas.size = Vector2(
@@ -752,7 +752,7 @@ func criar_menu() -> void:
 
 	estado_item.position = Vector2(
 		0.0,
-		224.0
+		217.0
 	)
 
 	estado_item.size = Vector2(
@@ -776,7 +776,7 @@ func criar_menu() -> void:
 
 	resultado.position = Vector2(
 		0.0,
-		245.0
+		238.0
 	)
 
 	resultado.size = Vector2(
@@ -798,7 +798,7 @@ func criar_menu() -> void:
 
 	voltar = criar_botao(
 		"VOLTAR",
-		Vector2(45.0, 310.0),
+		Vector2(45.0, 300.0),
 		Vector2(230.0, 44.0)
 	)
 
@@ -814,7 +814,7 @@ func criar_menu() -> void:
 
 	comprar = criar_botao(
 		"COMPRAR",
-		Vector2(325.0, 310.0),
+		Vector2(325.0, 300.0),
 		Vector2(230.0, 44.0)
 	)
 
@@ -989,7 +989,7 @@ func atualizar_menu() -> void:
 	if nome_item == null:
 		return
 
-	nome_item.text = "7 SAIAS DE FILÓ"
+	nome_item.text = "OFERTA DO DIA"
 	preco.text = "%d MOEDAS" % PRECO_SAIAS_FILO
 	moedas.text = "MOEDAS: %d" % Globals.coins
 

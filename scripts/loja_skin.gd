@@ -4,7 +4,7 @@ extends Area2D
 # FEIRINHA DO VALE - LOJA DE SKINS
 # =========================================================
 
-const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 80.0)
+const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 78.0)
 const OFFSET_AVISO: Vector2 = Vector2(-45.0, -58.0)
 
 # Distancia maxima para poder interagir com a lojinha.

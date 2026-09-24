@@ -937,8 +937,14 @@ layer_1/tile_data = PackedInt32Array(2686977, 65537, 5, 1310721, 327681, 1, 1310
 position = Vector2(-1, 0)
 
 [node name="atention" type="AnimatedSprite2D" parent="atention" unique_id=694955537]
-position = Vector2(113, 823)
+position = Vector2(193, 824)
 scale = Vector2(0.016, 0.016)
+sprite_frames = SubResource("SpriteFrames_ffp5f")
+autoplay = "default"
+
+[node name="atention2" type="AnimatedSprite2D" parent="atention" unique_id=216517122]
+position = Vector2(4131, 665)
+scale = Vector2(0.015, 0.015)
 sprite_frames = SubResource("SpriteFrames_ffp5f")
 autoplay = "default"
 
@@ -947,7 +953,7 @@ position = Vector2(4199, 628)
 next_level = "uid://2lrgxc7earf0"
 
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("4_naeyk")]
-position = Vector2(47, 822)
+position = Vector2(50, 820)
 
 [node name="portal chegada" type="AnimatedSprite2D" parent="." unique_id=654761614]
 position = Vector2(23, 810)
@@ -1355,9 +1361,9 @@ text = "0/5"
 position = Vector2(487, 346)
 
 [node name="warning_sign2" type="Node2D" parent="warning" unique_id=1454553200]
-position = Vector2(-375, 473)
+position = Vector2(-295, 474)
 script = ExtResource("20_6ibfi")
-dialog_texts = Array[String](["Onde eu estou...?", "Como eu volto pra casa?", "Talvez esses caminhos tenham alguma pista..."])
+dialog_texts = Array[String](["Onde eu estou...?", "Eu não lembro de nada. Quem sou eu? De onde eu vim?", "Eu tento lembrar, mas... é tudo vazio.", "Meus pensamentos... minhas lembranças... tudo sumiu.", "Só tem uma coisa na minha cabeça...", "Memória Zero.", "Talvez seja esse o começo.", "Talvez, se eu seguir em frente, eu consiga descobrir quem eu era."])
 
 [node name="alert_sign" type="Sprite2D" parent="warning/warning_sign2" unique_id=1334213129]
 position = Vector2(0, -13)
@@ -1648,12 +1654,11 @@ position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="warning_sing14" type="Node2D" parent="warning" unique_id=932250580]
-position = Vector2(3574, 313)
+position = Vector2(3575, 310)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Você chegou ao fim deste caminho...", "À sua frente existe um portal. ele não vai levar você para casa... ainda.", "Esse portal leva a um novo lugar, onde outro desafio espera por você. "])
 
 [node name="alert_sign" type="Sprite2D" parent="warning/warning_sing14" unique_id=2100529148]
-visible = false
 position = Vector2(0, -13)
 texture = ExtResource("21_jfqd0")
 region_enabled = true
@@ -1665,6 +1670,27 @@ position = Vector2(-2, 3)
 collision_layer = 2
 
 [node name="colission" type="CollisionShape2D" parent="warning/warning_sing14/area_sign" unique_id=1120471574]
+visible = false
+position = Vector2(1.75, -2)
+shape = SubResource("RectangleShape2D_sob1t")
+
+[node name="warning_sing19" type="Node2D" parent="warning" unique_id=1004253775]
+position = Vector2(3643, 315)
+script = ExtResource("20_6ibfi")
+dialog_texts = Array[String](["Eu... lembrei de alguma coisa.", "Foi só um instante... uma imagem, uma sensação...", "Mas desapareceu rápido demais.", "Então é isso... os fragmentos estão trazendo minhas lembranças de volta.", "Talvez eu não consiga lembrar de tudo de uma vez.", "A cada fragmento... uma parte de quem eu era volta para mim.", "Eu vou continuar.", "Talvez, quando eu recuperar todas as minhas memórias, eu finalmente descubra a verdade sobre mim."])
+
+[node name="alert_sign" type="Sprite2D" parent="warning/warning_sing19" unique_id=1486072525]
+position = Vector2(0, -13)
+texture = ExtResource("21_jfqd0")
+region_enabled = true
+region_rect = Rect2(0, 0, 16, 16)
+
+[node name="area_sign" type="Area2D" parent="warning/warning_sing19" unique_id=1861413559]
+visible = false
+position = Vector2(-2, 3)
+collision_layer = 2
+
+[node name="colission" type="CollisionShape2D" parent="warning/warning_sing19/area_sign" unique_id=2080958426]
 visible = false
 position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
