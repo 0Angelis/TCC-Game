@@ -2683,7 +2683,7 @@ sprite_frames = SubResource("SpriteFrames_443h2")
 autoplay = "default"
 
 [node name="goal" parent="." unique_id=1383269650 instance=ExtResource("17_qcc4m")]
-position = Vector2(1729, 546)
+position = Vector2(1965, 636)
 next_level = "uid://bwceyn2b0ln4k"
 
 [node name="FINAL" type="Area2D" parent="." unique_id=1663279095]

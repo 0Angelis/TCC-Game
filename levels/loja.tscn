@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cu2qwong3kyvc" path="res://scripts/world_01.gd" id="1_lhykt"]
 [ext_resource type="PackedScene" uid="uid://cvence5b8xxpw" path="res://prefabs/pause_menu.tscn" id="2_2ts34"]
 [ext_resource type="PackedScene" uid="uid://ct4nxdqyghxxn" path="res://prefabs/coin.tscn" id="2_2xca5"]
+[ext_resource type="Script" uid="uid://cbjbc0h4cdahy" path="res://scripts/loja_barata.gd" id="4_5217c"]
 [ext_resource type="Texture2D" uid="uid://0fyk46lijo1j" path="res://assets/Seasonal Tilesets/1 - Grassland/Terrain (16 x 16).png" id="4_a0a5v"]
 [ext_resource type="Texture2D" uid="uid://de6sg4txwpppx" path="res://assets/Sprite Pack 5/9 - Wispy Fire/Idle_Flicker_(32 x 32).png" id="4_de6gb"]
 [ext_resource type="Script" uid="uid://dmatouenhkl52" path="res://scripts/loja_skin.gd" id="4_vtj6g"]
@@ -45,6 +46,9 @@
 [ext_resource type="Script" uid="uid://dhx83fqukj7ji" path="res://scripts/transition.gd" id="51_d4u6g"]
 [ext_resource type="Shader" uid="uid://cfqg8x3kad7tx" path="res://shaders/transition.gdshader" id="52_xbd10"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="53_baxup"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_scsv4"]
+size = Vector2(43, 56)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uxckq"]
 size = Vector2(43, 90)
@@ -1455,7 +1459,7 @@ position = Vector2(2, 0)
 script = ExtResource("1_lhykt")
 
 [node name="coins" type="TileMap" parent="." unique_id=1647068549]
-position = Vector2(1282, 2015)
+position = Vector2(1509, 643)
 format = 2
 
 [node name="coin" parent="coins" unique_id=549563926 instance=ExtResource("2_2xca5")]
@@ -1580,6 +1584,13 @@ position = Vector2(-746, 39)
 
 [node name="pause_menu" parent="." unique_id=1799463148 instance=ExtResource("2_2ts34")]
 visible = false
+
+[node name="loja barata" type="Area2D" parent="." unique_id=505275893]
+script = ExtResource("4_5217c")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="loja barata" unique_id=1165799036]
+position = Vector2(1014.5, 708)
+shape = SubResource("RectangleShape2D_scsv4")
 
 [node name="loja skin" type="Area2D" parent="." unique_id=1674915937]
 script = ExtResource("4_vtj6g")
@@ -1867,6 +1878,7 @@ position = Vector2(0, 2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
+visible = false
 script = ExtResource("51_d4u6g")
 
 [node name="color_rect" type="ColorRect" parent="transition" unique_id=1131400237]

@@ -1258,7 +1258,7 @@ position = Vector2(144618.72, 28518.746)
 scale = Vector2(56.249992, 56.249992)
 
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("15_oonbl")]
-position = Vector2(22, 583)
+position = Vector2(35, 582)
 
 [node name="coins" type="TileMap" parent="." unique_id=624749532]
 position = Vector2(3268, 509)

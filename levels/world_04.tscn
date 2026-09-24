@@ -1796,7 +1796,7 @@ position = Vector2(2000, 689)
 shape = SubResource("CapsuleShape2D_5t4lp")
 
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("27_s3w5o")]
-position = Vector2(1944, 690)
+position = Vector2(60, 693)
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=395750549]
 

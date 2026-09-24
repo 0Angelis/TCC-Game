@@ -60,7 +60,11 @@ const ATTACK_DASH_TIME: float = 0.30
 const ATTACK_DASH_SPEED: float = 172.0
 
 const ATTACK_RECOVERY_TIME: float = 0.32
-const ATTACK_COOLDOWN: float = 1.20
+const ATTACK_COOLDOWN: float = 1.60
+
+# Delay antes do boss voltar a andar/atacar.
+# Usado ao iniciar a batalha e depois de cada desafio.
+const BATTLE_START_DELAY: float = 0.8
 
 
 # ============================================================
@@ -72,13 +76,18 @@ const DASH_CONTACT_VERTICAL: float = 28.0
 
 
 var attack_cooldown: float = 0.0
-var attack_prepare_timer: float = 0.0
-var attack_dash_timer: float = 0.0
+var attack_prepare_timer: float = 0.30
+var attack_dash_timer: float = 0.50
 var attack_recovery_timer: float = 0.0
 
 var is_attacking: bool = false
 var attack_hit_done: bool = false
 var attack_direction: int = 1
+
+# Delay curto antes de voltar a agir.
+var battle_start_delay_timer: float = 0.0
+var battle_start_delay_active: bool = false
+var damage_enabled_before_battle_delay: bool = false
 
 
 # ============================================================
@@ -357,6 +366,41 @@ func _physics_process(delta: float) -> void:
 		else:
 
 			_update_air_animation()
+
+		return
+
+
+	# ========================================================
+	# DELAY ANTES DE VOLTAR A ANDAR/ATACAR
+	# ========================================================
+
+	if battle_start_delay_active:
+
+		battle_start_delay_timer -= delta
+
+		can_move = false
+		velocity.x = 0.0
+
+		# Durante o delay o boss continua sujeito à gravidade.
+		move_and_slide()
+
+		if is_on_floor():
+
+			velocity.x = 0.0
+			velocity.y = 0.0
+			_play_animation("olhando")
+
+
+		if battle_start_delay_timer <= 0.0:
+
+			battle_start_delay_timer = 0.0
+			battle_start_delay_active = false
+			can_move = true
+
+			# Só devolve o dano quando o delay acabou.
+			damage_enabled = damage_enabled_before_battle_delay
+
+			_find_player()
 
 		return
 
@@ -2046,6 +2090,9 @@ func freeze_boss() -> void:
 
 	waiting_for_landing_lock = false
 
+	battle_start_delay_active = false
+	battle_start_delay_timer = 0.0
+
 	can_move = false
 
 	velocity = Vector2.ZERO
@@ -2105,7 +2152,23 @@ func unfreeze_boss() -> void:
 
 	waiting_for_landing_lock = false
 
-	can_move = true
+	# ========================================================
+	# DELAY DE 0.8s AO INICIAR/RETOMAR A BATALHA
+	# ========================================================
+	# O boss fica parado por um instante antes de voltar
+	# a perseguir/atacar. Durante esse tempo ele também
+	# não consegue causar dano por contato.
+
+	battle_start_delay_timer = BATTLE_START_DELAY
+	battle_start_delay_active = true
+
+	damage_enabled_before_battle_delay = damage_enabled
+	damage_enabled = false
+
+	can_move = false
+	velocity.x = 0.0
+
+	_reset_attack_state()
 
 	battle_controlled = false
 
@@ -2316,6 +2379,10 @@ func _reset_all_timers() -> void:
 	enraged = false
 
 	attack_cooldown = 0.0
+
+	battle_start_delay_timer = 0.0
+	battle_start_delay_active = false
+	damage_enabled_before_battle_delay = false
 
 	attack_prepare_timer = 0.0
 

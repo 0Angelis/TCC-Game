@@ -42,11 +42,18 @@ var attack_damage_cooldown: float = 0.0
 const STOMP_VERTICAL_DISTANCE: float = 24.0
 const STOMP_HORIZONTAL_DISTANCE: float = 28.0
 
+# O player precisa estar realmente caindo para o pisão contar.
+const STOMP_MIN_FALL_SPEED: float = 80.0
+
+# Depois de um pisão, o urso fica protegido contra outro imediatamente.
+const STOMP_INVULNERABILITY: float = 0.7
+
 # Força do pulo depois de pisar no urso
 const STOMP_BOUNCE_FORCE: float = -220.0
 
-# Pequeno empurrão lateral depois do pisão
-const STOMP_BOUNCE_X: float = 35.0
+# Empurrão lateral depois do pisão.
+# Isso evita que o player fique grudado na cabeça.
+const STOMP_BOUNCE_X: float = 90.0
 
 # Impede vários pisões enquanto o player
 # continua sobre a cabeça.
@@ -80,6 +87,7 @@ var stomp_count: int = 0
 const MAX_STOMPS: int = 3
 
 var stomp_cooldown: float = 0.0
+var stomp_invulnerability_timer: float = 0.0
 
 
 # ==========================================
@@ -136,6 +144,7 @@ func _ready() -> void:
 
 	stomp_count = 0
 	stomp_cooldown = 0.0
+	stomp_invulnerability_timer = 0.0
 
 	can_attack = true
 	attack_cooldown_timer = 0.0
@@ -196,12 +205,76 @@ func _ready() -> void:
 
 
 # ==========================================
+# DESAFIO DO WORLD 03
+# ==========================================
+
+func _is_world_03_challenge_open() -> bool:
+
+	var current_scene := get_tree().current_scene
+
+	if current_scene == null:
+		return false
+
+	var scene_path: String = (
+		current_scene.scene_file_path.to_lower()
+	)
+
+	if not scene_path.contains("world_03"):
+		return false
+
+	var trigger_names: Array[String] = [
+		"MemoryTrigger",
+		"MemoryTrigger2",
+		"MemoryTrigger3"
+	]
+
+	for trigger_name: String in trigger_names:
+
+		var trigger: Node = (
+			current_scene.find_child(
+				trigger_name,
+				true,
+				false
+			)
+		)
+
+		if trigger != null:
+
+			var challenge_is_open = (
+				trigger.get("challenge_open")
+			)
+
+			if challenge_is_open == true:
+				return true
+
+	return false
+
+
+# ==========================================
 # FÍSICA
 # ==========================================
 
 func _physics_process(delta: float) -> void:
 
 	if is_dead:
+		return
+
+	# ==========================================
+	# DESAFIO ABERTO NO WORLD 03
+	# ==========================================
+
+	if _is_world_03_challenge_open():
+
+		is_attacking = false
+		can_attack = false
+		attack_cooldown_timer = 0.2
+		attack_damage_cooldown = 0.2
+		velocity.x = 0.0
+
+		move_and_slide()
+
+		deixar_dormindo()
+
 		return
 
 
@@ -221,6 +294,10 @@ func _physics_process(delta: float) -> void:
 	if stomp_cooldown > 0.0:
 
 		stomp_cooldown -= delta
+
+	if stomp_invulnerability_timer > 0.0:
+
+		stomp_invulnerability_timer -= delta
 
 
 	if attack_cooldown_timer > 0.0:
@@ -471,6 +548,9 @@ func _physics_process(delta: float) -> void:
 func verificar_colisao_corpo() -> void:
 
 	if is_dead:
+		return
+
+	if _is_world_03_challenge_open():
 		return
 
 
@@ -1016,6 +1096,9 @@ func _on_hitbox_body_entered(
 	if is_dead:
 		return
 
+	if _is_world_03_challenge_open():
+		return
+
 
 	if is_hurt:
 		return
@@ -1063,6 +1146,22 @@ func _on_hitbox_body_entered(
 
 
 	if not player_above:
+		return
+
+
+	# ==========================================
+	# PRECISA ESTAR CAINDO
+	# ==========================================
+
+	if player_body.velocity.y < STOMP_MIN_FALL_SPEED:
+		return
+
+
+	# ==========================================
+	# URSO AINDA ESTÁ PROTEGIDO?
+	# ==========================================
+
+	if stomp_invulnerability_timer > 0.0:
 		return
 
 
@@ -1176,18 +1275,12 @@ func verificar_player_na_cabeca() -> void:
 
 
 	# ==========================================
-	# PLAYER ESTÁ PARADO NA CABEÇA
+	# NÃO CAUSA OUTRO DANO AQUI
 	# ==========================================
-
-	player_on_head = true
-
-	print("==============================")
-	print("PLAYER ESTÁ NA CABEÇA!")
-	print("PISÃO CONFIRMADO!")
-	print("==============================")
-
-
-	pisar_no_urso()
+	# O dano do urso é aplicado somente quando
+	# o player entra na cabeça caindo.
+	# Aqui apenas evitamos que ele fique parado
+	# em cima do urso.
 
 
 # ==========================================
@@ -1203,8 +1296,12 @@ func pisar_no_urso() -> void:
 	if stomp_cooldown > 0.0:
 		return
 
+	if stomp_invulnerability_timer > 0.0:
+		return
+
 
 	stomp_cooldown = 0.45
+	stomp_invulnerability_timer = STOMP_INVULNERABILITY
 
 
 	stomp_count += 1
