@@ -1459,7 +1459,7 @@ position = Vector2(2, 0)
 script = ExtResource("1_lhykt")
 
 [node name="coins" type="TileMap" parent="." unique_id=1647068549]
-position = Vector2(1509, 643)
+position = Vector2(1353, 986)
 format = 2
 
 [node name="coin" parent="coins" unique_id=549563926 instance=ExtResource("2_2xca5")]

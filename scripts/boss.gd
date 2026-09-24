@@ -12,6 +12,7 @@ signal boss_health_changed(
 const MAX_HEALTH: int = 100
 const DAMAGE_PER_SUCCESS: int = 20
 const TOTAL_CHALLENGES: int = 5
+const BOSS_SCORE_REWARD: int = 5000
 const FATIGUE_TIME: float = 15.0
 const EXHAUSTED_TIME: float = 30.0
 const TALK_DISTANCE: float = 70.0
@@ -1019,6 +1020,15 @@ func _update_health_from_boss() -> void:
 func _on_boss_defeated() -> void:
 	if state == BossState.VICTORY:
 		return
+
+	# ========================================================
+	# RECOMPENSA POR DERROTAR O BOSS
+	# ========================================================
+	# Os 5.000 pontos entram no score da fase atual.
+	# O sistema de score total poderá somá-los junto com o
+	# restante da fase quando ela for concluída.
+	Globals.score += BOSS_SCORE_REWARD
+
 	state = BossState.VICTORY
 	waiting_for_challenge = false
 	_set_boss_attack_enabled(false)

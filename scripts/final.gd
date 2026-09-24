@@ -44,6 +44,12 @@ var player_near: bool = false
 
 var entering_house: bool = false
 
+var score_screen_open: bool = false
+
+var final_total_score: int = 0
+
+var final_total_play_time: float = 0.0
+
 
 # ============================================================
 # NODES
@@ -54,6 +60,18 @@ var collision_shape: CollisionShape2D = null
 var prompt_layer: CanvasLayer = null
 
 var prompt_label: Label = null
+
+var score_layer: CanvasLayer = null
+
+var score_overlay: ColorRect = null
+
+var score_panel: Panel = null
+
+var score_title: Label = null
+
+var score_value: Label = null
+
+var score_hint: Label = null
 
 
 # ============================================================
@@ -153,10 +171,46 @@ func _process(_delta: float) -> void:
 
 
 # ============================================================
-# INPUT - E
+# INPUT - E / ENTER NA TELA DE SCORE
 # ============================================================
 
 func _input(event: InputEvent) -> void:
+
+	# ========================================================
+	# TELA DE SCORE FINAL
+	# ========================================================
+
+	if score_screen_open:
+
+		if not event is InputEventKey:
+			return
+
+		var key_event := (
+			event as InputEventKey
+		)
+
+		if not key_event.pressed:
+			return
+
+		if key_event.echo:
+			return
+
+		if (
+			key_event.keycode == KEY_ENTER
+			or
+			key_event.keycode == KEY_KP_ENTER
+			or
+			key_event.keycode == KEY_E
+			or
+			key_event.physical_keycode == KEY_E
+		):
+
+			get_viewport().set_input_as_handled()
+
+			_close_score_screen()
+
+		return
+
 
 	if entering_house:
 		return
@@ -305,25 +359,52 @@ func _enter_home() -> void:
 
 	_freeze_player()
 
+	# Para o cronômetro antes de abrir a tela final.
+	Globals.pause_game_timer()
+
+	# Soma o score do ultimo mundo ao total ja acumulado.
+	final_total_score = (
+		Globals.total_score
+		+
+		Globals.score
+	)
+
+	Globals.total_score = final_total_score
+
+	# Finaliza explicitamente o tempo da ultima fase.
+	# Assim a pontuacao e o tempo seguem a mesma regra:
+	# cada fase contribui uma unica vez para o total.
+	Globals.finalize_current_level_time()
+	final_total_play_time = Globals.total_play_time
+
+	# A partida terminou aqui.
+	Globals.stop_game_timer()
+
+	print(
+		"TEMPO TOTAL DA PARTIDA: ",
+		Globals.format_game_time(final_total_play_time)
+	)
+
 	print(
 		"================================"
 	)
 
 	print(
-		"FINAL: ENTRANDO EM CASA"
+		"SCORE TOTAL DA PARTIDA: ",
+		final_total_score
 	)
 
 	print(
-		"ABRINDO CREDITOS"
+		"ABRINDO TELA DE SCORE FINAL"
 	)
 
 	print(
 		"================================"
 	)
 
-	await get_tree().create_timer(
-		0.20
-	).timeout
+	_show_score_screen()
+
+	await _wait_for_score_screen()
 
 	if not is_inside_tree():
 		return
@@ -333,6 +414,213 @@ func _enter_home() -> void:
 	get_tree().change_scene_to_file(
 		CREDITS_SCENE
 	)
+
+
+# ============================================================
+# ESPERA A TELA DE SCORE
+# ============================================================
+
+func _wait_for_score_screen() -> void:
+
+	while score_screen_open and is_inside_tree():
+
+		await get_tree().process_frame
+
+
+# ============================================================
+# TELA DE SCORE FINAL
+# ============================================================
+
+func _show_score_screen() -> void:
+
+	if score_screen_open:
+		return
+
+	score_screen_open = true
+
+	score_layer = CanvasLayer.new()
+	score_layer.name = "FinalScoreLayer"
+	score_layer.layer = 500
+	score_layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(score_layer)
+
+	score_overlay = ColorRect.new()
+	score_overlay.name = "FinalScoreOverlay"
+	score_overlay.set_anchors_and_offsets_preset(
+		Control.PRESET_FULL_RECT
+	)
+	score_overlay.color = Color(
+		0.02,
+		0.01,
+		0.05,
+		0.88
+	)
+	score_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	score_overlay.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	score_layer.add_child(score_overlay)
+
+	score_panel = Panel.new()
+	score_panel.name = "FinalScorePanel"
+	score_panel.anchor_left = 0.5
+	score_panel.anchor_top = 0.5
+	score_panel.anchor_right = 0.5
+	score_panel.anchor_bottom = 0.5
+	score_panel.offset_left = -290
+	score_panel.offset_top = -225
+	score_panel.offset_right = 290
+	score_panel.offset_bottom = 225
+	score_panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color("#1B1030")
+	panel_style.border_width_left = 4
+	panel_style.border_width_top = 4
+	panel_style.border_width_right = 4
+	panel_style.border_width_bottom = 4
+	panel_style.border_color = Color("#8E4DCE")
+	panel_style.corner_radius_top_left = 8
+	panel_style.corner_radius_top_right = 8
+	panel_style.corner_radius_bottom_left = 8
+	panel_style.corner_radius_bottom_right = 8
+	panel_style.shadow_color = Color(0.20, 0.05, 0.30, 0.85)
+	panel_style.shadow_size = 12
+	panel_style.shadow_offset = Vector2(0, 6)
+
+	score_panel.add_theme_stylebox_override(
+		"panel",
+		panel_style
+	)
+
+	score_overlay.add_child(score_panel)
+
+	var font_resource: Resource = load(
+		"res://assets/Fontes/Pixeloid_Font_1_0/"
+		+
+		"OpenType (.otf)/PixeloidSans-Bold.otf"
+	)
+
+	# Titulo
+	score_title = Label.new()
+	score_title.name = "FinalScoreTitle"
+	score_title.text = "PONTUAÇÃO FINAL"
+	score_title.position = Vector2(30, 30)
+	score_title.size = Vector2(520, 55)
+	score_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	score_title.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	score_title.add_theme_font_size_override("font_size", 26)
+	score_title.add_theme_color_override("font_color", Color("#C88BFF"))
+	score_title.add_theme_color_override("font_outline_color", Color.BLACK)
+	score_title.add_theme_constant_override("outline_size", 5)
+	if font_resource != null:
+		score_title.add_theme_font_override("font", font_resource)
+	score_panel.add_child(score_title)
+
+	# Texto auxiliar
+	var score_caption := Label.new()
+	score_caption.name = "FinalScoreCaption"
+	score_caption.text = "SEU SCORE TOTAL"
+	score_caption.position = Vector2(30, 105)
+	score_caption.size = Vector2(520, 35)
+	score_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	score_caption.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	score_caption.add_theme_font_size_override("font_size", 15)
+	score_caption.add_theme_color_override("font_color", Color("#F7F1FF"))
+	score_caption.add_theme_color_override("font_outline_color", Color.BLACK)
+	score_caption.add_theme_constant_override("outline_size", 3)
+	if font_resource != null:
+		score_caption.add_theme_font_override("font", font_resource)
+	score_panel.add_child(score_caption)
+
+	# Valor
+	score_value = Label.new()
+	score_value.name = "FinalScoreValue"
+	score_value.text = str(final_total_score)
+	score_value.position = Vector2(30, 145)
+	score_value.size = Vector2(520, 95)
+	score_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_value.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	score_value.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	score_value.add_theme_font_size_override("font_size", 52)
+	score_value.add_theme_color_override("font_color", Color("#F5D56A"))
+	score_value.add_theme_color_override("font_outline_color", Color.BLACK)
+	score_value.add_theme_constant_override("outline_size", 6)
+	if font_resource != null:
+		score_value.add_theme_font_override("font", font_resource)
+	score_panel.add_child(score_value)
+
+	# Tempo total
+	var time_caption := Label.new()
+	time_caption.name = "FinalTimeCaption"
+	time_caption.text = "TEMPO TOTAL DE JOGO"
+	time_caption.position = Vector2(30, 245)
+	time_caption.size = Vector2(520, 32)
+	time_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	time_caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	time_caption.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	time_caption.add_theme_font_size_override("font_size", 12)
+	time_caption.add_theme_color_override("font_color", Color("#F7F1FF"))
+	time_caption.add_theme_color_override("font_outline_color", Color.BLACK)
+	time_caption.add_theme_constant_override("outline_size", 3)
+	if font_resource != null:
+		time_caption.add_theme_font_override("font", font_resource)
+	score_panel.add_child(time_caption)
+
+	var time_value := Label.new()
+	time_value.name = "FinalTimeValue"
+	time_value.text = Globals.format_game_time(final_total_play_time)
+	time_value.position = Vector2(30, 278)
+	time_value.size = Vector2(520, 55)
+	time_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	time_value.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	time_value.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	time_value.add_theme_font_size_override("font_size", 24)
+	time_value.add_theme_color_override("font_color", Color("#F5D56A"))
+	time_value.add_theme_color_override("font_outline_color", Color.BLACK)
+	time_value.add_theme_constant_override("outline_size", 4)
+	if font_resource != null:
+		time_value.add_theme_font_override("font", font_resource)
+	score_panel.add_child(time_value)
+
+	# Continuar
+	score_hint = Label.new()
+	score_hint.name = "FinalScoreHint"
+	score_hint.text = "[ ENTER ] CONTINUAR"
+	score_hint.position = Vector2(30, 350)
+	score_hint.size = Vector2(520, 45)
+	score_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	score_hint.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	score_hint.add_theme_font_size_override("font_size", 14)
+	score_hint.add_theme_color_override("font_color", Color("#7BE7FF"))
+	score_hint.add_theme_color_override("font_outline_color", Color.BLACK)
+	score_hint.add_theme_constant_override("outline_size", 4)
+	if font_resource != null:
+		score_hint.add_theme_font_override("font", font_resource)
+	score_panel.add_child(score_hint)
+
+
+# ============================================================
+# FECHA TELA DE SCORE
+# ============================================================
+
+func _close_score_screen() -> void:
+
+	if not score_screen_open:
+		return
+
+	score_screen_open = false
+
+	if score_layer != null:
+		score_layer.queue_free()
+
+	score_layer = null
+	score_overlay = null
+	score_panel = null
+	score_title = null
+	score_value = null
+	score_hint = null
 
 
 # ============================================================

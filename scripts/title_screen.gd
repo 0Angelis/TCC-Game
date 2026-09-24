@@ -760,7 +760,11 @@ func start_game():
 	Globals.life_snapshot_scene = ""
 
 	Globals.score = 0
+	Globals.total_score = 0
 	Globals.coins = 0
+
+	# Começa a contagem do tempo da partida.
+	Globals.start_new_game_timer()
 
 	Globals.level_score = 0
 	Globals.level_coins = 0

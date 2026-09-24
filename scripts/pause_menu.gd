@@ -721,6 +721,8 @@ func pause_game():
 
 	get_tree().paused = true
 
+	Globals.pause_game_timer()
+
 
 	# ==========================================
 	# COMEÇA NO CONTINUAR
@@ -752,6 +754,8 @@ func resume_game():
 
 
 	get_tree().paused = false
+
+	Globals.resume_game_timer()
 
 
 	visible = false
@@ -859,6 +863,12 @@ func restart_game():
 	Globals.atencao_fragments = 0
 	Globals.memoria_fragments = 0
 
+	# RESTART: zera somente o tempo da fase atual.
+	# O tempo das fases já concluídas permanece salvo.
+	# O cronometro volta a rodar no _ready() do player
+	# depois que a cena for recarregada.
+	Globals.reset_current_level_timer()
+
 
 	print(
 		"MOEDAS: ",
@@ -915,6 +925,8 @@ func quit_game():
 
 
 	get_tree().paused = false
+
+	Globals.stop_game_timer()
 
 
 	visible = false

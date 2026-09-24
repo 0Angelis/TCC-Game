@@ -12,3 +12,11 @@ res://levels/world_05.tscn
 res://scripts/loja_barata.gd
 res://scripts/loja_skin.gd
 res://levels/loja.tscn
+res://scripts/final.gd
+res://scripts/game_over.gd
+res://singletons/globals.gd
+res://scripts/goal.gd
+res://scripts/title_screen.gd
+res://scripts/boss.gd
+res://scripts/pause_menu.gd
+res://scripts/player.gd

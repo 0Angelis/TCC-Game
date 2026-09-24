@@ -1024,6 +1024,10 @@ func _show_result_screen() -> void:
 
 	result_screen_open = true
 
+	# O tempo da fase para assim que a tela de resultado aparece.
+	# Ele só volta a contar quando a próxima cena iniciar.
+	Globals.pause_game_timer()
+
 
 	# =====================================================
 	# PAUSA
@@ -2067,6 +2071,20 @@ func _close_result_screen() -> void:
 	# para voltar ao saldo que existia antes do mapa atual.
 
 	Globals.coins_before_level = Globals.coins
+
+
+	# =====================================================
+	# SALVA O SCORE DO MUNDO NO TOTAL DA PARTIDA
+	# =====================================================
+
+	Globals.total_score += Globals.score
+
+	print(
+		"SCORE DO MUNDO ADICIONADO: ",
+		Globals.score,
+		" | SCORE TOTAL: ",
+		Globals.total_score
+	)
 
 
 	# =====================================================

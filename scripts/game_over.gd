@@ -54,6 +54,8 @@ func _ready():
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
+	Globals.pause_game_timer()
+
 
 	# ==========================================
 	# BOTÕES SEM FOCO VISUAL AUTOMÁTICO
@@ -614,7 +616,13 @@ func restart_game():
 	# Nenhuma skin comprada e perdida e a ultima skin
 	# equipada continua equipada.
 	# ==========================================
-	# RESET DOS DADOS
+	# RESET DOS DADOS DA FASE ATUAL
+	# ==========================================
+	#
+	# A pontuação da fase em que o jogador morreu
+	# começa novamente do zero.
+	# O total acumulado dos mundos já concluídos
+	# NÃO é perdido e continua salvo até o fim da partida.
 	# ==========================================
 
 	# Morte = novo começo com 5 vidas.
@@ -625,6 +633,10 @@ func restart_game():
 	Globals.coins = 0
 
 	Globals.score = 0
+
+	# IMPORTANTE:
+	# Globals.total_score não é zerado aqui.
+	# Ele guarda apenas os pontos dos mundos já concluídos.
 
 	# Depois da morte, o novo começo da fase parte de 0 moedas.
 	Globals.coins_before_level = 0
@@ -638,6 +650,12 @@ func restart_game():
 	Globals.atencao_fragments = 0
 
 	Globals.memoria_fragments = 0
+
+	# RESTART APÓS MORTE: zera somente o tempo da fase atual.
+	# O tempo das fases concluídas continua salvo.
+	# O cronometro volta a rodar no _ready() do player
+	# quando a fase for carregada novamente.
+	Globals.reset_current_level_timer()
 
 
 	print(
@@ -713,6 +731,8 @@ func go_to_menu():
 	# ==========================================
 
 	get_tree().paused = false
+
+	Globals.stop_game_timer()
 
 
 	# ==========================================

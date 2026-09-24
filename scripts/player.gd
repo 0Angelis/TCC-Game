@@ -153,6 +153,10 @@ func _ready() -> void:
 
 	call_deferred("atualizar_cor_skin")
 
+	# Toda vez que uma fase e carregada (inclusive apos RESTART),
+	# o cronometro da fase volta a contar do zero.
+	Globals.resume_game_timer()
+
 	print("PLAYER INICIADO")
 	print("VIDAS: ", Globals.player_life)
 	print("SKIN: ", skin_equipada)
@@ -1216,6 +1220,9 @@ func die() -> void:
 	Globals.atencao_fragments = 0
 	Globals.memoria_fragments = 0
 
+	# A tentativa desta fase morreu: descarta apenas o tempo da fase atual.
+	# O tempo das fases concluídas continua salvo.
+	Globals.reset_current_level_timer()
 
 	print(
 		"=============================="
