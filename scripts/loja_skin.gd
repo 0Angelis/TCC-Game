@@ -4,8 +4,8 @@ extends Area2D
 # FEIRINHA DO VALE - LOJA DE SKINS
 # =========================================================
 
-const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 78.0)
-const OFFSET_AVISO: Vector2 = Vector2(-45.0, -58.0)
+const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 99.0)  # Aviso pequeno acima da barraca
+const OFFSET_AVISO: Vector2 = Vector2(-45.0, -42.0)
 
 # Distancia maxima para poder interagir com a lojinha.
 # Isso impede que o E abra a loja mesmo quando o jogador esta longe.
@@ -83,6 +83,14 @@ var direita: Button = null
 # =========================================================
 
 var skin_atual_index: int = 0
+
+# 0 = area das skins
+# 1 = botoes VOLTAR / COMPRAR
+var area_navegacao: int = 0
+
+# 0 = VOLTAR
+# 1 = COMPRAR / EQUIPAR
+var botao_navegacao_index: int = 0
 
 # =========================================================
 # FONTE
@@ -528,6 +536,11 @@ func abrir_menu() -> void:
 
 	estado = EstadoLoja.MENU
 
+	# Sempre abre inicialmente na area das skins.
+	area_navegacao = 0
+	botao_navegacao_index = 0
+	limpar_selecao_botoes()
+
 	bloquear_player_para_loja()
 
 	resultado.hide()
@@ -748,7 +761,7 @@ func criar_menu() -> void:
 
 	icone_skin.position = Vector2(
 		0.0,
-		84.0
+		124.0
 	)
 
 	icone_skin.size = Vector2(
@@ -772,7 +785,7 @@ func criar_menu() -> void:
 
 	nome_item.position = Vector2(
 		0.0,
-		145.0
+		185.0
 	)
 
 	nome_item.size = Vector2(
@@ -796,7 +809,7 @@ func criar_menu() -> void:
 
 	preco.position = Vector2(
 		0.0,
-		172.0
+		212.0
 	)
 
 	preco.size = Vector2(
@@ -820,7 +833,7 @@ func criar_menu() -> void:
 
 	moedas.position = Vector2(
 		0.0,
-		198.0
+		238.0
 	)
 
 	moedas.size = Vector2(
@@ -844,7 +857,7 @@ func criar_menu() -> void:
 
 	estado_skin.position = Vector2(
 		0.0,
-		224.0
+		264.0
 	)
 
 	estado_skin.size = Vector2(
@@ -868,7 +881,7 @@ func criar_menu() -> void:
 
 	resultado.position = Vector2(
 		0.0,
-		251.0
+		291.0
 	)
 
 	resultado.size = Vector2(
@@ -888,7 +901,7 @@ func criar_menu() -> void:
 
 	esquerda = criar_botao(
 		"<",
-		Vector2(45.0, 90.0),
+		Vector2(45.0, 130.0),
 		Vector2(65.0, 45.0)
 	)
 
@@ -904,7 +917,7 @@ func criar_menu() -> void:
 
 	direita = criar_botao(
 		">",
-		Vector2(490.0, 90.0),
+		Vector2(490.0, 130.0),
 		Vector2(65.0, 45.0)
 	)
 
@@ -1182,49 +1195,7 @@ func processar_menu(event: InputEvent) -> void:
 		return
 
 	# -----------------------------------------------------
-	# ESQUERDA / A = SKIN ANTERIOR
-	# -----------------------------------------------------
-
-	if event.is_action_pressed("ui_left") \
-	or (event is InputEventKey and event.pressed \
-	and not event.echo and event.keycode == KEY_A):
-
-		mudar_skin(-1)
-
-		get_viewport().set_input_as_handled()
-
-		return
-
-	# -----------------------------------------------------
-	# DIREITA / D = PROXIMA SKIN
-	# -----------------------------------------------------
-
-	if event.is_action_pressed("ui_right") \
-	or (event is InputEventKey and event.pressed \
-	and not event.echo and event.keycode == KEY_D):
-
-		mudar_skin(1)
-
-		get_viewport().set_input_as_handled()
-
-		return
-
-	# -----------------------------------------------------
-	# ENTER = COMPRAR OU EQUIPAR
-	# -----------------------------------------------------
-	# E e ESPACO ficam desabilitados dentro da loja.
-	# -----------------------------------------------------
-
-	if event.is_action_pressed("ui_accept"):
-
-		comprar_ou_equipar()
-
-		get_viewport().set_input_as_handled()
-
-		return
-
-	# -----------------------------------------------------
-	# ESC = VOLTAR / FECHAR
+	# ESC = FECHAR A LOJA
 	# -----------------------------------------------------
 
 	if event.is_action_pressed("ui_cancel"):
@@ -1234,6 +1205,140 @@ func processar_menu(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 		return
+
+	# -----------------------------------------------------
+	# CIMA = VOLTAR PARA A AREA DAS SKINS
+	# -----------------------------------------------------
+
+	if event.is_action_pressed("ui_up"):
+
+		if area_navegacao == 1:
+
+			area_navegacao = 0
+
+			limpar_selecao_botoes()
+
+
+			get_viewport().set_input_as_handled()
+
+			return
+
+	# -----------------------------------------------------
+	# BAIXO = IR PARA VOLTAR / COMPRAR
+	# -----------------------------------------------------
+
+	if event.is_action_pressed("ui_down"):
+
+		if area_navegacao == 0:
+
+			area_navegacao = 1
+			botao_navegacao_index = 0
+
+			selecionar_botao_inferior()
+
+
+			get_viewport().set_input_as_handled()
+
+			return
+
+	# -----------------------------------------------------
+	# ESQUERDA / A
+	# -----------------------------------------------------
+	# Na area das skins:
+	#   esquerda = skin anterior
+	#
+	# Na area dos botoes:
+	#   esquerda = VOLTAR
+
+	if event.is_action_pressed("ui_left") 	or (event is InputEventKey and event.pressed 	and not event.echo and event.keycode == KEY_A):
+
+		if area_navegacao == 0:
+
+			mudar_skin(-1)
+
+		else:
+
+			botao_navegacao_index = 0
+			selecionar_botao_inferior()
+
+		get_viewport().set_input_as_handled()
+
+		return
+
+	# -----------------------------------------------------
+	# DIREITA / D
+	# -----------------------------------------------------
+	# Na area das skins:
+	#   direita = proxima skin
+	#
+	# Na area dos botoes:
+	#   direita = COMPRAR / EQUIPAR
+
+	if event.is_action_pressed("ui_right") 	or (event is InputEventKey and event.pressed 	and not event.echo and event.keycode == KEY_D):
+
+		if area_navegacao == 0:
+
+			mudar_skin(1)
+
+		else:
+
+			botao_navegacao_index = 1
+			selecionar_botao_inferior()
+
+		get_viewport().set_input_as_handled()
+
+		return
+
+	# -----------------------------------------------------
+	# ENTER = CONFIRMAR
+	# -----------------------------------------------------
+
+	if event.is_action_pressed("ui_accept"):
+
+		if area_navegacao == 0:
+
+			comprar_ou_equipar()
+
+		else:
+
+			if botao_navegacao_index == 0:
+				_clicar_voltar()
+			else:
+				_clicar_comprar()
+
+		get_viewport().set_input_as_handled()
+
+		return
+
+
+# =========================================================
+# SELECIONAR BOTAO INFERIOR
+# =========================================================
+
+func selecionar_botao_inferior() -> void:
+
+	if voltar == null or comprar == null:
+		return
+
+	remover_destaque_botao(voltar)
+	remover_destaque_botao(comprar)
+
+	if botao_navegacao_index == 0:
+
+		destacar_botao(voltar)
+
+	else:
+
+		destacar_botao(comprar)
+
+
+func limpar_selecao_botoes() -> void:
+
+	if voltar != null:
+		remover_destaque_botao(voltar)
+
+	if comprar != null:
+		remover_destaque_botao(comprar)
 
 
 # =========================================================

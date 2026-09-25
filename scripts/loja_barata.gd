@@ -18,7 +18,7 @@ extends Area2D
 # CONFIGURAÇÃO
 # =========================================================
 
-const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 95.0)
+const OFFSET_DIALOGO: Vector2 = Vector2(0.0, 99.0)
 const OFFSET_AVISO: Vector2 = Vector2(-45.0, -42.0)
 
 const DISTANCIA_MAXIMA_INTERACAO: float = 100.0
@@ -540,10 +540,10 @@ func criar_menu() -> void:
 	painel.anchor_right = 0.5
 	painel.anchor_bottom = 0.5
 
-	painel.offset_left = -300.0
-	painel.offset_top = -205.0
-	painel.offset_right = 300.0
-	painel.offset_bottom = 205.0
+	painel.offset_left = -270.0
+	painel.offset_top = -185.0
+	painel.offset_right = 270.0
+	painel.offset_bottom = 185.0
 
 	var estilo := StyleBoxFlat.new()
 
@@ -589,7 +589,7 @@ func criar_menu() -> void:
 	)
 
 	linha.size = Vector2(
-		544.0,
+		484.0,
 		2.0
 	)
 
@@ -614,7 +614,7 @@ func criar_menu() -> void:
 	)
 
 	titulo.size = Vector2(
-		600.0,
+		540.0,
 		30.0
 	)
 
@@ -638,7 +638,7 @@ func criar_menu() -> void:
 	)
 
 	subtitulo.size = Vector2(
-		600.0,
+		540.0,
 		20.0
 	)
 
@@ -662,7 +662,7 @@ func criar_menu() -> void:
 	)
 
 	icone_item.size = Vector2(
-		600.0,
+		540.0,
 		38.0
 	)
 
@@ -686,7 +686,7 @@ func criar_menu() -> void:
 	)
 
 	nome_item.size = Vector2(
-		600.0,
+		540.0,
 		22.0
 	)
 
@@ -710,7 +710,7 @@ func criar_menu() -> void:
 	)
 
 	preco.size = Vector2(
-		600.0,
+		540.0,
 		22.0
 	)
 
@@ -734,7 +734,7 @@ func criar_menu() -> void:
 	)
 
 	moedas.size = Vector2(
-		600.0,
+		540.0,
 		22.0
 	)
 
@@ -758,7 +758,7 @@ func criar_menu() -> void:
 	)
 
 	estado_item.size = Vector2(
-		600.0,
+		540.0,
 		22.0
 	)
 
@@ -782,7 +782,7 @@ func criar_menu() -> void:
 	)
 
 	resultado.size = Vector2(
-		600.0,
+		540.0,
 		55.0
 	)
 
@@ -800,8 +800,8 @@ func criar_menu() -> void:
 
 	voltar = criar_botao(
 		"VOLTAR",
-		Vector2(45.0, 300.0),
-		Vector2(230.0, 44.0)
+		Vector2(25.0, 290.0),
+		Vector2(220.0, 44.0)
 	)
 
 	voltar.pressed.connect(_clicar_voltar)
@@ -816,8 +816,8 @@ func criar_menu() -> void:
 
 	comprar = criar_botao(
 		"COMPRAR",
-		Vector2(325.0, 300.0),
-		Vector2(230.0, 44.0)
+		Vector2(295.0, 290.0),
+		Vector2(220.0, 44.0)
 	)
 
 	comprar.pressed.connect(_clicar_comprar)

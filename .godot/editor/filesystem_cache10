@@ -1,6 +1,6 @@
 78098b89c88a74ebe8c20117b8754620
-::res://::1790343625
-export_presets.cfg::TextFile::-1::1790124192::0::1::::<><><>0<>0<><>::
+::res://::1790343885
+export_presets.cfg::TextFile::-1::1790343640::0::1::::<><><>0<>0<><>::
 icon.svg::CompressedTexture2D::6063952031870446696::1781536624::1785347248::1::::<><><>0<>0<>cfd3e028912ec79602b0ab10f9796824<>res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex::
 ::res://actors/::1790078468
 boss.tscn::PackedScene::8246654367072244896::1790076863::0::1::::<><><>0<>0<><>::uid://c2vfh4hqks4m::::res://scripts/bossinimigo.gd<>uid://dch7b6f4tqeop::::res://assets/Sprite Pack 5/8 - Orc/Spear_Jab_(64 x 32).png<>uid://drv2apgfi8t88::::res://assets/Sprite Pack 5/8 - Orc/Hurt_(64 x 32).png<>uid://bnqck1cvbayde::::res://assets/Sprite Pack 5/8 - Orc/Idle_(64 x 32).png<>uid://cb14uni38foni::::res://assets/Sprite Pack 5/8 - Orc/Walking_(64 x 32).png<>uid://bfn6j1iloa6ex::::res://assets/Sprite Pack 5/8 - Orc/Falling_(64 x 32).png
@@ -798,4 +798,4 @@ globals.gd::GDScript::5853657309172393086::1790335709::0::1::::<>Node<><>0<>0<><
 ::res://sounds/::1787067937
 ::res://tema/::1790272548
 new_theme.tres::Theme::8534137219221394560::1790272548::0::1::::<><><>0<>0<><>::
-::res://teste/::1790170403
+::res://teste/::1790343639
