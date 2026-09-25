@@ -362,6 +362,41 @@ func _mark_input_handled() -> void:
 
 
 # ==========================================
+# TELA FINAL DE SCORE/TEMPO ESTÁ ABERTA
+# ==========================================
+# Enquanto a tela final estiver aberta, o pause não recebe
+# teclado. Assim o ENTER da tela final não pode acionar
+# nenhum botão do pause ou outro comportamento dele.
+func _final_score_screen_active() -> bool:
+
+	var current_scene := get_tree().current_scene
+
+	if current_scene == null:
+
+		return false
+
+	var final_node: Node = (
+		current_scene.get_node_or_null(
+			"FINAL"
+		)
+	)
+
+	if final_node == null:
+
+		return false
+
+	if "score_screen_open" in final_node:
+
+		return bool(
+			final_node.get(
+				"score_screen_open"
+			)
+		)
+
+	return false
+
+
+# ==========================================
 # INPUT
 # ==========================================
 
@@ -384,6 +419,14 @@ func _input(event):
 
 
 	if event.echo:
+
+		return
+
+
+	# ==========================================
+	# A TELA FINAL BLOQUEIA O PAUSE
+	# ==========================================
+	if _final_score_screen_active():
 
 		return
 
@@ -721,8 +764,6 @@ func pause_game():
 
 	get_tree().paused = true
 
-	Globals.pause_game_timer()
-
 
 	# ==========================================
 	# COMEÇA NO CONTINUAR
@@ -754,8 +795,6 @@ func resume_game():
 
 
 	get_tree().paused = false
-
-	Globals.resume_game_timer()
 
 
 	visible = false
@@ -863,10 +902,8 @@ func restart_game():
 	Globals.atencao_fragments = 0
 	Globals.memoria_fragments = 0
 
-	# RESTART: zera somente o tempo da fase atual.
-	# O tempo das fases já concluídas permanece salvo.
-	# O cronometro volta a rodar no _ready() do player
-	# depois que a cena for recarregada.
+	# Reinicia somente o tempo da fase atual.
+	# O tempo das fases ja concluidas permanece no total.
 	Globals.reset_current_level_timer()
 
 
@@ -925,8 +962,6 @@ func quit_game():
 
 
 	get_tree().paused = false
-
-	Globals.stop_game_timer()
 
 
 	visible = false

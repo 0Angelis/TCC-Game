@@ -26,6 +26,10 @@ var gameplay_timer_paused: bool = true
 # Cena usada para detectar quando uma fase terminou e outra começou.
 var tracked_scene_path: String = ""
 
+# True quando a troca de cena faz parte de um RESTART.
+# Nesse caso, o tempo da tentativa descartada não pode ser somado ao total.
+var restart_time_pending: bool = false
+
 var player_life := 5
 
 # ==========================================
@@ -80,10 +84,17 @@ var memoria_fragments := 0
 
 func _ready() -> void:
 
-	# O cronometro precisa continuar executando quando a
-	# SceneTree estiver pausada. A propria flag abaixo decide
-	# se o tempo realmente deve ser contado.
+	# O cronometro continua recebendo _process() mesmo quando
+	# a SceneTree estiver pausada. As flags abaixo decidem
+	# quando o tempo deve ser realmente contado.
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	if not get_tree().scene_changed.is_connected(
+		_on_scene_changed
+	):
+		get_tree().scene_changed.connect(
+			_on_scene_changed
+		)
 
 
 func _process(delta: float) -> void:
@@ -95,57 +106,88 @@ func _process(delta: float) -> void:
 
 	var current_path := current_scene.scene_file_path.to_lower()
 
-	# Menus/telas que NÃO fazem parte do tempo de jogo.
 	var is_non_gameplay_scene := (
 		current_path.ends_with("title_screen.tscn")
 		or current_path.ends_with("credits.tscn")
 		or current_path.ends_with("game_over.tscn")
 	)
 
-	# IMPORTANTE:
-	# Se o jogador iniciar diretamente uma fase pelo editor
-	# (por exemplo, World 05), não dependemos do title_screen.gd
-	# para ligar o cronômetro. A primeira cena jogável já inicia
-	# a contagem automaticamente.
+	# Permite iniciar uma fase diretamente pelo editor.
 	if not is_non_gameplay_scene and not gameplay_timer_running:
 		gameplay_timer_running = true
 		gameplay_timer_paused = false
-		tracked_scene_path = current_path
-		level_play_time = 0.0
-
-	# Guarda qual cena está sendo cronometrada.
-	if tracked_scene_path == "":
-		tracked_scene_path = current_path
-
-	# Quando a cena muda normalmente, a fase anterior terminou.
-	# Soma somente o tempo efetivamente jogado naquela fase.
-	elif current_path != tracked_scene_path:
-		if gameplay_timer_running:
-			total_play_time += level_play_time
-
-			print(
-				"TEMPO DA FASE ADICIONADO: ",
-				format_game_time(level_play_time),
-				" | TEMPO TOTAL: ",
-				format_game_time(total_play_time)
-			)
-
 		level_play_time = 0.0
 		tracked_scene_path = current_path
 
-	# Menus/telas fora da partida não contam.
+	# Nada para contar fora da partida.
 	if not gameplay_timer_running:
-		return
-
-	# Qualquer pause da SceneTree também não conta tempo.
-	# Isso cobre pause normal e telas de resultado/desafio.
-	if gameplay_timer_paused or get_tree().paused:
 		return
 
 	if is_non_gameplay_scene:
 		return
 
+	# Pause nao conta tempo.
+	if gameplay_timer_paused or get_tree().paused:
+		return
+
 	level_play_time += delta
+
+
+# ==========================================
+# TROCA DE CENA
+# ==========================================
+
+func _on_scene_changed() -> void:
+	var current_scene := get_tree().current_scene
+
+	if current_scene == null:
+		return
+
+	var current_path := current_scene.scene_file_path.to_lower()
+
+	var is_non_gameplay_scene := (
+		current_path.ends_with("title_screen.tscn")
+		or current_path.ends_with("credits.tscn")
+		or current_path.ends_with("game_over.tscn")
+	)
+
+	# RESTART: descarta completamente o tempo da tentativa
+	# anterior. Isso funciona mesmo quando a cena recarregada
+	# tem exatamente o mesmo caminho.
+	if restart_time_pending:
+		level_play_time = 0.0
+		restart_time_pending = false
+		tracked_scene_path = current_path
+		gameplay_timer_running = true
+		gameplay_timer_paused = false
+
+		print(
+			"RESTART: TEMPO DA FASE RESETADO PARA 00:00"
+		)
+		return
+
+	# Game Over/Menu/Creditos nao representam conclusao
+	# de fase, entao nunca adicionam o tempo atual ao total.
+	if is_non_gameplay_scene:
+		tracked_scene_path = current_path
+		return
+
+	# Troca normal de uma fase para outra:
+	# salva somente o tempo efetivamente jogado na fase anterior.
+	if gameplay_timer_running and tracked_scene_path != "":
+		total_play_time += level_play_time
+
+		print(
+			"TEMPO DA FASE CONCLUIDA: ",
+			format_game_time(level_play_time),
+			" | TEMPO TOTAL: ",
+			format_game_time(total_play_time)
+		)
+
+	level_play_time = 0.0
+	tracked_scene_path = current_path
+	gameplay_timer_running = true
+	gameplay_timer_paused = false
 
 
 # ==========================================
@@ -185,6 +227,7 @@ func start_new_game_timer() -> void:
 	gameplay_timer_running = true
 	gameplay_timer_paused = false
 	tracked_scene_path = ""
+	restart_time_pending = false
 
 
 # ==========================================
@@ -208,10 +251,14 @@ func reset_current_level_timer() -> void:
 	# Zera somente o tempo da cena/fase atual.
 	# O total das cenas ja concluidas permanece intacto.
 	level_play_time = 0.0
-	gameplay_timer_paused = true
+	restart_time_pending = true
+	# Depois do RESTART a nova tentativa deve começar a contar
+	# imediatamente a partir de 00:00.
+	gameplay_timer_paused = false
 
-	# Mantem a cena atual como referencia para impedir que o tempo
-	# descartado seja somado ao total durante o RESTART.
+	# Mantem a cena atual como referencia. Quando o RESTART
+	# trocar/recarregar a cena, o _process() vai reconhecer
+	# que essa troca veio do restart e nao somara o tempo antigo.
 	var current_scene := get_tree().current_scene
 	if current_scene != null:
 		tracked_scene_path = current_scene.scene_file_path.to_lower()

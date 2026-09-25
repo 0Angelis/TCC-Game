@@ -71,7 +71,7 @@ var score_title: Label = null
 
 var score_value: Label = null
 
-var score_hint: Label = null
+var score_hint: Button = null
 
 
 # ============================================================
@@ -584,21 +584,36 @@ func _show_score_screen() -> void:
 	score_panel.add_child(time_value)
 
 	# Continuar
-	score_hint = Label.new()
+	# Agora e um Button de verdade para poder clicar com o mouse.
+	score_hint = Button.new()
 	score_hint.name = "FinalScoreHint"
-	score_hint.text = "[ ENTER ] CONTINUAR"
+	score_hint.text = "CONTINUAR"
 	score_hint.position = Vector2(30, 350)
 	score_hint.size = Vector2(520, 45)
-	score_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	score_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	score_hint.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	score_hint.focus_mode = Control.FOCUS_NONE
+	score_hint.mouse_filter = Control.MOUSE_FILTER_STOP
+	score_hint.flat = true
 	score_hint.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	score_hint.add_theme_font_size_override("font_size", 14)
 	score_hint.add_theme_color_override("font_color", Color("#7BE7FF"))
+	score_hint.add_theme_color_override("font_hover_color", Color("#A9F0FF"))
+	score_hint.add_theme_color_override("font_pressed_color", Color("#7BE7FF"))
 	score_hint.add_theme_color_override("font_outline_color", Color.BLACK)
 	score_hint.add_theme_constant_override("outline_size", 4)
 	if font_resource != null:
 		score_hint.add_theme_font_override("font", font_resource)
+	score_hint.pressed.connect(_on_score_continue_pressed)
 	score_panel.add_child(score_hint)
+
+
+# ============================================================
+# BOTAO CONTINUAR DA TELA FINAL
+# ============================================================
+
+func _on_score_continue_pressed() -> void:
+	get_viewport().set_input_as_handled()
+	_close_score_screen()
 
 
 # ============================================================

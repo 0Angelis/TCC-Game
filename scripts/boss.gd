@@ -13,6 +13,7 @@ const MAX_HEALTH: int = 100
 const DAMAGE_PER_SUCCESS: int = 20
 const TOTAL_CHALLENGES: int = 5
 const BOSS_SCORE_REWARD: int = 5000
+const BOSS_HEAL_ON_FAILURE: int = 20
 const FATIGUE_TIME: float = 15.0
 const EXHAUSTED_TIME: float = 30.0
 const TALK_DISTANCE: float = 70.0
@@ -909,8 +910,11 @@ func _start_current_challenge() -> void:
 		return
 	if challenge_manager == null:
 		return
+	# Quando os 5 desafios da rodada terminarem,
+	# sorteia uma nova rodada e continua a luta.
 	if challenge_index >= TOTAL_CHALLENGES:
-		return
+		_build_challenge_order()
+		challenge_index = 0
 	waiting_for_challenge = false
 	state = BossState.CHALLENGE
 	# ========================================================
@@ -968,7 +972,9 @@ func _on_challenge_finished(
 ) -> void:
 	if state != BossState.CHALLENGE:
 		return
+
 	if correct:
+		# DESAFIO CERTO: o boss perde 20 de vida.
 		if (
 			is_instance_valid(boss_visual)
 			and
@@ -980,15 +986,43 @@ func _on_challenge_finished(
 				"take_boss_damage",
 				DAMAGE_PER_SUCCESS
 			)
+
 		_update_health_from_boss()
+
+		# SOMENTE ACERTO avanca para o proximo desafio.
+		# Se errar, o mesmo desafio continua sendo o desafio atual
+		# ate o jogador acertar.
 		challenge_index += 1
-		if challenge_index >= TOTAL_CHALLENGES:
-			if current_health <= 0:
-				_on_boss_defeated()
-				return
-		_set_player_can_move(true)
-		_start_chase()
-		return
+
+		# Se a vida chegou a zero, encerra a luta imediatamente.
+		if current_health <= 0:
+			_on_boss_defeated()
+			return
+
+	else:
+		# DESAFIO ERRADO: o boss recupera 20 de vida.
+		# A recuperação é limitada à vida máxima.
+		if (
+			is_instance_valid(boss_visual)
+			and
+			boss_visual.has_method(
+				"heal_boss"
+			)
+		):
+			boss_visual.call(
+				"heal_boss",
+				BOSS_HEAL_ON_FAILURE
+			)
+
+		_update_health_from_boss()
+
+		# ERRO: volta exatamente 1 desafio, mas nunca abaixo do 1/5.
+		# Ex.: 3/5 -> 2/5. No primeiro, continua 1/5.
+		challenge_index = max(
+			challenge_index - 1,
+			0
+		)
+
 	_set_player_can_move(true)
 	_start_chase()
 # ============================================================
@@ -1480,8 +1514,11 @@ func _update_health_ui() -> void:
 func _update_phase_ui() -> void:
 	if hud_phase == null:
 		return
+	# O HUD nunca passa de 5/5.
+	# O indice interno pode chegar a 5 antes da nova rodada ser
+	# iniciada, mas o contador visual deve continuar valido.
 	var number: int = (
-		challenge_index + 1
+		(challenge_index % TOTAL_CHALLENGES) + 1
 	)
 	if state == BossState.CHASE:
 		hud_phase.text = (

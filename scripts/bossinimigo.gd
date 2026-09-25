@@ -170,6 +170,7 @@ var current_health: int = 100
 
 var is_dead: bool = false
 var is_hurt: bool = false
+var healing_feedback: bool = false
 
 var can_move: bool = true
 var battle_controlled: bool = false
@@ -593,12 +594,23 @@ func _update_flash(delta: float) -> void:
 
 	if flash_time_left > 0.0:
 
-		animated_sprite.modulate = Color(
-			1.0,
-			0.65,
-			0.65,
-			1.0
-		)
+		if healing_feedback:
+
+			animated_sprite.modulate = Color(
+				0.65,
+				1.0,
+				0.65,
+				1.0
+			)
+
+		else:
+
+			animated_sprite.modulate = Color(
+				1.0,
+				0.65,
+				0.65,
+				1.0
+			)
 
 
 		flash_time_left -= delta
@@ -1814,6 +1826,7 @@ func _start_hurt() -> void:
 		return
 
 
+	healing_feedback = false
 	is_hurt = true
 
 	hurt_time_left = (
@@ -1854,6 +1867,7 @@ func _process_hurt(
 	if hurt_time_left <= 0.0:
 
 		is_hurt = false
+		healing_feedback = false
 
 		flash_time_left = 0.0
 
@@ -2262,6 +2276,50 @@ func take_boss_damage(
 
 
 	_start_hurt()
+
+
+func heal_boss(
+	amount: int = 20
+) -> void:
+
+	if is_dead:
+
+		return
+
+	if amount <= 0:
+
+		return
+
+
+	current_health = min(
+		current_health + amount,
+		max_health
+	)
+
+	boss_health_changed.emit(
+		current_health,
+		max_health
+	)
+
+	print(
+		"BOSS RECUPEROU VIDA: ",
+		amount,
+		" | VIDA: ",
+		current_health,
+		"/",
+		max_health
+	)
+
+	# Mesmo stun do dano, mas com feedback verde.
+	healing_feedback = true
+	is_hurt = true
+	hurt_time_left = HURT_DURATION
+	flash_time_left = FLASH_DURATION
+	_reset_attack_state()
+	velocity.x = 0.0
+	_play_animation(
+		"hurt"
+	)
 
 
 func hurt() -> void:
