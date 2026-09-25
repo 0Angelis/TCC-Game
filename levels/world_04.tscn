@@ -2013,7 +2013,6 @@ position = Vector2(2, -2)
 shape = SubResource("RectangleShape2D_356tu")
 
 [node name="transition" type="CanvasLayer" parent="." unique_id=105367182]
-visible = false
 script = ExtResource("51_bb7ao")
 
 [node name="color_rect" type="ColorRect" parent="transition" unique_id=1131400237]

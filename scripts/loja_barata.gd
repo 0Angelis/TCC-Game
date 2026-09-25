@@ -89,6 +89,7 @@ var comprar: Button = null
 # =========================================================
 
 var comprou_saias_filo: bool = false
+var selecao: int = -1
 
 # =========================================================
 # FONTE
@@ -438,6 +439,7 @@ func abrir_menu() -> void:
 
 	bloqueado = false
 	estado = EstadoLoja.MENU
+	selecao = -1
 
 	bloquear_player_para_loja()
 
@@ -1029,15 +1031,81 @@ func processar_menu(event: InputEvent) -> void:
 		return
 
 	# -----------------------------------------------------
-	# ENTER = COMPRAR
+	# ESQUERDA = VOLTAR
+	# -----------------------------------------------------
+
+	if event.is_action_pressed("ui_left"):
+
+		selecao = 0
+		remover_destaque_botao(comprar)
+		destacar_botao(voltar)
+
+		get_viewport().set_input_as_handled()
+		return
+
+	# -----------------------------------------------------
+	# DIREITA = COMPRAR
+	# -----------------------------------------------------
+
+	if event.is_action_pressed("ui_right"):
+
+		selecao = 1
+		remover_destaque_botao(voltar)
+		destacar_botao(comprar)
+
+		get_viewport().set_input_as_handled()
+		return
+
+	# -----------------------------------------------------
+	# CIMA = COMPRAR
+	# -----------------------------------------------------
+
+	if event.is_action_pressed("ui_up"):
+
+		selecao = 1
+		remover_destaque_botao(voltar)
+		destacar_botao(comprar)
+
+		get_viewport().set_input_as_handled()
+		return
+
+	# -----------------------------------------------------
+	# BAIXO = VOLTAR
+	# -----------------------------------------------------
+
+	if event.is_action_pressed("ui_down"):
+
+		selecao = 0
+		remover_destaque_botao(comprar)
+		destacar_botao(voltar)
+
+		get_viewport().set_input_as_handled()
+		return
+
+	# -----------------------------------------------------
+	# E = CONFIRMAR
+	# -----------------------------------------------------
+
+	if event.is_action_pressed("interact"):
+
+		if selecao == -1:
+			return
+
+		get_viewport().set_input_as_handled()
+		confirmar_opcao()
+		return
+
+	# -----------------------------------------------------
+	# ENTER = CONFIRMAR
 	# -----------------------------------------------------
 
 	if event.is_action_pressed("ui_accept"):
 
-		comprar_ou_equipar()
+		if selecao == -1:
+			return
 
 		get_viewport().set_input_as_handled()
-
+		confirmar_opcao()
 		return
 
 	# -----------------------------------------------------
@@ -1046,15 +1114,28 @@ func processar_menu(event: InputEvent) -> void:
 
 	if event.is_action_pressed("ui_cancel"):
 
-		fechar_menu()
-
 		get_viewport().set_input_as_handled()
-
+		fechar_menu()
 		return
+
 
 # =========================================================
 # COMPRAR
 # =========================================================
+
+func confirmar_opcao() -> void:
+
+	if bloqueado:
+		return
+
+	if selecao == 0:
+		fechar_menu()
+		return
+
+	if selecao == 1:
+		comprar_ou_equipar()
+		return
+
 
 func comprar_ou_equipar() -> void:
 
@@ -1193,9 +1274,11 @@ func _clicar_comprar() -> void:
 
 func _mouse_entrou_voltar() -> void:
 
-	if voltar == null:
+	if voltar == null or comprar == null:
 		return
 
+	selecao = -1
+	remover_destaque_botao(comprar)
 	destacar_botao(voltar)
 
 # =========================================================
@@ -1204,9 +1287,11 @@ func _mouse_entrou_voltar() -> void:
 
 func _mouse_entrou_comprar() -> void:
 
-	if comprar == null:
+	if voltar == null or comprar == null:
 		return
 
+	selecao = -1
+	remover_destaque_botao(voltar)
 	destacar_botao(comprar)
 
 # =========================================================
@@ -1228,6 +1313,8 @@ func _mouse_saiu_botao() -> void:
 	)
 
 	if not sobre_voltar and not sobre_comprar:
+
+		selecao = -1
 
 		if voltar != null:
 			remover_destaque_botao(voltar)

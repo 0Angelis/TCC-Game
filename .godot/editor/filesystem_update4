@@ -21,3 +21,5 @@ res://scripts/boss.gd
 res://scripts/pause_menu.gd
 res://scripts/player.gd
 res://scripts/bossinimigo.gd
+res://scripts/frag_raciocinio.gd
+res://scripts/loja_urso.gd

@@ -25,13 +25,6 @@
 [ext_resource type="Script" uid="uid://dhx83fqukj7ji" path="res://scripts/transition.gd" id="22_tnbok"]
 [ext_resource type="Shader" uid="uid://cfqg8x3kad7tx" path="res://shaders/transition.gdshader" id="23_lpku0"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="24_1m6rt"]
-[ext_resource type="Script" uid="uid://crto63u7ixodo" path="res://scripts/hud_manager.gd" id="25_uoslg"]
-[ext_resource type="Texture2D" uid="uid://diern7layrefr" path="res://assets/Mini FX, Items & UI/Common Pick-ups/00_Coin-Sprites.png" id="26_ylp0b"]
-[ext_resource type="Texture2D" uid="uid://f86ocwm53s20" path="res://assets/Mini FX, Items & UI/Common Pick-ups/01_Coin-Sprites.png" id="27_vtgu0"]
-[ext_resource type="Texture2D" uid="uid://dbi2ulj2dt0dn" path="res://assets/Mini FX, Items & UI/Common Pick-ups/02_Coin-Sprites.png" id="28_eplnd"]
-[ext_resource type="Texture2D" uid="uid://v36h3di4vd1d" path="res://assets/Mini FX, Items & UI/Common Pick-ups/03_Coin-Sprites.png" id="29_22lq0"]
-[ext_resource type="FontFile" uid="uid://ciyqtt45x1jtc" path="res://assets/Fontes/RevMiniPixel.ttf" id="30_k8tr8"]
-[ext_resource type="Texture2D" uid="uid://bdai1dxok1ply" path="res://assets/Mini FX, Items & UI/Common Pick-ups/Health_Kit (16 x 16).png" id="31_wfc0i"]
 [ext_resource type="Script" uid="uid://davd5atp6b5si" path="res://scripts/final.gd" id="33_443h2"]
 [ext_resource type="Texture2D" uid="uid://ciui18xao3bit" path="res://assets/Comandos/Red!Assets.png" id="34_tk66p"]
 [ext_resource type="PackedScene" uid="uid://bbn2y2xyd8qva" path="res://actors/player.tscn" id="35_p0jlc"]
@@ -2582,17 +2575,6 @@ shader_parameter/threshold = 0.0
 shader_parameter/line_color_a = Color(0.5411765, 0.2, 1, 1)
 shader_parameter/line_color_b = Color(0, 0, 0, 1)
 
-[sub_resource type="AnimatedTexture" id="AnimatedTexture_bu4vl"]
-frames = 4
-speed_scale = 3.0
-frame_0/texture = ExtResource("26_ylp0b")
-frame_1/texture = ExtResource("27_vtgu0")
-frame_1/duration = 1.0
-frame_2/texture = ExtResource("28_eplnd")
-frame_2/duration = 1.0
-frame_3/texture = ExtResource("29_22lq0")
-frame_3/duration = 1.0
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_pid7m"]
 atlas = ExtResource("34_tk66p")
 region = Rect2(0, 0, 1024, 1024)
@@ -2758,128 +2740,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("24_1m6rt")
-
-[node name="HUD" type="CanvasLayer" parent="." unique_id=1591967619]
-visible = false
-
-[node name="control" type="Control" parent="HUD" unique_id=1423453452]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("25_uoslg")
-
-[node name="container" type="MarginContainer" parent="HUD/control" unique_id=1850679551]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_right = 48.0
-offset_bottom = 554.0
-grow_horizontal = 2
-grow_vertical = 2
-scale = Vector2(0.964, 0.964)
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
-
-[node name="coins_container" type="HBoxContainer" parent="HUD/control/container" unique_id=2131907268]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-
-[node name="coins_icon" type="TextureRect" parent="HUD/control/container/coins_container" unique_id=662803326]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-offset_transform_enabled = true
-offset_transform_position = Vector2(10, 15)
-offset_transform_position_ratio = Vector2(12, 0)
-offset_transform_scale = Vector2(6, 6)
-offset_transform_visual_only = false
-texture = SubResource("AnimatedTexture_bu4vl")
-
-[node name="coins_counter" type="Label" parent="HUD/control/container/coins_container" unique_id=1253054071]
-layout_mode = 2
-offset_transform_enabled = true
-offset_transform_position = Vector2(0, 5)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-theme_override_fonts/font = ExtResource("30_k8tr8")
-theme_override_font_sizes/font_size = 40
-text = "000"
-vertical_alignment = 1
-
-[node name="tiemer_container" type="HBoxContainer" parent="HUD/control/container" unique_id=21794384]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 0
-
-[node name="timer_counter" type="Label" parent="HUD/control/container/tiemer_container" unique_id=2135269493]
-layout_mode = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-theme_override_fonts/font = ExtResource("30_k8tr8")
-theme_override_font_sizes/font_size = 40
-text = "00:00"
-vertical_alignment = 1
-
-[node name="score_container" type="HBoxContainer" parent="HUD/control/container" unique_id=751609319]
-layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 0
-
-[node name="score_counter" type="Label" parent="HUD/control/container/score_container" unique_id=1638310371]
-layout_mode = 2
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-theme_override_fonts/font = ExtResource("30_k8tr8")
-theme_override_font_sizes/font_size = 40
-text = "000000"
-vertical_alignment = 1
-
-[node name="life_container" type="HBoxContainer" parent="HUD/control/container" unique_id=720390628]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 8
-offset_transform_enabled = true
-offset_transform_position = Vector2(0, -160)
-
-[node name="life_icon" type="TextureRect" parent="HUD/control/container/life_container" unique_id=1661838862]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-offset_transform_enabled = true
-offset_transform_position = Vector2(-24, -364)
-offset_transform_position_ratio = Vector2(8, -1)
-offset_transform_scale = Vector2(5, 5)
-texture = ExtResource("31_wfc0i")
-
-[node name="life_counter" type="Label" parent="HUD/control/container/life_container" unique_id=2081770454]
-layout_mode = 2
-size_flags_horizontal = 0
-offset_transform_enabled = true
-offset_transform_position = Vector2(0, -370)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-theme_override_fonts/font = ExtResource("30_k8tr8")
-theme_override_font_sizes/font_size = 40
-text = "05"
-vertical_alignment = 1
-
-[node name="clock_timer" type="Timer" parent="HUD/control/container" unique_id=39834916]
-autostart = true
-
-[node name="raciocinio_container" type="HBoxContainer" parent="HUD/control/container" unique_id=1431539780]
-layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 8
-offset_transform_enabled = true
-offset_transform_position = Vector2(470, 390)
-offset_transform_scale = Vector2(0.09, 0.09)
 
 [node name="sprites" type="Node2D" parent="." unique_id=933432580]
 position = Vector2(311.00003, 662)

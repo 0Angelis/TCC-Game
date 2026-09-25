@@ -103,9 +103,15 @@ func _on_body_entered(body: Node2D) -> void:
 
 			Globals.raciocinio_fragments += 1
 
+			# +1000 PONTOS POR FRAGMENTO DE RACIOCÍNIO
+			Globals.score += 1000
+
 			print(
 				"FRAGMENTO DE RACIOCÍNIO: ",
-				Globals.raciocinio_fragments
+				Globals.raciocinio_fragments,
+				" | +1000 SCORE",
+				" | SCORE: ",
+				Globals.score
 			)
 
 
