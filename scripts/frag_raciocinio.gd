@@ -2,6 +2,13 @@ extends Area2D
 
 
 # ==========================================
+# CONTROLE DE COLETA
+# ==========================================
+
+var coletado := false
+
+
+# ==========================================
 # TIPO DO FRAGMENTO
 # ==========================================
 
@@ -82,15 +89,37 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# EVITA PEGAR DUAS VEZES
+	# EVITA COLETA DUPLA
 	# ==========================================
 
-	if not monitoring:
+	if coletado:
 
 		return
 
 
+	coletado = true
+
+
+	# ==========================================
+	# DESATIVA A COLISÃO
+	# ==========================================
+
 	monitoring = false
+	monitorable = false
+
+
+	# ==========================================
+	# SOME IMEDIATAMENTE DA TELA
+	# ==========================================
+
+	hide()
+
+
+	# ==========================================
+	# TOCA O SOM DO FRAGMENTO
+	# ==========================================
+
+	$fragmento_sfx.play()
 
 
 	# ==========================================
@@ -151,41 +180,14 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 	# ==========================================
-	# ANIMAÇÃO DE COLETA
+	# ESPERA O SOM TERMINAR
 	# ==========================================
 
-	match tipo_fragmento:
-
-		"Raciocinio":
-
-			if frag_raciocinio.has_method("play"):
-
-				frag_raciocinio.play("collect")
-
-
-		"Atencao":
-
-			if frag_atencao.has_method("play"):
-
-				frag_atencao.play("collect")
-
-
-		"Memoria":
-
-			if frag_memoria.has_method("play"):
-
-				frag_memoria.play("collect")
+	await $fragmento_sfx.finished
 
 
 	# ==========================================
-	# ESPERA
-	# ==========================================
-
-	await get_tree().create_timer(0.1).timeout
-
-
-	# ==========================================
-	# REMOVE
+	# REMOVE O FRAGMENTO
 	# ==========================================
 
 	queue_free()

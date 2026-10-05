@@ -9,6 +9,7 @@ const MEMORY_SCENE = preload(
 	"res://scenes/memory_game.tscn"
 )
 
+
 # =========================================================
 # WORLD 03
 # =========================================================
@@ -60,6 +61,16 @@ var memory_instance: Control = null
 
 var transition: Node = null
 
+
+# =========================================================
+# SOM DO FRAGMENTO
+# =========================================================
+# O som está dentro do memory_game.tscn.
+# Aqui guardamos o Stream para tocar depois da transição.
+
+var fragmento_stream: AudioStream = null
+
+
 # =========================================================
 # QUAL DOS 3 DESAFIOS É ESTE?
 # =========================================================
@@ -80,14 +91,20 @@ func _get_challenge_number() -> int:
 	return 1
 
 
+# =========================================================
+# PEGA PROGRESSO DA MEMÓRIA
+# =========================================================
+
 func _get_memory_progress() -> int:
 
 	var world: Node = get_tree().current_scene
 
 	if world == null:
+
 		return 0
 
 	if not world.has_meta("memory_progress"):
+
 		return 0
 
 	return int(
@@ -97,6 +114,10 @@ func _get_memory_progress() -> int:
 	)
 
 
+# =========================================================
+# VERIFICA SE O DESAFIO ESTÁ LIBERADO
+# =========================================================
+
 func _is_unlocked() -> bool:
 
 	var challenge_number: int = (
@@ -104,6 +125,7 @@ func _is_unlocked() -> bool:
 	)
 
 	if challenge_number == 1:
+
 		return true
 
 	return _get_memory_progress() >= (
@@ -141,11 +163,12 @@ func _ready() -> void:
 			false
 		)
 
+
 		if transition != null:
 
-			# O Memory Game pausa a árvore na tela final.
-			# A transição precisa continuar rodando mesmo pausada.
-			transition.process_mode = Node.PROCESS_MODE_ALWAYS
+			transition.process_mode = (
+				Node.PROCESS_MODE_ALWAYS
+			)
 
 
 	# =====================================================
@@ -174,7 +197,7 @@ func _ready() -> void:
 
 		body_exited.connect(
 			_on_body_exited
-	)
+		)
 
 
 # =========================================================
@@ -357,9 +380,6 @@ func _unhandled_input(
 
 	# =====================================================
 	# ABRE DESAFIO
-	#
-	# IMPORTANTE:
-	# NÃO USA EFEITO RETRÔ AQUI.
 	# =====================================================
 
 	_open_memory()
@@ -413,12 +433,12 @@ func _open_memory() -> void:
 
 
 	challenge_open = true
+
 	transition_busy = true
 
 
 	# =====================================================
 	# COBRE A TELA
-	# EXATAMENTE COMO NO STROOP
 	# =====================================================
 
 	if transition != null:
@@ -517,12 +537,11 @@ func _open_memory() -> void:
 
 			memory_instance.challenge_completed.connect(
 				_on_memory_completed
-		)
+			)
 
 
 	# =====================================================
 	# REVELA MEMORY
-	# EXATAMENTE COMO NO STROOP
 	# =====================================================
 
 	if transition != null:
@@ -531,6 +550,138 @@ func _open_memory() -> void:
 
 
 	transition_busy = false
+
+
+# =========================================================
+# PEGA O SOM DO MEMORY GAME
+# =========================================================
+# O AudioStreamPlayer está dentro de memory_game.tscn
+# com o nome "fragmento_collect_sfx".
+
+func _save_fragment_sound() -> void:
+
+	fragmento_stream = null
+
+
+	if memory_instance == null:
+
+		print(
+			"ERRO: memory_instance não existe."
+		)
+
+		return
+
+
+	var sound_node: Node = (
+		memory_instance.get_node_or_null(
+			"fragmento_collect_sfx"
+		)
+	)
+
+
+	if sound_node == null:
+
+		print(
+			"ERRO: fragmento_collect_sfx não encontrado no memory_game.tscn."
+		)
+
+		return
+
+
+	if sound_node is AudioStreamPlayer:
+
+		var audio_player: AudioStreamPlayer = (
+			sound_node as AudioStreamPlayer
+		)
+
+
+		if audio_player.stream != null:
+
+			fragmento_stream = audio_player.stream
+
+			print(
+				"SOM DO FRAGMENTO ENCONTRADO!"
+			)
+
+		else:
+
+			print(
+				"ERRO: fragmento_collect_sfx está sem Stream."
+			)
+
+	else:
+
+		print(
+			"ERRO: fragmento_collect_sfx não é AudioStreamPlayer."
+		)
+
+
+# =========================================================
+# TOCA O SOM DO FRAGMENTO
+# =========================================================
+# Cria um AudioStreamPlayer independente no mundo.
+# Assim ele não é destruído quando o Memory Game é removido.
+
+func _play_fragment_sound() -> void:
+
+	if fragmento_stream == null:
+
+		print(
+			"ERRO: nenhum som de fragmento foi salvo."
+		)
+
+		return
+
+
+	var world: Node = get_tree().current_scene
+
+
+	if world == null:
+
+		print(
+			"ERRO: mundo atual não encontrado."
+		)
+
+		return
+
+
+	var sound_player: AudioStreamPlayer = (
+		AudioStreamPlayer.new()
+	)
+
+
+	sound_player.name = (
+		"FragmentoCollectSound"
+	)
+
+	sound_player.stream = fragmento_stream
+
+	sound_player.process_mode = (
+		Node.PROCESS_MODE_ALWAYS
+	)
+
+	sound_player.bus = "Master"
+
+	sound_player.volume_db = -7.0
+
+
+	world.add_child(
+		sound_player
+	)
+
+
+	sound_player.play()
+
+
+	print(
+		"SOM DO FRAGMENTO TOCANDO APÓS A TRANSIÇÃO!"
+	)
+
+
+	sound_player.finished.connect(
+		sound_player.queue_free
+	)
+
 
 # =========================================================
 # DESAFIO CONCLUÍDO
@@ -549,8 +700,14 @@ func _on_memory_completed() -> void:
 
 
 	# =====================================================
+	# PEGA O SOM ANTES DE DESTRUIR O MEMORY GAME
+	# =====================================================
+
+	_save_fragment_sound()
+
+
+	# =====================================================
 	# COBRE A TELA
-	# EXATAMENTE COMO NO STROOP
 	# =====================================================
 
 	if transition != null:
@@ -568,9 +725,13 @@ func _on_memory_completed() -> void:
 
 	var world: Node = get_tree().current_scene
 
+
 	if world != null:
 
-		# Guarda qual desafio já foi concluído.
+		# =================================================
+		# GUARDA QUAL DESAFIO FOI CONCLUÍDO
+		# =================================================
+
 		world.set_meta(
 			"memory_progress",
 			max(
@@ -579,10 +740,9 @@ func _on_memory_completed() -> void:
 			)
 		)
 
+
 		# =================================================
-		# MUNDO 03
-		# Cada desafio concluído libera 1 fragmento.
-		# Máximo de 3 fragmentos.
+		# CADA DESAFIO LIBERA 1 FRAGMENTO
 		# =================================================
 
 		var novos_fragmentos: int = clamp(
@@ -591,6 +751,7 @@ func _on_memory_completed() -> void:
 			3
 		)
 
+
 		Globals.memoria_fragments = max(
 			Globals.memoria_fragments,
 			novos_fragmentos
@@ -598,7 +759,7 @@ func _on_memory_completed() -> void:
 
 
 	# =====================================================
-	# REMOVE MEMORY
+	# REMOVE MEMORY GAME
 	# =====================================================
 
 	if challenge_canvas != null:
@@ -616,6 +777,7 @@ func _on_memory_completed() -> void:
 	# =====================================================
 
 	challenge_open = false
+
 	challenge_completed = true
 
 
@@ -625,34 +787,59 @@ func _on_memory_completed() -> void:
 
 	if player == null:
 
-		player = get_tree().get_first_node_in_group(
-			"player"
+		player = (
+			get_tree()
+			.get_first_node_in_group(
+				"player"
+			)
 		)
 
 
 	if player != null:
 
-		if player.get("can_move") != null:
+		if player.get(
+			"can_move"
+		) != null:
 
 			player.set(
 				"can_move",
 				true
 			)
 
-		if player.get("velocity") != null:
+
+		if player.get(
+			"velocity"
+		) != null:
 
 			player.velocity = Vector2.ZERO
 
 
 	# =====================================================
 	# REVELA WORLD 03
-	# EXATAMENTE COMO NO STROOP
 	# =====================================================
 
 	if transition != null:
 
 		await _reveal_screen()
 
+
+	# =====================================================
+	# ESPERA UM FRAME
+	# =====================================================
+
+	await get_tree().process_frame
+
+
+	# =====================================================
+	# TOCA O SOM DEPOIS DA TRANSIÇÃO
+	# =====================================================
+
+	_play_fragment_sound()
+
+
+	# =====================================================
+	# FINALIZA
+	# =====================================================
 
 	transition_busy = false
 
@@ -665,6 +852,7 @@ func _on_memory_failed() -> void:
 
 	# Mantido somente para compatibilidade.
 	# A tela de derrota/retry é controlada pelo Memory Game.
+
 	return
 
 

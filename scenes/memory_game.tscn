@@ -2,10 +2,11 @@
 
 [ext_resource type="Script" uid="uid://vadbvti5crgg" path="res://scripts/memory_game.gd" id="1_env4m"]
 [ext_resource type="Texture2D" uid="uid://cg8ke0pi0g0ri" path="res://assets/Telas/telamemoria 1.png" id="1_y6l4y"]
-[ext_resource type="Texture2D" uid="uid://cvkbais0uvyds" path="res://assets/Telas/TUTORIAL MEMORIA.png" id="3_0pgar"]
 [ext_resource type="Texture2D" uid="uid://bjxb0igslhykh" path="res://assets/Telas/BG2 DESAFIO3.png" id="3_cvhak"]
 [ext_resource type="Texture2D" uid="uid://hqo83c4rrn6w" path="res://assets/Telas/BG3DESAFIO3.png" id="4_kpetd"]
 [ext_resource type="Texture2D" uid="uid://ubpeduwi5qpf" path="res://assets/Sprite Pack 6/1 - Penguin/Surprised (16 x 16).png" id="5_6yvph"]
+[ext_resource type="Texture2D" uid="uid://drvkbrmjould8" path="res://assets/Comandos/Painel Pixelado_ Como Jogar o Desafio da Memória.png" id="6_0oesl"]
+[ext_resource type="AudioStream" uid="uid://biw2nxuwj8uao" path="res://sounds/fragmento_collect_sfx.wav" id="7_0oesl"]
 
 [node name="MemoryGame" type="Control" unique_id=1682236344]
 layout_mode = 3
@@ -58,14 +59,14 @@ offset_bottom = 522.0
 
 [node name="tutorial_MEMO" type="TextureRect" parent="tutorial" unique_id=2029547621]
 layout_mode = 0
-offset_left = -407.0
+offset_left = -426.0
 offset_top = -450.0
-offset_right = 1269.0
+offset_right = 1320.0
 offset_bottom = 574.0
 scale = Vector2(0.5, 0.5)
 offset_transform_enabled = true
 offset_transform_scale = Vector2(0.9, 0.9)
-texture = ExtResource("3_0pgar")
+texture = ExtResource("6_0oesl")
 
 [node name="Button" type="Button" parent="tutorial" unique_id=2072823181]
 layout_mode = 0
@@ -136,3 +137,7 @@ text = "0 / 10"
 layout_mode = 2
 size_flags_horizontal = 4
 text = "CORRETO"
+
+[node name="fragmento_collect_sfx" type="AudioStreamPlayer" parent="." unique_id=1010184073]
+stream = ExtResource("7_0oesl")
+volume_db = -7.0

@@ -1,6 +1,13 @@
 extends Area2D
 
 
+# ==========================================
+# CONTROLE DE COLETA
+# ==========================================
+
+var coletada := false
+
+
 func _ready() -> void:
 	pass
 
@@ -11,24 +18,70 @@ func _process(_delta: float) -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 
-	if body.name == "player":
+	# ==========================================
+	# VERIFICA SE É O PLAYER
+	# ==========================================
 
-		monitoring = false
+	if body.name != "player":
+		return
 
-		# ==========================================
-		# MOEDA TOTAL
-		# ==========================================
 
-		Globals.coins += 1
+	# ==========================================
+	# IMPEDIR COLETA DUPLA
+	# ==========================================
 
-		# ==========================================
-		# MOEDA COLETADA NESTE MAPA
-		# ==========================================
+	if coletada:
+		return
 
-		Globals.level_coins += 1
 
-		$anim.play("collect")
+	# ==========================================
+	# MARCA COMO COLETADA IMEDIATAMENTE
+	# ==========================================
 
-		await get_tree().create_timer(0.1).timeout
+	coletada = true
 
-		queue_free()
+	# Desativa completamente a colisão da moeda
+	monitoring = false
+	monitorable = false
+
+
+	# ==========================================
+	# SOM DA MOEDA
+	# ==========================================
+
+	$coin_sfx.play()
+
+
+	# ==========================================
+	# MOEDA TOTAL
+	# ==========================================
+
+	Globals.coins += 1
+
+
+	# ==========================================
+	# MOEDA COLETADA NESTE MAPA
+	# ==========================================
+
+	Globals.level_coins += 1
+
+
+	# ==========================================
+	# ANIMAÇÃO DA MOEDA
+	# ==========================================
+
+	$anim.play("collect")
+
+
+	# ==========================================
+	# ESPERA O SOM TERMINAR
+	# ==========================================
+
+	await $coin_sfx.finished
+
+
+	# ==========================================
+	# REMOVE A MOEDA
+	# ==========================================
+
+	queue_free()

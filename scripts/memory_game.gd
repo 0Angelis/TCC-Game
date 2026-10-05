@@ -2797,8 +2797,6 @@ func _draw() -> void:
 		center
 	)
 
-	draw_status_panel()
-
 
 # =========================================================
 # HUD TOPO

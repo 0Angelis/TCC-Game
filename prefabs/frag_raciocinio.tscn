@@ -4,6 +4,7 @@
 [ext_resource type="SpriteFrames" uid="uid://dg468x5qbeydm" path="res://frag/frag_atencao.tres" id="2_a6p5o"]
 [ext_resource type="SpriteFrames" uid="uid://y6ordsct1q8k" path="res://frag/frag_memoria.tres" id="3_rbri2"]
 [ext_resource type="SpriteFrames" uid="uid://bvr0ysq3jptqn" path="res://frag/frag_raciocinio.tres" id="4_vhydf"]
+[ext_resource type="AudioStream" uid="uid://biw2nxuwj8uao" path="res://sounds/fragmento_collect_sfx.wav" id="5_rbri2"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_sob1t"]
 animations = [{
@@ -44,5 +45,9 @@ autoplay = "default"
 
 [node name="collision" type="CollisionShape2D" parent="." unique_id=1351668820]
 shape = SubResource("CapsuleShape2D_5t4lp")
+
+[node name="fragmento_sfx" type="AudioStreamPlayer" parent="." unique_id=1060036787]
+stream = ExtResource("5_rbri2")
+volume_db = -7.0
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]

@@ -1,3 +1,5 @@
+AudioStreamPlayer
+AudioStreamPlayer3D
 CollisionShape2D
 Area2D
 AnimatedSprite2D
@@ -10,5 +12,3 @@ ParallaxBackground
 Control
 Node
 CenterContainer
-HBoxContainer
-Button

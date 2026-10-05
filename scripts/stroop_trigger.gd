@@ -11,6 +11,16 @@ const STROOP_SCENE = preload(
 
 
 # =========================================================
+# SOM DO FRAGMENTO
+# Mesmo som usado no desafio da memória.
+# =========================================================
+
+const FRAGMENTO_SOUND = preload(
+	"res://sounds/fragmento_collect_sfx.wav"
+)
+
+
+# =========================================================
 # CONTROLE
 # =========================================================
 
@@ -788,12 +798,67 @@ func _on_stroop_completed() -> void:
 		await _reveal_screen()
 
 
+	# =====================================================
+	# SOM DO FRAGMENTO
+	# Toca somente depois da transição.
+	# =====================================================
+
+	_play_fragment_sound()
+
+
 	transition_busy = false
 
 
 	print(
 		"PRÓXIMO STROOP LIBERADO: ",
 		difficulty + 1
+	)
+
+
+# =========================================================
+# TOCA SOM DO FRAGMENTO
+# =========================================================
+
+func _play_fragment_sound() -> void:
+
+	var sound_player: AudioStreamPlayer = (
+		AudioStreamPlayer.new()
+	)
+
+
+	sound_player.name = (
+		"FragmentoCollectSound"
+	)
+
+	sound_player.stream = FRAGMENTO_SOUND
+
+	sound_player.volume_db = -7.0
+
+	sound_player.bus = "Master"
+
+	sound_player.process_mode = (
+		Node.PROCESS_MODE_ALWAYS
+	)
+
+
+	var current_scene = get_tree().current_scene
+
+
+	if current_scene == null:
+
+		return
+
+
+	current_scene.add_child(
+		sound_player
+	)
+
+
+	sound_player.play()
+
+
+	sound_player.finished.connect(
+		sound_player.queue_free
 	)
 
 
