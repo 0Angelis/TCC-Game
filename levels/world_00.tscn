@@ -39,6 +39,8 @@
 [ext_resource type="Shader" uid="uid://cfqg8x3kad7tx" path="res://shaders/transition.gdshader" id="37_35dpt"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="38_r0cko"]
 [ext_resource type="PackedScene" uid="uid://ct4nxdqyghxxn" path="res://prefabs/coin.tscn" id="39_pid7m"]
+[ext_resource type="AudioStream" uid="uid://c54xseb5b8foc" path="res://sounds/mundos/mundo00.wav" id="40_ces85"]
+[ext_resource type="Script" uid="uid://eudu4j8c3esd" path="res://scripts/mundo_00_music.gd" id="41_6tj1r"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_j8rs1"]
 tile_data = PackedInt32Array(0, 65537, 1)
@@ -1267,3 +1269,8 @@ position = Vector2(448, 48)
 
 [node name="coin" parent="coin6" unique_id=1812959765 instance=ExtResource("39_pid7m")]
 position = Vector2(-812, 85)
+
+[node name="Mundo00Music" type="AudioStreamPlayer" parent="." unique_id=1765687149]
+stream = ExtResource("40_ces85")
+autoplay = true
+script = ExtResource("41_6tj1r")

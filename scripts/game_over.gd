@@ -3,6 +3,12 @@ extends Control
 const META_SESSAO_SKINS: String = "skins_session_state"
 const META_SNAPSHOT_SKINS: String = "skins_phase_checkpoints"
 
+# ==========================================
+# SOM DOS BOTÕES
+# ==========================================
+
+var som_click_button = preload("res://sounds/click_button.wav")
+
 
 # ==========================================
 # BOTÕES
@@ -402,10 +408,12 @@ func _input(event):
 
 		if selected_button == restart_btn:
 
+			_play_click_button()
 			restart_game()
 
 		elif selected_button == menu_btn:
 
+			_play_click_button()
 			go_to_menu()
 
 		return
@@ -752,10 +760,37 @@ func go_to_menu():
 
 
 # ==========================================
+# SOM DE CLIQUE
+# ==========================================
+
+func _play_click_button() -> void:
+	var root := get_tree().root
+
+	if root == null:
+		return
+
+	var player := AudioStreamPlayer.new()
+	player.name = "GameOverClickSound"
+	player.stream = som_click_button
+	player.volume_db = 15.0
+	player.bus = "Master"
+	player.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	root.add_child(player)
+	player.play()
+
+	player.finished.connect(
+		player.queue_free
+	)
+
+
+# ==========================================
 # CLIQUE RESTART
 # ==========================================
 
 func _on_restart_btn_pressed():
+
+	_play_click_button()
 
 	selected_button = restart_btn
 
@@ -771,6 +806,8 @@ func _on_restart_btn_pressed():
 # ==========================================
 
 func _on_menu_btn_pressed():
+
+	_play_click_button()
 
 	selected_button = menu_btn
 

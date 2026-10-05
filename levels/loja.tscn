@@ -45,6 +45,8 @@
 [ext_resource type="PackedScene" uid="uid://c05me6gpn8c70" path="res://prefabs/goal.tscn" id="47_yb5jk"]
 [ext_resource type="Script" uid="uid://drigg0hefx8yg" path="res://scripts/warning_sing.gd" id="48_62vpf"]
 [ext_resource type="Texture2D" uid="uid://c3ci0i5r2t8h0" path="res://assets/Mini FX, Items & UI/Mini UI/Speech_Emotes (16 x 16).png" id="49_5l4dc"]
+[ext_resource type="AudioStream" uid="uid://duob7mjhb4pm5" path="res://sounds/mundos/loja.wav" id="49_wh8tn"]
+[ext_resource type="Script" uid="uid://boub1ipcltuuf" path="res://scripts/loja.gd" id="50_ojfpu"]
 [ext_resource type="Script" uid="uid://dhx83fqukj7ji" path="res://scripts/transition.gd" id="51_d4u6g"]
 [ext_resource type="Shader" uid="uid://cfqg8x3kad7tx" path="res://shaders/transition.gdshader" id="52_xbd10"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="53_baxup"]
@@ -1696,6 +1698,10 @@ scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_5t4lp")
 autoplay = "default"
 
+[node name="goal" parent="." unique_id=1383269650 instance=ExtResource("47_yb5jk")]
+position = Vector2(1491, 708)
+next_level = "res://levels/world_02.tscn"
+
 [node name="player" parent="." unique_id=1042794639 instance=ExtResource("27_4cvot")]
 position = Vector2(55, 731)
 
@@ -1884,10 +1890,6 @@ frame_progress = 1.0
 [node name="Desafio" type="Node2D" parent="." unique_id=203089235]
 position = Vector2(1096, 504)
 
-[node name="goal" parent="." unique_id=1383269650 instance=ExtResource("47_yb5jk")]
-position = Vector2(1491, 708)
-next_level = "res://levels/world_02.tscn"
-
 [node name="Camera2D" type="Camera2D" parent="." unique_id=317586548]
 zoom = Vector2(2.5, 2.5)
 limit_left = 0
@@ -1930,3 +1932,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("53_baxup")
+
+[node name="loja" type="AudioStreamPlayer" parent="." unique_id=1279362415]
+stream = ExtResource("49_wh8tn")
+autoplay = true
+script = ExtResource("50_ojfpu")

@@ -38,6 +38,12 @@ var selected_button: Button = null
 
 var mouse_mode_active := false
 
+# ==========================================
+# MÚSICA DE FUNDO DO MUNDO
+# ==========================================
+
+var musicas_do_mundo_pausadas: Array[AudioStreamPlayer] = []
+
 
 # ==========================================
 # CORES NORMAIS
@@ -782,6 +788,8 @@ func pause_game():
 
 	layer = PAUSE_LAYER
 
+	_pausar_musica_do_mundo()
+
 
 	get_tree().paused = true
 
@@ -794,6 +802,66 @@ func pause_game():
 
 
 	_apply_keyboard_visual()
+
+
+# ==========================================
+# PAUSAR MÚSICA DE FUNDO DO MUNDO
+# ==========================================
+
+func _pausar_musica_do_mundo() -> void:
+	musicas_do_mundo_pausadas.clear()
+
+	var cena_atual := get_tree().current_scene
+
+	if cena_atual == null:
+		return
+
+	var players := cena_atual.find_children(
+		"*",
+		"AudioStreamPlayer",
+		true,
+		false
+	)
+
+	for node in players:
+		if not (node is AudioStreamPlayer):
+			continue
+
+		var audio := node as AudioStreamPlayer
+
+		if audio.stream == null:
+			continue
+
+		var caminho := audio.stream.resource_path.to_lower()
+
+		# Só pega músicas da pasta sounds/mundos.
+		if "res://sounds/mundos/" not in caminho:
+			continue
+
+		if audio.playing:
+			if not audio.stream_paused:
+				audio.stream_paused = true
+				musicas_do_mundo_pausadas.append(audio)
+
+
+# ==========================================
+# RETOMAR MÚSICA DE FUNDO DO MUNDO
+# ==========================================
+
+func _retomar_musica_do_mundo() -> void:
+	for audio in musicas_do_mundo_pausadas:
+		if audio == null:
+			continue
+
+		if not is_instance_valid(audio):
+			continue
+
+		if audio.stream == null:
+			continue
+
+		audio.stream_paused = false
+
+	musicas_do_mundo_pausadas.clear()
 
 
 # ==========================================
@@ -816,6 +884,8 @@ func resume_game():
 
 
 	get_tree().paused = false
+
+	_retomar_musica_do_mundo()
 
 
 	visible = false
@@ -1004,7 +1074,7 @@ func _play_click_button() -> void:
 	var player := AudioStreamPlayer.new()
 	player.name = "PauseClickSound"
 	player.stream = som_click_button
-	player.volume_db = 20.0
+	player.volume_db = 15.0
 	player.process_mode = Node.PROCESS_MODE_ALWAYS
 	player.bus = "Master"
 

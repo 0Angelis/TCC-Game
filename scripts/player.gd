@@ -1084,38 +1084,10 @@ func cancelar_warning_por_movimento() -> void:
 
 func play_victory() -> void:
 
-	if is_dead:
-		return
-
-
-	if taking_damage:
-		return
-
-
-	showing_warning = false
-
-	celebrating = true
-
-	can_move = false
-
-	velocity.x = 0.0
-
-	animation.stop()
-
-	animation.play("vitoria")
-
-
-	print(
-		"================================"
-	)
-
-	print(
-		"ANIMAÇÃO DE VITÓRIA!"
-	)
-
-	print(
-		"================================"
-	)
+	# Mantido por compatibilidade com scripts antigos.
+	# A animação de dança agora é exclusiva da tecla B.
+	# Assim, coletar fragmento não trava nem faz o player dançar.
+	return
 
 
 # ==========================================

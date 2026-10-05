@@ -216,7 +216,7 @@ func _ready() -> void:
 	audio_click_button = AudioStreamPlayer.new()
 	audio_click_button.name = "AudioClickButton"
 	audio_click_button.stream = som_click_button
-	audio_click_button.volume_db = 20.0
+	audio_click_button.volume_db = 15.0
 	add_child(audio_click_button)
 
 	audio_equip_skin = AudioStreamPlayer.new()

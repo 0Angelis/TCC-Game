@@ -23,6 +23,13 @@ var selected_button: Button = null
 
 var som_click_button = preload("res://sounds/click_button.wav")
 
+# ==========================================
+# MÚSICA DA TELA INICIAL
+# ==========================================
+
+var som_title = preload("res://sounds/mundos/title.wav")
+var audio_title: AudioStreamPlayer = null
+
 
 # ==========================================
 # MOUSE ESTÁ SENDO USADO?
@@ -47,6 +54,26 @@ var hover_text_color: Color = Color("#7B3FC6")
 func _ready():
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# ==========================================
+	# MÚSICA DA TELA INICIAL
+	# ==========================================
+	# Começa sozinha e reinicia automaticamente
+	# quando a música chegar ao fim.
+
+	audio_title = AudioStreamPlayer.new()
+	audio_title.name = "TitleMusic"
+	audio_title.stream = som_title
+	audio_title.volume_db = -20.0
+	audio_title.bus = "Master"
+	audio_title.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	add_child(audio_title)
+
+	if not audio_title.finished.is_connected(_on_title_music_finished):
+		audio_title.finished.connect(_on_title_music_finished)
+
+	audio_title.play()
 
 	# ==========================================
 	# SOM DOS BOTÕES
@@ -764,7 +791,7 @@ func _play_click_button() -> void:
 
 	audio.name = "MenuClickButton"
 	audio.stream = som_click_button
-	audio.volume_db = 20.0
+	audio.volume_db = 15.0
 	audio.bus = "Master"
 	audio.process_mode = Node.PROCESS_MODE_ALWAYS
 
@@ -777,6 +804,20 @@ func _play_click_button() -> void:
 			if is_instance_valid(audio):
 				audio.queue_free()
 	)
+
+
+# ==========================================
+# LOOP DA MÚSICA DA TELA INICIAL
+# ==========================================
+
+func _on_title_music_finished() -> void:
+	if audio_title == null:
+		return
+
+	if not is_instance_valid(audio_title):
+		return
+
+	audio_title.play()
 
 
 # ==========================================
