@@ -594,6 +594,13 @@ var final_button: Button = null
 var final_retro_font: Font = null
 var final_retro_theme: Theme = null
 
+# =========================================================
+# SOM DOS BOTÕES
+# =========================================================
+
+var som_click_button = preload("res://sounds/click_button.wav")
+var audio_click_button: AudioStreamPlayer = null
+
 
 # =========================================================
 # RETRO
@@ -954,6 +961,9 @@ func _start_challenge_intro() -> void:
 	if tutorial_finished:
 		return
 
+	if audio_click_button != null:
+		audio_click_button.play()
+
 	tutorial_finished = true
 
 	var intro_layer: CanvasLayer = get_node_or_null(
@@ -1227,6 +1237,17 @@ func _ready() -> void:
 	randomize()
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# =====================================================
+	# SOM DOS BOTÕES
+	# =====================================================
+
+	audio_click_button = AudioStreamPlayer.new()
+	audio_click_button.name = "AudioClickButton"
+	audio_click_button.stream = som_click_button
+	audio_click_button.volume_db = 20.0
+	audio_click_button.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(audio_click_button)
 
 	# =====================================================
 	# TIMER INICIAL
@@ -1896,6 +1917,9 @@ func _on_tutorial_continue() -> void:
 
 		return
 
+	if audio_click_button != null:
+		audio_click_button.play()
+
 
 	tutorial_finished = true
 
@@ -2315,6 +2339,9 @@ func player_selected_color(
 	if player_index >= sequence.size():
 
 		return
+
+	if audio_click_button != null:
+		audio_click_button.play()
 
 
 	# =====================================================

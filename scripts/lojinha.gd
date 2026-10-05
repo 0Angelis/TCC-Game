@@ -105,6 +105,15 @@ var textura_vida = preload(
 	"res://assets/Mini FX, Items & UI/Common Pick-ups/Health_Kit (16 x 16).png"
 )
 
+# =========================================================
+# SONS DA LOJA
+# =========================================================
+
+var som_compra = preload("res://sounds/buy.wav")
+var som_negado = preload("res://sounds/negado.wav")
+var som_click_button = preload("res://sounds/click_button.wav")
+
+var audio_click_button: AudioStreamPlayer = null
 
 # =========================================================
 # READY
@@ -125,6 +134,17 @@ func _ready() -> void:
 	# =====================================================
 
 	player = get_node_or_null("../player") as Node2D
+
+
+	# =====================================================
+	# SONS DA LOJA
+	# =====================================================
+
+	audio_click_button = AudioStreamPlayer.new()
+	audio_click_button.name = "AudioClickButton"
+	audio_click_button.stream = som_click_button
+	audio_click_button.volume_db = 20.0
+	add_child(audio_click_button)
 
 
 	# =====================================================
@@ -1416,6 +1436,10 @@ func confirmar_opcao() -> void:
 
 	if selecao == 0:
 
+		# Som de clique ao voltar, tanto pelo mouse quanto pelo teclado/Enter.
+		if audio_click_button != null:
+			audio_click_button.play()
+
 		fechar_menu()
 
 		return
@@ -1428,6 +1452,22 @@ func confirmar_opcao() -> void:
 	if selecao == 1:
 
 		comprar_vida()
+
+
+# =========================================================
+# TOCAR SOM
+# =========================================================
+
+func tocar_som(som: AudioStream) -> void:
+	if som == null:
+		return
+
+	var audio_player := AudioStreamPlayer.new()
+	audio_player.stream = som
+	add_child(audio_player)
+
+	audio_player.finished.connect(audio_player.queue_free)
+	audio_player.play()
 
 
 # =========================================================
@@ -1453,6 +1493,9 @@ func comprar_vida() -> void:
 		Globals.coins -= PRECO_VIDA
 
 		Globals.player_life += 1
+
+		# SOM DE COMPRA
+		tocar_som(som_compra)
 
 
 		print("LOJA: VIDA COMPRADA")
@@ -1513,6 +1556,9 @@ func comprar_vida() -> void:
 	# =====================================================
 
 	else:
+
+		# SOM DE COMPRA NEGADA
+		tocar_som(som_negado)
 
 		var faltam: int = (
 			PRECO_VIDA - Globals.coins

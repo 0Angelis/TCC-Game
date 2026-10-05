@@ -93,6 +93,14 @@ var fonte_retro = preload(
 	"res://assets/Fontes/Pixeloid_Font_1_0/OpenType (.otf)/PixeloidSans-Bold.otf"
 )
 
+var som_compra = preload("res://sounds/buy.wav")
+var som_negado = preload("res://sounds/negado.wav")
+var som_click_button = preload("res://sounds/click_button.wav")
+
+var audio_compra: AudioStreamPlayer = null
+var audio_negado: AudioStreamPlayer = null
+var audio_click_button: AudioStreamPlayer = null
+
 
 # =========================================================
 # READY
@@ -113,6 +121,26 @@ func _ready() -> void:
 	# =====================================================
 
 	player = get_node_or_null("../player") as Node2D
+
+	# =====================================================
+	# SONS DA LOJA
+	# =====================================================
+
+	audio_compra = AudioStreamPlayer.new()
+	audio_compra.name = "AudioCompra"
+	audio_compra.stream = som_compra
+	add_child(audio_compra)
+
+	audio_negado = AudioStreamPlayer.new()
+	audio_negado.name = "AudioNegado"
+	audio_negado.stream = som_negado
+	add_child(audio_negado)
+
+	audio_click_button = AudioStreamPlayer.new()
+	audio_click_button.name = "AudioClickButton"
+	audio_click_button.stream = som_click_button
+	audio_click_button.volume_db = 20.0
+	add_child(audio_click_button)
 
 
 	# =====================================================
@@ -1397,6 +1425,9 @@ func confirmar_opcao() -> void:
 
 	if selecao == 0:
 
+		if audio_click_button != null:
+			audio_click_button.play()
+
 		fechar_menu()
 
 		return
@@ -1434,6 +1465,10 @@ func comprar_score() -> void:
 		Globals.coins -= PRECO_SCORE
 
 		Globals.score += 1000
+
+		# Som de compra realizada.
+		if audio_compra != null:
+			audio_compra.play()
 
 
 		print("LOJA: SCORE COMPRADO")
@@ -1494,6 +1529,10 @@ func comprar_score() -> void:
 	# =====================================================
 
 	else:
+
+		# Som de compra negada por falta de moedas.
+		if audio_negado != null:
+			audio_negado.play()
 
 		var faltam: int = (
 			PRECO_SCORE - Globals.coins

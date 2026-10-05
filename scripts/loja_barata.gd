@@ -99,6 +99,16 @@ var fonte_retro = preload(
 	"res://assets/Fontes/Pixeloid_Font_1_0/OpenType (.otf)/PixeloidSans-Bold.otf"
 )
 
+var som_compra = preload("res://sounds/buy.wav")
+var som_negado = preload("res://sounds/negado.wav")
+var som_barata_rindo = preload("res://sounds/barata_rindo.wav")
+var som_click_button = preload("res://sounds/click_button.wav")
+
+var audio_compra: AudioStreamPlayer = null
+var audio_negado: AudioStreamPlayer = null
+var audio_barata_rindo: AudioStreamPlayer = null
+var audio_click_button: AudioStreamPlayer = null
+
 # =========================================================
 # READY
 # =========================================================
@@ -113,6 +123,31 @@ func _ready() -> void:
 	# -----------------------------------------------------
 
 	player = get_node_or_null("../player") as Node2D
+
+	# -----------------------------------------------------
+	# SONS DA LOJA
+	# -----------------------------------------------------
+
+	audio_compra = AudioStreamPlayer.new()
+	audio_compra.name = "AudioCompra"
+	audio_compra.stream = som_compra
+	add_child(audio_compra)
+
+	audio_negado = AudioStreamPlayer.new()
+	audio_negado.name = "AudioNegado"
+	audio_negado.stream = som_negado
+	add_child(audio_negado)
+
+	audio_barata_rindo = AudioStreamPlayer.new()
+	audio_barata_rindo.name = "AudioBarataRindo"
+	audio_barata_rindo.stream = som_barata_rindo
+	add_child(audio_barata_rindo)
+
+	audio_click_button = AudioStreamPlayer.new()
+	audio_click_button.name = "AudioClickButton"
+	audio_click_button.stream = som_click_button
+	audio_click_button.volume_db = 20.0
+	add_child(audio_click_button)
 
 	# -----------------------------------------------------
 	# SINAIS
@@ -1004,9 +1039,38 @@ func atualizar_menu() -> void:
 			Color("#FF7185")
 		)
 
-		comprar.text = "JÁ COMPREI"
+		comprar.text = "JA COMPROU"
 
-		comprar.disabled = true
+		# Continua habilitado para poder clicar e ouvir a risada novamente.
+		comprar.disabled = false
+
+		# Visual escuro de "já comprado", igual ao botão desabilitado.
+		# Ele continua clicável, então o mouse ainda consegue acionar a risada.
+		var normal_comprado := StyleBoxFlat.new()
+		normal_comprado.bg_color = Color("#17111F")
+		normal_comprado.border_color = Color("#30263A")
+		normal_comprado.set_border_width_all(2)
+		normal_comprado.corner_radius_top_left = 6
+		normal_comprado.corner_radius_top_right = 6
+		normal_comprado.corner_radius_bottom_left = 6
+		normal_comprado.corner_radius_bottom_right = 6
+
+		# Quando já comprou, passar o mouse NÃO muda o visual.
+		var hover_comprado := StyleBoxFlat.new()
+		hover_comprado.bg_color = Color("#17111F")
+		hover_comprado.border_color = Color("#30263A")
+		hover_comprado.set_border_width_all(2)
+		hover_comprado.corner_radius_top_left = 6
+		hover_comprado.corner_radius_top_right = 6
+		hover_comprado.corner_radius_bottom_left = 6
+		hover_comprado.corner_radius_bottom_right = 6
+
+		comprar.add_theme_stylebox_override("normal", normal_comprado)
+		comprar.add_theme_stylebox_override("hover", hover_comprado)
+		comprar.add_theme_color_override("font_color", Color("#6B6470"))
+		comprar.add_theme_color_override("font_hover_color", Color("#6B6470"))
+		comprar.add_theme_color_override("font_pressed_color", Color("#6B6470"))
+		comprar.add_theme_color_override("font_focus_color", Color("#6B6470"))
 
 	else:
 
@@ -1020,6 +1084,30 @@ func atualizar_menu() -> void:
 		comprar.text = "COMPRAR"
 
 		comprar.disabled = false
+
+		# Restaura o visual normal quando ainda não comprou.
+		var normal := StyleBoxFlat.new()
+		normal.bg_color = Color("#39234C")
+		normal.border_color = Color("#8C5BB2")
+		normal.set_border_width_all(2)
+		normal.corner_radius_top_left = 6
+		normal.corner_radius_top_right = 6
+		normal.corner_radius_bottom_left = 6
+		normal.corner_radius_bottom_right = 6
+
+		var hover := StyleBoxFlat.new()
+		hover.bg_color = Color("#472D63")
+		hover.border_color = Color("#D58CFF")
+		hover.set_border_width_all(2)
+		hover.corner_radius_top_left = 6
+		hover.corner_radius_top_right = 6
+		hover.corner_radius_bottom_left = 6
+		hover.corner_radius_bottom_right = 6
+
+		comprar.add_theme_stylebox_override("normal", normal)
+		comprar.add_theme_stylebox_override("hover", hover)
+		comprar.add_theme_color_override("font_color", Color("#FFF0C7"))
+		comprar.add_theme_color_override("font_hover_color", Color("#D9A7FF"))
 
 # =========================================================
 # PROCESSAR MENU
@@ -1051,7 +1139,11 @@ func processar_menu(event: InputEvent) -> void:
 
 		selecao = 1
 		remover_destaque_botao(voltar)
-		destacar_botao(comprar)
+
+		if comprou_saias_filo:
+			deixar_botao_comprado_sem_destaque()
+		else:
+			destacar_botao(comprar)
 
 		get_viewport().set_input_as_handled()
 		return
@@ -1064,7 +1156,11 @@ func processar_menu(event: InputEvent) -> void:
 
 		selecao = 1
 		remover_destaque_botao(voltar)
-		destacar_botao(comprar)
+
+		if comprou_saias_filo:
+			deixar_botao_comprado_sem_destaque()
+		else:
+			destacar_botao(comprar)
 
 		get_viewport().set_input_as_handled()
 		return
@@ -1118,7 +1214,6 @@ func processar_menu(event: InputEvent) -> void:
 		fechar_menu()
 		return
 
-
 # =========================================================
 # COMPRAR
 # =========================================================
@@ -1136,7 +1231,6 @@ func confirmar_opcao() -> void:
 		comprar_ou_equipar()
 		return
 
-
 func comprar_ou_equipar() -> void:
 
 	if bloqueado:
@@ -1149,6 +1243,10 @@ func comprar_ou_equipar() -> void:
 			Color("#FF7185")
 		)
 
+		# Tentou comprar de novo? A barata ri da cara do jogador.
+		if audio_barata_rindo != null:
+			audio_barata_rindo.play()
+
 		return
 
 	# -----------------------------------------------------
@@ -1156,6 +1254,10 @@ func comprar_ou_equipar() -> void:
 	# -----------------------------------------------------
 
 	if Globals.coins < PRECO_SAIAS_FILO:
+
+		# Som de compra negada por falta de moedas.
+		if audio_negado != null:
+			audio_negado.play()
 
 		var faltam: int = (
 			PRECO_SAIAS_FILO - Globals.coins
@@ -1176,6 +1278,18 @@ func comprar_ou_equipar() -> void:
 
 	# O jogador REALMENTE perde as moedas.
 	Globals.coins -= PRECO_SAIAS_FILO
+
+	# Som da compra realizada.
+	if audio_compra != null:
+		audio_compra.play()
+		await audio_compra.finished
+
+	if not is_inside_tree():
+		return
+
+	# Depois que o som da compra termina, a barata começa a rir.
+	if audio_barata_rindo != null:
+		audio_barata_rindo.play()
 
 	# Marca que comprou para não permitir pagar de novo.
 	comprou_saias_filo = true
@@ -1255,6 +1369,10 @@ func _clicar_voltar() -> void:
 	if estado != EstadoLoja.MENU:
 		return
 
+	# Som de clique ao clicar em VOLTAR.
+	if audio_click_button != null:
+		audio_click_button.play()
+
 	fechar_menu()
 
 # =========================================================
@@ -1290,6 +1408,15 @@ func _mouse_entrou_comprar() -> void:
 	if voltar == null or comprar == null:
 		return
 
+	# Depois de comprar, o botão continua clicável para a risada,
+	# mas o mouse não mostra destaque/seleção nele.
+	if comprou_saias_filo:
+		selecao = -1
+		remover_destaque_botao(voltar)
+		comprar.add_theme_color_override("font_color", Color("#6B6470"))
+		comprar.add_theme_color_override("font_hover_color", Color("#6B6470"))
+		return
+
 	selecao = -1
 	remover_destaque_botao(voltar)
 	destacar_botao(comprar)
@@ -1320,11 +1447,40 @@ func _mouse_saiu_botao() -> void:
 			remover_destaque_botao(voltar)
 
 		if comprar != null:
-			remover_destaque_botao(comprar)
+			if comprou_saias_filo:
+				deixar_botao_comprado_sem_destaque()
+			else:
+				remover_destaque_botao(comprar)
 
 # =========================================================
 # DESTAQUE DOS BOTÕES
 # =========================================================
+
+func deixar_botao_comprado_sem_destaque() -> void:
+
+	if comprar == null:
+		return
+
+	comprar.scale = Vector2.ONE
+	comprar.add_theme_color_override("font_color", Color("#6B6470"))
+	comprar.add_theme_color_override("font_hover_color", Color("#6B6470"))
+	comprar.add_theme_color_override("font_pressed_color", Color("#6B6470"))
+	comprar.add_theme_color_override("font_focus_color", Color("#6B6470"))
+	comprar.add_theme_color_override("font_disabled_color", Color("#6B6470"))
+
+	var estilo_escuro := StyleBoxFlat.new()
+	estilo_escuro.bg_color = Color("#17111F")
+	estilo_escuro.border_color = Color("#30263A")
+	estilo_escuro.set_border_width_all(2)
+	estilo_escuro.corner_radius_top_left = 6
+	estilo_escuro.corner_radius_top_right = 6
+	estilo_escuro.corner_radius_bottom_left = 6
+	estilo_escuro.corner_radius_bottom_right = 6
+
+	comprar.add_theme_stylebox_override("normal", estilo_escuro)
+	comprar.add_theme_stylebox_override("hover", estilo_escuro)
+	comprar.add_theme_stylebox_override("pressed", estilo_escuro)
+	comprar.add_theme_stylebox_override("focus", estilo_escuro)
 
 func destacar_botao(botao: Button) -> void:
 
@@ -1352,6 +1508,12 @@ func destacar_botao(botao: Button) -> void:
 func remover_destaque_botao(botao: Button) -> void:
 
 	if botao == null:
+		return
+
+	# Depois que a compra foi feita, o botão COMPRAR/JÁ COMPROU
+	# permanece sempre apagado, mesmo quando perde a seleção.
+	if botao == comprar and comprou_saias_filo:
+		deixar_botao_comprado_sem_destaque()
 		return
 
 	botao.add_theme_color_override(

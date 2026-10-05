@@ -18,6 +18,13 @@ var selected_button: Button = null
 
 
 # ==========================================
+# SOM DOS BOTÕES
+# ==========================================
+
+var som_click_button = preload("res://sounds/click_button.wav")
+
+
+# ==========================================
 # MOUSE ESTÁ SENDO USADO?
 # ==========================================
 
@@ -41,6 +48,11 @@ func _ready():
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
+	# ==========================================
+	# SOM DOS BOTÕES
+	# ==========================================
+	# O som é criado individualmente a cada clique.
+	# Assim nenhum clique é cortado quando a cena muda.
 
 	# ==========================================
 	# MOUSE
@@ -448,14 +460,17 @@ func _unhandled_input(event):
 
 		if selected_button == start_btn:
 
+			_play_click_button()
 			start_game()
 
 		elif selected_button == credits_btn:
 
+			_play_click_button()
 			open_credits()
 
 		elif selected_button == quit_btn:
 
+			_play_click_button()
 			quit_game()
 
 
@@ -683,6 +698,8 @@ func _on_quit_focus():
 
 func _on_start_btn_pressed():
 
+	_play_click_button()
+
 	# ==========================================
 	# CLIQUE PASSA A SER A SELEÇÃO
 	# ==========================================
@@ -707,6 +724,8 @@ func _on_start_btn_pressed():
 
 func _on_credits_btn_pressed():
 
+	_play_click_button()
+
 	selected_button = credits_btn
 
 	mouse_mode_active = false
@@ -722,6 +741,8 @@ func _on_credits_btn_pressed():
 
 func _on_quit_btn_pressed():
 
+	_play_click_button()
+
 	selected_button = quit_btn
 
 	mouse_mode_active = false
@@ -729,6 +750,33 @@ func _on_quit_btn_pressed():
 	_apply_keyboard_visual()
 
 	quit_game()
+
+
+# ==========================================
+# SOM DE CLIQUE
+# ==========================================
+# Cria um player independente para cada clique.
+# O player fica no root para não ser destruído
+# quando o menu troca de cena.
+
+func _play_click_button() -> void:
+	var audio := AudioStreamPlayer.new()
+
+	audio.name = "MenuClickButton"
+	audio.stream = som_click_button
+	audio.volume_db = 20.0
+	audio.bus = "Master"
+	audio.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	get_tree().root.add_child(audio)
+
+	audio.play()
+
+	audio.finished.connect(
+		func():
+			if is_instance_valid(audio):
+				audio.queue_free()
+	)
 
 
 # ==========================================

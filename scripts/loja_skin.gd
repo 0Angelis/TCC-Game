@@ -101,6 +101,20 @@ var fonte_retro = preload(
 )
 
 # =========================================================
+# SONS DA LOJA
+# =========================================================
+
+var som_compra = preload("res://sounds/buy.wav")
+var som_negado = preload("res://sounds/negado.wav")
+var som_click_button = preload("res://sounds/click_button.wav")
+var som_equip_skin = preload("res://sounds/equip_skin.wav")
+
+var audio_compra: AudioStreamPlayer = null
+var audio_negado: AudioStreamPlayer = null
+var audio_click_button: AudioStreamPlayer = null
+var audio_equip_skin: AudioStreamPlayer = null
+
+# =========================================================
 # SKINS
 # =========================================================
 
@@ -184,6 +198,32 @@ func _ready() -> void:
 	# -----------------------------------------------------
 
 	player = get_node_or_null("../player") as Node2D
+
+	# -----------------------------------------------------
+	# SONS DA LOJA
+	# -----------------------------------------------------
+
+	audio_compra = AudioStreamPlayer.new()
+	audio_compra.name = "AudioCompra"
+	audio_compra.stream = som_compra
+	add_child(audio_compra)
+
+	audio_negado = AudioStreamPlayer.new()
+	audio_negado.name = "AudioNegado"
+	audio_negado.stream = som_negado
+	add_child(audio_negado)
+
+	audio_click_button = AudioStreamPlayer.new()
+	audio_click_button.name = "AudioClickButton"
+	audio_click_button.stream = som_click_button
+	audio_click_button.volume_db = 20.0
+	add_child(audio_click_button)
+
+	audio_equip_skin = AudioStreamPlayer.new()
+	audio_equip_skin.name = "AudioEquipSkin"
+	audio_equip_skin.stream = som_equip_skin
+	audio_equip_skin.volume_db = -7.0
+	add_child(audio_equip_skin)
 
 	# -----------------------------------------------------
 	# SINAIS
@@ -1364,6 +1404,9 @@ func mudar_skin(direcao: int) -> void:
 
 	skin_atual_index = novo_index
 
+	if audio_click_button != null:
+		audio_click_button.play()
+
 	resultado.hide()
 
 	atualizar_menu()
@@ -1437,6 +1480,10 @@ func comprar_ou_equipar() -> void:
 
 	if Globals.coins < valor:
 
+		# Som de compra negada por falta de moedas.
+		if audio_negado != null:
+			audio_negado.play()
+
 		var faltam: int = valor - Globals.coins
 
 		mostrar_resultado(
@@ -1453,6 +1500,10 @@ func comprar_ou_equipar() -> void:
 	bloqueado = true
 
 	Globals.coins -= valor
+
+	# Som de compra realizada.
+	if audio_compra != null:
+		audio_compra.play()
 
 	if not skins_desbloqueadas.has(id):
 		skins_desbloqueadas.append(id)
@@ -1496,6 +1547,9 @@ func equipar_skin(id: String) -> void:
 	# inclusive quando a cena muda de fase.
 	skin_equipada = id
 	atualizar_estado_da_sessao()
+
+	if audio_equip_skin != null:
+		audio_equip_skin.play()
 
 	if player != null and is_instance_valid(player):
 		if player.has_method("definir_skin_visual"):
@@ -1573,6 +1627,9 @@ func _clicar_voltar() -> void:
 
 	if estado != EstadoLoja.MENU:
 		return
+
+	if audio_click_button != null:
+		audio_click_button.play()
 
 	fechar_menu()
 

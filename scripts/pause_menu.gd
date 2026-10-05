@@ -7,6 +7,13 @@ extends CanvasLayer
 
 const PAUSE_LAYER := 1000
 
+# ==========================================
+# SOM DOS BOTÕES
+# ==========================================
+
+var som_click_button = preload("res://sounds/click_button.wav")
+var audio_click_button: AudioStreamPlayer = null
+
 
 # ==========================================
 # BOTÕES
@@ -61,6 +68,13 @@ func _ready():
 	# ==========================================
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# ==========================================
+	# SOM DOS BOTÕES
+	# ==========================================
+	# O player permanente não é usado para os cliques.
+	# Cada clique cria um player temporário no Root, evitando
+	# corte do áudio quando a cena muda ou outro clique acontece.
 
 
 	# ==========================================
@@ -448,6 +462,8 @@ func _input(event):
 
 			_mark_input_handled()
 
+			_play_click_button()
+
 			resume_game()
 
 			return
@@ -474,6 +490,8 @@ func _input(event):
 		# ======================================
 
 		_mark_input_handled()
+
+		_play_click_button()
 
 		pause_game()
 
@@ -616,14 +634,17 @@ func _input(event):
 
 		if selected_button == resume_btn:
 
+			_play_click_button()
 			resume_game()
 
 		elif selected_button == restart_btn:
 
+			_play_click_button()
 			restart_game()
 
 		elif selected_button == quit_btn:
 
+			_play_click_button()
 			quit_game()
 
 
@@ -975,11 +996,33 @@ func quit_game():
 	)
 
 
+func _play_click_button() -> void:
+	var root := get_tree().root
+	if root == null:
+		return
+
+	var player := AudioStreamPlayer.new()
+	player.name = "PauseClickSound"
+	player.stream = som_click_button
+	player.volume_db = 20.0
+	player.process_mode = Node.PROCESS_MODE_ALWAYS
+	player.bus = "Master"
+
+	root.add_child(player)
+	player.play()
+
+	player.finished.connect(
+		player.queue_free
+	)
+
+
 # ==========================================
 # BOTÃO RESUME
 # ==========================================
 
 func _on_resume_btn_pressed():
+	_play_click_button()
+
 
 	selected_button = resume_btn
 
@@ -995,6 +1038,8 @@ func _on_resume_btn_pressed():
 # ==========================================
 
 func _on_restart_btn_pressed():
+	_play_click_button()
+
 
 	selected_button = restart_btn
 
@@ -1010,6 +1055,8 @@ func _on_restart_btn_pressed():
 # ==========================================
 
 func _on_quit_btn_pressed():
+	_play_click_button()
+
 
 	selected_button = quit_btn
 

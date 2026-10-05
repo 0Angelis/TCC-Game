@@ -30,6 +30,16 @@ const MAX_TIME := 30.0
 
 
 # =========================================================
+# SOM DOS CLIQUES
+# =========================================================
+
+var som_click_button = preload("res://sounds/click_button.wav")
+var som_negado = preload("res://sounds/negado.wav")
+var audio_click_button: AudioStreamPlayer = null
+var audio_negado: AudioStreamPlayer = null
+
+
+# =========================================================
 # CORES PRINCIPAIS
 # =========================================================
 
@@ -503,6 +513,21 @@ func _ready() -> void:
 	# para automaticamente quando get_tree().paused = true.
 	# =====================================================
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# =====================================================
+	# SOM DOS CLIQUES
+	# =====================================================
+
+	audio_click_button = AudioStreamPlayer.new()
+	audio_click_button.name = "AudioClickButton"
+	audio_click_button.stream = som_click_button
+	audio_click_button.volume_db = 20.0
+	add_child(audio_click_button)
+
+	audio_negado = AudioStreamPlayer.new()
+	audio_negado.name = "AudioNegado"
+	audio_negado.stream = som_negado
+	add_child(audio_negado)
 
 	# =====================================================
 	# FONTE RETRÔ DO HUD
@@ -1733,6 +1758,9 @@ func _on_tutorial_button_pressed() -> void:
 
 		return
 
+	if audio_click_button != null:
+		audio_click_button.play()
+
 
 	get_tree().set_meta(
 		"stroop_tutorial_seen",
@@ -2092,6 +2120,9 @@ func _answer(
 
 	if selected_color == current_color:
 
+		if audio_click_button != null:
+			audio_click_button.play()
+
 		correct_answers += 1
 
 
@@ -2133,6 +2164,9 @@ func _answer(
 
 
 	else:
+
+		if audio_negado != null:
+			audio_negado.play()
 
 		error_count += 1
 
@@ -4322,6 +4356,9 @@ func _start_pre_start_screen() -> void:
 	if not pre_start_active:
 
 		return
+
+	if audio_click_button != null:
+		audio_click_button.play()
 
 
 	pre_start_active = false
