@@ -109,7 +109,7 @@ var textura_vida = preload(
 # SONS DA LOJA
 # =========================================================
 
-var som_compra = preload("res://sounds/buy.wav")
+var som_compra = preload("res://sounds/lojas/buy.wav")
 var som_negado = preload("res://sounds/negado.wav")
 var som_click_button = preload("res://sounds/click_button.wav")
 

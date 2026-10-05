@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://rbmhdni0v3h4"
-path="res://.godot/imported/buy.wav-0015a1e79dd3bf36272cbd7de735d478.sample"
+uid="uid://sktna35jjk6o"
+path="res://.godot/imported/equip_skin.wav-302eb8667e548486de6a6ce84c98e062.sample"
 
 [deps]
 
-source_file="res://sounds/buy.wav"
-dest_files=["res://.godot/imported/buy.wav-0015a1e79dd3bf36272cbd7de735d478.sample"]
+source_file="res://sounds/lojas/equip_skin.wav"
+dest_files=["res://.godot/imported/equip_skin.wav-302eb8667e548486de6a6ce84c98e062.sample"]
 
 [params]
 

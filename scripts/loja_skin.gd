@@ -104,10 +104,10 @@ var fonte_retro = preload(
 # SONS DA LOJA
 # =========================================================
 
-var som_compra = preload("res://sounds/buy.wav")
+var som_compra = preload("res://sounds/lojas/buy.wav")
 var som_negado = preload("res://sounds/negado.wav")
 var som_click_button = preload("res://sounds/click_button.wav")
-var som_equip_skin = preload("res://sounds/equip_skin.wav")
+var som_equip_skin = preload("res://sounds/lojas/equip_skin.wav")
 
 var audio_compra: AudioStreamPlayer = null
 var audio_negado: AudioStreamPlayer = null

@@ -99,9 +99,9 @@ var fonte_retro = preload(
 	"res://assets/Fontes/Pixeloid_Font_1_0/OpenType (.otf)/PixeloidSans-Bold.otf"
 )
 
-var som_compra = preload("res://sounds/buy.wav")
+var som_compra = preload("res://sounds/lojas/buy.wav")
 var som_negado = preload("res://sounds/negado.wav")
-var som_barata_rindo = preload("res://sounds/barata_rindo.wav")
+var som_barata_rindo = preload("res://sounds/lojas/barata_rindo.wav")
 var som_click_button = preload("res://sounds/click_button.wav")
 
 var audio_compra: AudioStreamPlayer = null
@@ -1224,6 +1224,10 @@ func confirmar_opcao() -> void:
 		return
 
 	if selecao == 0:
+		# Som ao confirmar VOLTAR pelo teclado.
+		if audio_click_button != null:
+			audio_click_button.play()
+
 		fechar_menu()
 		return
 

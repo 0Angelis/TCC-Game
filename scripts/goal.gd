@@ -9,6 +9,18 @@ var transition = null
 
 
 # =========================================================
+# SOM DO PORTAL
+# =========================================================
+
+var som_portal: AudioStream = preload("res://sounds/portal.wav")
+var audio_portal: AudioStreamPlayer = null
+
+# Ajuste o volume do portal diretamente no Inspector.
+@export_category("Som do Portal")
+@export_range(-40.0, 20.0, 0.5) var volume_portal_db: float = 0.0
+
+
+# =========================================================
 # PRÓXIMA FASE
 # =========================================================
 
@@ -112,6 +124,17 @@ const BOSS_DEFEATED_META: String = "world_04_boss_defeated"
 func _ready() -> void:
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# =====================================================
+	# SOM DO PORTAL
+	# =====================================================
+
+	audio_portal = AudioStreamPlayer.new()
+	audio_portal.name = "AudioPortal"
+	audio_portal.stream = som_portal
+	audio_portal.volume_db = volume_portal_db
+	audio_portal.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(audio_portal)
 
 
 	# =====================================================
@@ -970,6 +993,17 @@ func _on_body_entered(
 		)
 
 		return
+
+
+	# =====================================================
+	# SOM DE ENTRADA NO PORTAL
+	# =====================================================
+	# O som toca somente quando o portal está liberado
+	# e uma próxima cena válida foi encontrada.
+
+	if audio_portal != null:
+		audio_portal.stop()
+		audio_portal.play()
 
 
 	# =====================================================

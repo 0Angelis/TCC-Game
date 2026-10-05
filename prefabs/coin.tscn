@@ -93,7 +93,7 @@ shape = SubResource("CircleShape2D_53380")
 
 [node name="coin_sfx" type="AudioStreamPlayer" parent="." unique_id=145226259]
 stream = ExtResource("4_1we67")
-volume_db = -7.0
+volume_db = -14.0
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
 [connection signal="animation_finished" from="anim" to="." method="_on_anim_animation_finished"]

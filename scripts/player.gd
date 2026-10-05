@@ -84,6 +84,23 @@ var celebrating: bool = false
 
 
 # ==========================================
+# SONS DO PINGUIM
+# ==========================================
+
+var som_dano_pinguin = preload("res://sounds/pinguin/dano_pinguin.wav")
+var som_jump_pinguin = preload("res://sounds/pinguin/jump_pinguin.wav")
+var som_morte_pinguin = preload("res://sounds/pinguin/morte_pinguin.wav")
+
+@export_category("Volume dos Sons")
+@export_range(-40.0, 20.0, 0.5) var volume_dano_pinguin_db: float = 0.0
+@export_range(-40.0, 20.0, 0.5) var volume_jump_pinguin_db: float = 5.0
+@export_range(-40.0, 20.0, 0.5) var volume_morte_pinguin_db: float = 0.0
+
+var audio_dano_pinguin: AudioStreamPlayer = null
+var audio_jump_pinguin: AudioStreamPlayer = null
+
+
+# ==========================================
 # NÓS
 # ==========================================
 
@@ -108,6 +125,22 @@ var skin_equipada: String = "original"
 # ==========================================
 
 func _ready() -> void:
+
+	# ==========================================
+	# SONS DO PINGUIM
+	# ==========================================
+
+	audio_dano_pinguin = AudioStreamPlayer.new()
+	audio_dano_pinguin.name = "AudioDanoPinguin"
+	audio_dano_pinguin.stream = som_dano_pinguin
+	audio_dano_pinguin.volume_db = volume_dano_pinguin_db
+	add_child(audio_dano_pinguin)
+
+	audio_jump_pinguin = AudioStreamPlayer.new()
+	audio_jump_pinguin.name = "AudioJumpPinguin"
+	audio_jump_pinguin.stream = som_jump_pinguin
+	audio_jump_pinguin.volume_db = volume_jump_pinguin_db
+	add_child(audio_jump_pinguin)
 
 	add_to_group("player")
 
@@ -340,6 +373,9 @@ func _physics_process(delta: float) -> void:
 	):
 
 		velocity.y = JUMP_FORCE
+
+		if audio_jump_pinguin != null:
+			audio_jump_pinguin.play()
 
 
 	# ==========================================
@@ -797,6 +833,15 @@ func take_damage(
 
 
 	# ==========================================
+	# SOM DE DANO
+	# ==========================================
+	# Interrompe o áudio anterior antes de tocar novamente.
+
+	if audio_dano_pinguin != null:
+		audio_dano_pinguin.stop()
+		audio_dano_pinguin.play()
+
+	# ==========================================
 	# PERDE VIDA
 	# ==========================================
 
@@ -1245,6 +1290,21 @@ func die() -> void:
 
 	set_physics_process(false)
 
+
+	# ==========================================
+	# SOM DE MORTE
+	# ==========================================
+
+	var death_player := AudioStreamPlayer.new()
+	death_player.name = "PinguinDeathSound"
+	death_player.stream = som_morte_pinguin
+	death_player.volume_db = volume_morte_pinguin_db
+	death_player.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	var root := get_tree().root
+	root.add_child(death_player)
+	death_player.play()
+	death_player.finished.connect(death_player.queue_free)
 
 	# ==========================================
 	# GAME OVER
