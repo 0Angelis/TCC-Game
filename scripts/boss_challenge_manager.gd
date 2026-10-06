@@ -40,6 +40,11 @@ const WRONG_PENALTY: float = 5.0
 
 const CHALLENGE_TIME: float = 18.0
 
+const SOM_CLICK_BUTTON: AudioStream = preload("res://sounds/click_button.wav")
+
+@export_range(-40.0, 20.0, 0.5)
+var volume_click_button_db: float = 20.0
+
 
 # ============================================================
 # CORES
@@ -82,6 +87,8 @@ var feedback_label: Label = null
 var start_prompt: Panel = null
 var start_prompt_label: Label = null
 
+var audio_click_button: AudioStreamPlayer = null
+
 
 # ============================================================
 # ESTADO
@@ -98,6 +105,11 @@ var challenge_limit: float = CHALLENGE_TIME
 var input_locked: bool = false
 
 var external_start_prompt: bool = false
+
+# O destaque do teclado so aparece depois que uma SETA e usada.
+# O mouse limpa o destaque imediatamente.
+var keyboard_navigation_enabled: bool = false
+var keyboard_selected_index: int = -1
 
 
 # ============================================================
@@ -150,9 +162,36 @@ var memory_position: int = 0
 
 func _ready() -> void:
 
+	_setup_click_sound()
+
 	_build_ui()
 
 	hide_all()
+
+
+# ============================================================
+# SOM DE CLIQUE
+# ============================================================
+
+func _setup_click_sound() -> void:
+
+	audio_click_button = AudioStreamPlayer.new()
+	audio_click_button.name = "AudioClickButton"
+	audio_click_button.stream = SOM_CLICK_BUTTON
+	audio_click_button.volume_db = volume_click_button_db
+	audio_click_button.bus = "Master"
+	audio_click_button.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	add_child(audio_click_button)
+
+
+func _play_click_sound() -> void:
+
+	if audio_click_button == null:
+		return
+
+	audio_click_button.volume_db = volume_click_button_db
+	audio_click_button.play()
 
 
 # ============================================================
@@ -194,102 +233,155 @@ func _process(
 # INPUT
 # ============================================================
 
-func _unhandled_input(
+func _input(
 	event: InputEvent
 ) -> void:
 
 	if input_locked:
 		return
 
-	if not event is InputEventKey:
+	if state == "ready":
+		if event is InputEventKey:
+			var start_key: InputEventKey = event as InputEventKey
+			if not start_key.pressed or start_key.echo:
+				return
+			if start_key.keycode == KEY_ENTER or start_key.keycode == KEY_KP_ENTER:
+				_play_click_sound()
+				start_current_challenge()
+				get_viewport().set_input_as_handled()
+				return
 		return
-
-	var key_event: InputEventKey = (
-		event as InputEventKey
-	)
-
-	if not key_event.pressed:
-		return
-
-	if key_event.echo:
-		return
-
-
-	# ========================================================
-	# E
-	# ========================================================
-
-	if (
-		state == "ready"
-		and
-		(
-			key_event.keycode == KEY_E
-			or
-			key_event.physical_keycode == KEY_E
-		)
-	):
-
-		start_current_challenge()
-
-		get_viewport().set_input_as_handled()
-
-		return
-
 
 	if state != "active":
 		return
 
+	if not event is InputEventKey:
+		return
 
-	# ========================================================
-	# 1
-	# ========================================================
+	var key_event: InputEventKey = event as InputEventKey
 
-	if key_event.keycode == KEY_1:
+	if not key_event.pressed or key_event.echo:
+		return
 
+	if key_event.keycode == KEY_LEFT or key_event.keycode == KEY_UP:
+		_move_keyboard_focus(-1)
+		get_viewport().set_input_as_handled()
+		return
+
+	if key_event.keycode == KEY_RIGHT or key_event.keycode == KEY_DOWN:
+		_move_keyboard_focus(1)
+		get_viewport().set_input_as_handled()
+		return
+
+	if key_event.keycode == KEY_1 or key_event.keycode == KEY_KP_1:
 		_press_index(0)
-
 		get_viewport().set_input_as_handled()
-
 		return
 
-
-	# ========================================================
-	# 2
-	# ========================================================
-
-	if key_event.keycode == KEY_2:
-
+	if key_event.keycode == KEY_2 or key_event.keycode == KEY_KP_2:
 		_press_index(1)
-
 		get_viewport().set_input_as_handled()
-
 		return
 
-
-	# ========================================================
-	# 3
-	# ========================================================
-
-	if key_event.keycode == KEY_3:
-
+	if key_event.keycode == KEY_3 or key_event.keycode == KEY_KP_3:
 		_press_index(2)
-
 		get_viewport().set_input_as_handled()
-
 		return
 
-
-	# ========================================================
-	# 4
-	# ========================================================
-
-	if key_event.keycode == KEY_4:
-
+	if key_event.keycode == KEY_4 or key_event.keycode == KEY_KP_4:
 		_press_index(3)
-
 		get_viewport().set_input_as_handled()
-
 		return
+
+	if key_event.keycode == KEY_ENTER or key_event.keycode == KEY_KP_ENTER:
+		if keyboard_navigation_enabled:
+			_play_click_sound()
+			_press_focused_button()
+			get_viewport().set_input_as_handled()
+		return
+
+
+func _move_keyboard_focus(
+	direction_step: int
+) -> void:
+
+	if active_buttons.is_empty():
+		return
+
+	keyboard_navigation_enabled = true
+
+	if keyboard_selected_index < 0 or keyboard_selected_index >= active_buttons.size():
+		if direction_step > 0:
+			keyboard_selected_index = 0
+		else:
+			keyboard_selected_index = active_buttons.size() - 1
+		_apply_keyboard_selection()
+		return
+
+	var next_index: int = keyboard_selected_index + direction_step
+	var attempts: int = active_buttons.size()
+
+	while attempts > 0:
+		if next_index < 0:
+			next_index = active_buttons.size() - 1
+		elif next_index >= active_buttons.size():
+			next_index = 0
+
+		var next_button: Button = active_buttons[next_index]
+		if is_instance_valid(next_button) and not next_button.disabled:
+			keyboard_selected_index = next_index
+			_apply_keyboard_selection()
+			return
+
+		next_index += direction_step
+		attempts -= 1
+
+
+func _apply_keyboard_selection() -> void:
+
+	for i in range(active_buttons.size()):
+		var button: Button = active_buttons[i]
+		if not is_instance_valid(button):
+			continue
+		_set_button_keyboard_selected(button, i == keyboard_selected_index and keyboard_navigation_enabled)
+
+
+func _set_button_keyboard_selected(
+	button: Button,
+	selected: bool
+) -> void:
+
+	if not is_instance_valid(button):
+		return
+
+	button.focus_mode = Control.FOCUS_NONE
+	button.release_focus()
+
+	if selected:
+		var selected_style: StyleBoxFlat = _button_style(Color("#3A2450"), PURPLE_LIGHT)
+		button.add_theme_stylebox_override("normal", selected_style)
+		button.add_theme_stylebox_override("hover", selected_style)
+		button.add_theme_stylebox_override("pressed", selected_style)
+	else:
+		button.add_theme_stylebox_override("normal", _button_style(Color("#241832"), Color("#54336F")))
+		button.add_theme_stylebox_override("hover", _button_style(Color("#37214E"), PURPLE_LIGHT))
+		button.add_theme_stylebox_override("pressed", _button_style(Color("#5C3281"), PURPLE_LIGHT))
+
+
+func _press_focused_button() -> void:
+
+	if not keyboard_navigation_enabled:
+		return
+
+	if keyboard_selected_index < 0 or keyboard_selected_index >= active_buttons.size():
+		return
+
+	var button: Button = active_buttons[keyboard_selected_index]
+	if not is_instance_valid(button) or button.disabled:
+		return
+
+	_animate_button_press(button)
+	button.emit_signal("pressed")
 
 
 # ============================================================
@@ -332,7 +424,7 @@ func prepare_challenge(
 	_create_start_prompt()
 
 	_set_start_text(
-		"[ E ] INICIAR DESAFIO %d"
+		"[ ENTER ]  INICIAR DESAFIO %d"
 		% (
 			current_round + 1
 		)
@@ -677,7 +769,84 @@ func _build_ui() -> void:
 
 
 # ============================================================
-# PROMPT E
+# COMANDOS PEQUENOS NOS BOTOES
+# ============================================================
+
+func _apply_keyboard_hints_and_focus() -> void:
+
+	keyboard_navigation_enabled = false
+	keyboard_selected_index = -1
+
+	for i in range(active_buttons.size()):
+		var button: Button = active_buttons[i]
+		if not is_instance_valid(button):
+			continue
+		button.focus_mode = Control.FOCUS_NONE
+		button.release_focus()
+		_add_key_hint(button, i + 1)
+
+	_apply_keyboard_selection()
+
+
+func _add_key_hint(
+	button: Button,
+	key_number: int
+) -> void:
+
+	var key_hint: Label = Label.new()
+	key_hint.text = "[%d]" % key_number
+	key_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	key_hint.position = Vector2(5, 3)
+	key_hint.size = Vector2(20, 12)
+	key_hint.add_theme_font_size_override("font_size", 7)
+	key_hint.add_theme_color_override("font_color", Color(MUTED.r, MUTED.g, MUTED.b, 0.35))
+	key_hint.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.30))
+	key_hint.add_theme_constant_override("outline_size", 1)
+	_apply_font(key_hint)
+	button.add_child(key_hint)
+
+
+func _clear_keyboard_selection() -> void:
+
+	keyboard_navigation_enabled = false
+	keyboard_selected_index = -1
+	_apply_keyboard_selection()
+
+
+func _on_answer_button_gui_input(
+	event: InputEvent,
+	button: Button
+) -> void:
+
+	if not event is InputEventMouseButton:
+		return
+
+	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+	if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+		_play_click_sound()
+		_clear_keyboard_selection()
+		_animate_button_press(button)
+
+
+func _animate_button_press(
+	button: Button
+) -> void:
+
+	if not is_instance_valid(button):
+		return
+
+	button.pivot_offset = button.size * 0.5
+
+	var tween: Tween = create_tween()
+	tween.set_trans(Tween.TRANS_QUAD)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(button, "scale", Vector2(1.055, 1.055), 0.06)
+	tween.set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(button, "scale", Vector2.ONE, 0.08)
+
+
+# ============================================================
+# PROMPT ENTER
 # ============================================================
 
 func _create_start_prompt() -> void:
@@ -687,21 +856,34 @@ func _create_start_prompt() -> void:
 
 	start_prompt = Panel.new()
 
+	# Mantem o mesmo painel visual, mas agora ele tambem
+	# funciona como um botao por clique do mouse.
+	start_prompt.mouse_filter = Control.MOUSE_FILTER_STOP
+	start_prompt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
+	if not start_prompt.gui_input.is_connected(
+		_on_start_prompt_gui_input
+	):
+
+		start_prompt.gui_input.connect(
+			_on_start_prompt_gui_input
+		)
+
 	start_prompt.position = Vector2(
 		430,
-		635
+		630
 	)
 
 	start_prompt.size = Vector2(
 		420,
-		64
+		58
 	)
 
 	start_prompt.add_theme_stylebox_override(
 		"panel",
 		_panel_style(
 			PANEL_2,
-			PURPLE,
+			PURPLE_LIGHT,
 			2,
 			9
 		)
@@ -712,8 +894,8 @@ func _create_start_prompt() -> void:
 	)
 
 	start_prompt_label = _label(
-		"[ E ] INICIAR DESAFIO",
-		18,
+		"[ ENTER ]  INICIAR DESAFIO",
+		14,
 		WHITE
 	)
 
@@ -732,6 +914,37 @@ func _create_start_prompt() -> void:
 	start_prompt.add_child(
 		start_prompt_label
 	)
+
+
+func _on_start_prompt_gui_input(
+	event: InputEvent
+) -> void:
+
+	if state != "ready":
+		return
+
+	if input_locked:
+		return
+
+	if event is not InputEventMouseButton:
+		return
+
+	var mouse_event: InputEventMouseButton = (
+		event as InputEventMouseButton
+	)
+
+	if (
+		mouse_event.button_index
+		== MOUSE_BUTTON_LEFT
+		and
+		mouse_event.pressed
+	):
+
+		_play_click_sound()
+
+		start_current_challenge()
+
+		get_viewport().set_input_as_handled()
 
 
 func _set_start_text(
@@ -773,6 +986,9 @@ func _clear_body() -> void:
 		child.queue_free()
 
 	active_buttons.clear()
+
+	keyboard_navigation_enabled = false
+	keyboard_selected_index = -1
 
 	memory_buttons.clear()
 
@@ -863,8 +1079,11 @@ func _make_button(
 	button.text = text_value
 
 	button.focus_mode = (
-		Control.FOCUS_ALL
+		Control.FOCUS_NONE
 	)
+
+	if not button.gui_input.is_connected(_on_answer_button_gui_input):
+		button.gui_input.connect(_on_answer_button_gui_input.bind(button))
 
 	button.mouse_default_cursor_shape = (
 		Control.CURSOR_POINTING_HAND
@@ -894,6 +1113,11 @@ func _make_button(
 		WHITE
 	)
 
+	button.add_theme_color_override(
+		"font_focus_color",
+		WHITE
+	)
+
 	button.add_theme_stylebox_override(
 		"normal",
 		_button_style(
@@ -914,6 +1138,14 @@ func _make_button(
 		"pressed",
 		_button_style(
 			Color("#5C3281"),
+			PURPLE_LIGHT
+		)
+	)
+
+	button.add_theme_stylebox_override(
+		"focus",
+		_button_style(
+			Color("#3A2450"),
 			PURPLE_LIGHT
 		)
 	)
@@ -1364,6 +1596,9 @@ func _create_integer_answer_row(
 		)
 
 
+	_apply_keyboard_hints_and_focus()
+
+
 func _on_logic_answer(
 	value: int
 ) -> void:
@@ -1569,6 +1804,9 @@ func _create_attention_buttons() -> void:
 		)
 
 
+	_apply_keyboard_hints_and_focus()
+
+
 func _on_attention_answer(
 	value: String
 ) -> void:
@@ -1739,6 +1977,12 @@ func _build_memory_number_buttons() -> void:
 		memory_buttons.append(
 			button
 		)
+
+
+	active_buttons.clear()
+	for memory_button: Button in memory_buttons:
+		active_buttons.append(memory_button)
+	_apply_keyboard_hints_and_focus()
 
 
 func _on_memory_number(
@@ -1971,6 +2215,12 @@ func _build_memory_word_buttons() -> void:
 		)
 
 
+	active_buttons.clear()
+	for memory_button: Button in memory_buttons:
+		active_buttons.append(memory_button)
+	_apply_keyboard_hints_and_focus()
+
+
 func _on_memory_word(
 	word: String,
 	button: Button
@@ -2108,6 +2358,9 @@ func _build_order_numbers() -> void:
 	input_locked = false
 
 
+	_apply_keyboard_hints_and_focus()
+
+
 func _on_order_answer(
 	selected_index: int
 ) -> void:
@@ -2139,17 +2392,19 @@ func _press_index(
 		or
 		index >= active_buttons.size()
 	):
-
 		return
 
-	if not is_instance_valid(
-		active_buttons[index]
-	):
+	var button: Button = active_buttons[index]
 
+	if not is_instance_valid(button):
 		return
 
-	active_buttons[
-		index
-	].emit_signal(
-		"pressed"
-	)
+	if button.disabled:
+		return
+
+	# Atalho numerico: animacao apenas no botao apertado.
+	# Nao deixa selecao permanente.
+	_play_click_sound()
+	_animate_button_press(button)
+
+	button.emit_signal("pressed")
