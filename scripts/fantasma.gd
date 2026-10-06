@@ -2,6 +2,20 @@ extends CharacterBody2D
 
 
 # ==========================================
+# SOM DA MORTE
+# ==========================================
+
+const SOM_MORTE := preload(
+	"res://sounds/inimigos/morte_fantasma.wav"
+)
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_morte_db: float = 0.0
+
+var audio_morte: AudioStreamPlayer = null
+
+
+# ==========================================
 # MOVIMENTO
 # ==========================================
 
@@ -70,6 +84,8 @@ var player: Node2D = null
 
 func _ready() -> void:
 
+	_setup_som_morte()
+
 	add_to_group("enemies")
 
 	direction = -1
@@ -105,6 +121,40 @@ func _ready() -> void:
 		if animated_sprite.sprite_frames.has_animation("idle"):
 
 			animated_sprite.play("idle")
+
+
+# ==========================================
+# CONFIGURAÇÃO DO SOM DA MORTE
+# ==========================================
+
+func _setup_som_morte() -> void:
+
+	audio_morte = AudioStreamPlayer.new()
+
+	audio_morte.name = "AudioMorteFantasma"
+
+	audio_morte.stream = SOM_MORTE
+
+	audio_morte.volume_db = volume_morte_db
+
+	audio_morte.bus = "Master"
+
+	audio_morte.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	add_child(audio_morte)
+
+
+# ==========================================
+# TOCAR SOM DA MORTE
+# ==========================================
+
+func _play_death_sound() -> void:
+
+	if audio_morte == null:
+		return
+
+	audio_morte.stop()
+	audio_morte.play()
 
 
 # ==========================================
@@ -506,6 +556,9 @@ func matar_fantasma() -> void:
 
 
 	is_dead = true
+
+	# Som da morte.
+	_play_death_sound()
 
 
 	# ==========================================

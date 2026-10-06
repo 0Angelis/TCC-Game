@@ -25,6 +25,7 @@
 [ext_resource type="Script" uid="uid://dhx83fqukj7ji" path="res://scripts/transition.gd" id="22_tnbok"]
 [ext_resource type="Shader" uid="uid://cfqg8x3kad7tx" path="res://shaders/transition.gdshader" id="23_lpku0"]
 [ext_resource type="Script" uid="uid://b63do7fmlktm2" path="res://scripts/color_rect.gd" id="24_1m6rt"]
+[ext_resource type="Script" uid="uid://b3n8n3xtjlvm4" path="res://scripts/mundo_05_music.gd" id="31_jaywk"]
 [ext_resource type="Script" uid="uid://davd5atp6b5si" path="res://scripts/final.gd" id="33_443h2"]
 [ext_resource type="Texture2D" uid="uid://ciui18xao3bit" path="res://assets/Comandos/Red!Assets.png" id="34_tk66p"]
 [ext_resource type="PackedScene" uid="uid://bbn2y2xyd8qva" path="res://actors/player.tscn" id="35_p0jlc"]
@@ -2799,3 +2800,6 @@ collision_layer = 2
 [node name="colission" type="CollisionShape2D" parent="warning_sign3/area_sign" unique_id=1023073173]
 position = Vector2(2, -2)
 shape = SubResource("RectangleShape2D_bi2pd")
+
+[node name="Mundo05Music" type="AudioStreamPlayer" parent="." unique_id=1811545216]
+script = ExtResource("31_jaywk")

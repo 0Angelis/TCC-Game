@@ -2,6 +2,38 @@ extends CharacterBody2D
 
 
 # ==========================================
+# SONS
+# ==========================================
+
+const SOM_ATAQUE := preload(
+	"res://sounds/inimigos/soco_brabao.wav"
+)
+
+const SOM_MORTE := preload(
+	"res://sounds/inimigos/morte_brabao.wav"
+)
+
+
+# ==========================================
+# VOLUME DOS SONS
+# ==========================================
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_ataque_db: float = -15.0
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_morte_db: float = -6.0
+
+
+# ==========================================
+# PLAYERS DE ÁUDIO
+# ==========================================
+
+var audio_ataque: AudioStreamPlayer = null
+var audio_morte: AudioStreamPlayer = null
+
+
+# ==========================================
 # MOVIMENTO
 # ==========================================
 
@@ -90,6 +122,8 @@ const TURN_COOLDOWN: float = 0.20
 
 func _ready() -> void:
 
+	_setup_sons()
+
 	add_to_group("enemies")
 
 	_find_player()
@@ -146,6 +180,78 @@ func _ready() -> void:
 	print("==============================")
 	print("CROCS INICIADO")
 	print("==============================")
+
+
+# ==========================================
+# CONFIGURAÇÃO DOS SONS
+# ==========================================
+
+func _setup_sons() -> void:
+
+	# ------------------------------------------
+	# SOM DE ATAQUE
+	# ------------------------------------------
+
+	audio_ataque = AudioStreamPlayer.new()
+
+	audio_ataque.name = "AudioAtaqueBrabao"
+
+	audio_ataque.stream = SOM_ATAQUE
+
+	audio_ataque.volume_db = volume_ataque_db
+
+	audio_ataque.bus = "Master"
+
+	audio_ataque.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	add_child(audio_ataque)
+
+
+	# ------------------------------------------
+	# SOM DE MORTE
+	# ------------------------------------------
+
+	audio_morte = AudioStreamPlayer.new()
+
+	audio_morte.name = "AudioMorteBrabao"
+
+	audio_morte.stream = SOM_MORTE
+
+	audio_morte.volume_db = volume_morte_db
+
+	audio_morte.bus = "Master"
+
+	audio_morte.process_mode = Node.PROCESS_MODE_ALWAYS
+
+	add_child(audio_morte)
+
+
+# ==========================================
+# TOCAR SOM DE ATAQUE
+# ==========================================
+
+func _play_attack_sound() -> void:
+
+	if audio_ataque == null:
+		return
+
+	audio_ataque.stop()
+
+	audio_ataque.play()
+
+
+# ==========================================
+# TOCAR SOM DE MORTE
+# ==========================================
+
+func _play_death_sound() -> void:
+
+	if audio_morte == null:
+		return
+
+	audio_morte.stop()
+
+	audio_morte.play()
 
 
 # ==========================================
@@ -555,6 +661,9 @@ func _start_attack() -> void:
 	velocity.x = 0.0
 
 	_face_player()
+
+	# Som do soco no início do ataque.
+	_play_attack_sound()
 
 	if animated_sprite.sprite_frames != null:
 
@@ -984,6 +1093,13 @@ func matar_crocs() -> void:
 	# ==========================================
 
 	ray_cast.enabled = false
+
+
+	# ==========================================
+	# SOM DA MORTE
+	# ==========================================
+
+	_play_death_sound()
 
 
 	# ==========================================

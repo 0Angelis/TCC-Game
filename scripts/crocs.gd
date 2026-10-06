@@ -2,6 +2,18 @@ extends CharacterBody2D
 
 
 # ==========================================
+# SOM DE MORTE
+# ==========================================
+
+const SOM_MORTE := preload("res://sounds/inimigos/morte_crocs.wav")
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_morte_db: float = -12.0
+
+var audio_morte: AudioStreamPlayer
+
+
+# ==========================================
 # MOVIMENTO
 # ==========================================
 
@@ -71,6 +83,18 @@ const TURN_COOLDOWN: float = 0.20
 func _ready() -> void:
 
 	add_to_group("enemies")
+
+	# ==========================================
+	# CONFIGURA SOM DE MORTE
+	# ==========================================
+
+	audio_morte = AudioStreamPlayer.new()
+	audio_morte.name = "AudioMorteCrocs"
+	audio_morte.stream = SOM_MORTE
+	audio_morte.volume_db = volume_morte_db
+	audio_morte.bus = "Master"
+	audio_morte.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(audio_morte)
 
 
 	# ==========================================
@@ -626,6 +650,18 @@ func take_damage() -> void:
 
 
 # ==========================================
+# SOM DE MORTE
+# ==========================================
+
+func _play_death_sound() -> void:
+	if audio_morte == null:
+		return
+
+	audio_morte.volume_db = volume_morte_db
+	audio_morte.play()
+
+
+# ==========================================
 # MORTE
 # ==========================================
 
@@ -637,6 +673,9 @@ func matar_crocs() -> void:
 
 
 	is_dead = true
+
+	# Toca o som imediatamente quando o Crocs morre.
+	_play_death_sound()
 
 
 	# ==========================================

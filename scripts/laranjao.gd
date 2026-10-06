@@ -39,6 +39,18 @@ var is_dead: bool = false
 
 
 # ==========================================
+# SOM DE MORTE
+# ==========================================
+
+const SOM_MORTE := preload("res://sounds/inimigos/morte_laranjao.wav")
+
+@export_range(-40.0, 10.0, 0.5)
+var volume_morte_db: float = 0.0
+
+var audio_morte: AudioStreamPlayer
+
+
+# ==========================================
 # NÓS
 # ==========================================
 
@@ -56,6 +68,18 @@ var is_dead: bool = false
 func _ready() -> void:
 
 	add_to_group("enemies")
+
+	# ==========================================
+	# CONFIGURA SOM DE MORTE
+	# ==========================================
+
+	audio_morte = AudioStreamPlayer.new()
+	audio_morte.name = "AudioMorteLaranja"
+	audio_morte.stream = SOM_MORTE
+	audio_morte.volume_db = volume_morte_db
+	audio_morte.bus = "Master"
+	audio_morte.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(audio_morte)
 
 
 	# ==========================================
@@ -497,6 +521,10 @@ func matar_laranja() -> void:
 
 
 	is_dead = true
+
+	# SOM DE MORTE
+	if is_instance_valid(audio_morte):
+		audio_morte.play()
 
 
 	# ==========================================

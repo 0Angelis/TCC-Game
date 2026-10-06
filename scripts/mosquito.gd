@@ -39,6 +39,18 @@ var is_dead: bool = false
 
 
 # ==========================================
+# SOM DE MORTE
+# ==========================================
+
+const SOM_MORTE := preload("res://sounds/inimigos/morte_mosquito.wav")
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_morte_db: float = -15.0
+
+var audio_morte: AudioStreamPlayer
+
+
+# ==========================================
 # NÓS
 # ==========================================
 
@@ -54,6 +66,17 @@ var is_dead: bool = false
 # ==========================================
 
 func _ready() -> void:
+
+	# ==========================================
+	# CONFIGURA SOM DE MORTE
+	# ==========================================
+
+	audio_morte = AudioStreamPlayer.new()
+	audio_morte.name = "AudioMorte"
+	audio_morte.stream = SOM_MORTE
+	audio_morte.volume_db = volume_morte_db
+	audio_morte.bus = "Master"
+	add_child(audio_morte)
 
 	add_to_group("enemies")
 
@@ -545,6 +568,10 @@ func matar_minhoca() -> void:
 
 
 	is_dead = true
+
+	# Toca o som de morte imediatamente ao derrotar o inimigo.
+	if is_instance_valid(audio_morte):
+		audio_morte.play()
 
 	is_attacking = false
 

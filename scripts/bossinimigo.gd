@@ -12,6 +12,62 @@ signal boss_defeated
 
 
 # ============================================================
+# SONS DO BOSS
+# ============================================================
+
+const SOM_ATAQUE := preload(
+	"res://sounds/inimigos/ataque_boss.wav"
+)
+
+const SOM_PULO := preload(
+	"res://sounds/inimigos/jump_boss.wav"
+)
+
+const SOM_DANO := preload(
+	"res://sounds/inimigos/dano_boss.wav"
+)
+
+const SOM_CURA := preload(
+	"res://sounds/inimigos/cura_boss.wav"
+)
+
+const SOM_MORTE := preload(
+	"res://sounds/inimigos/boss_morte.wav"
+)
+
+
+# ============================================================
+# VOLUME DOS SONS
+# ============================================================
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_ataque_db: float = -12.0
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_pulo_db: float = 5.0
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_dano_db: float = -5.0
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_cura_db: float = -15.0
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_morte_db: float = -15.0
+
+
+# ============================================================
+# PLAYERS DE ÁUDIO
+# ============================================================
+
+var audio_ataque: AudioStreamPlayer = null
+var audio_pulo: AudioStreamPlayer = null
+var audio_dano: AudioStreamPlayer = null
+var audio_cura: AudioStreamPlayer = null
+var audio_morte: AudioStreamPlayer = null
+
+
+# ============================================================
 # SPRITE
 # ============================================================
 
@@ -230,6 +286,8 @@ var player: CharacterBody2D = null
 
 func _ready() -> void:
 
+	_setup_boss_sounds()
+
 	add_to_group("enemies")
 	add_to_group("boss")
 
@@ -302,6 +360,142 @@ func _ready() -> void:
 	print("BOSS PRONTO")
 	print("VIDA: ", current_health, "/", max_health)
 	print("================================")
+
+
+# ============================================================
+# CONFIGURAÇÃO DOS SONS
+# ============================================================
+
+func _setup_boss_sounds() -> void:
+
+	# --------------------------------------------------------
+	# ATAQUE
+	# --------------------------------------------------------
+
+	audio_ataque = AudioStreamPlayer.new()
+	audio_ataque.name = "AudioAtaqueBoss"
+	audio_ataque.stream = SOM_ATAQUE
+	audio_ataque.volume_db = volume_ataque_db
+	audio_ataque.bus = "Master"
+	audio_ataque.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(audio_ataque)
+
+
+	# --------------------------------------------------------
+	# PULO
+	# --------------------------------------------------------
+
+	audio_pulo = AudioStreamPlayer.new()
+	audio_pulo.name = "AudioPuloBoss"
+	audio_pulo.stream = SOM_PULO
+	audio_pulo.volume_db = volume_pulo_db
+	audio_pulo.bus = "Master"
+	audio_pulo.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(audio_pulo)
+
+
+	# --------------------------------------------------------
+	# DANO
+	# --------------------------------------------------------
+
+	audio_dano = AudioStreamPlayer.new()
+	audio_dano.name = "AudioDanoBoss"
+	audio_dano.stream = SOM_DANO
+	audio_dano.volume_db = volume_dano_db
+	audio_dano.bus = "Master"
+	audio_dano.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(audio_dano)
+
+
+	# --------------------------------------------------------
+	# CURA
+	# --------------------------------------------------------
+
+	audio_cura = AudioStreamPlayer.new()
+	audio_cura.name = "AudioCuraBoss"
+	audio_cura.stream = SOM_CURA
+	audio_cura.volume_db = volume_cura_db
+	audio_cura.bus = "Master"
+	audio_cura.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(audio_cura)
+
+
+	# --------------------------------------------------------
+	# MORTE
+	# --------------------------------------------------------
+
+	audio_morte = AudioStreamPlayer.new()
+	audio_morte.name = "AudioMorteBoss"
+	audio_morte.stream = SOM_MORTE
+	audio_morte.volume_db = volume_morte_db
+	audio_morte.bus = "Master"
+	audio_morte.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(audio_morte)
+
+
+# ============================================================
+# TOCAR SOM DE ATAQUE
+# ============================================================
+
+func _play_attack_sound() -> void:
+
+	if audio_ataque == null:
+		return
+
+	audio_ataque.stop()
+	audio_ataque.play()
+
+
+# ============================================================
+# TOCAR SOM DE PULO
+# ============================================================
+
+func _play_jump_sound() -> void:
+
+	if audio_pulo == null:
+		return
+
+	audio_pulo.stop()
+	audio_pulo.play()
+
+
+# ============================================================
+# TOCAR SOM DE DANO
+# ============================================================
+
+func _play_damage_sound() -> void:
+
+	if audio_dano == null:
+		return
+
+	audio_dano.stop()
+	audio_dano.play()
+
+
+# ============================================================
+# TOCAR SOM DE CURA
+# ============================================================
+
+func _play_heal_sound() -> void:
+
+	if audio_cura == null:
+		return
+
+	audio_cura.stop()
+	audio_cura.play()
+
+
+# ============================================================
+# TOCAR SOM DE MORTE
+# ============================================================
+
+func _play_death_sound() -> void:
+
+	if audio_morte == null:
+		return
+
+	audio_morte.stop()
+	audio_morte.play()
 
 
 # ============================================================
@@ -1067,6 +1261,9 @@ func _start_jump() -> void:
 		horizontal_speed
 	)
 
+	# Som do pulo exatamente quando o impulso acontece.
+	_play_jump_sound()
+
 
 	_play_animation("pular")
 
@@ -1354,6 +1551,9 @@ func _begin_dash() -> void:
 		*
 		ATTACK_DASH_SPEED
 	)
+
+	# Som toca quando o ataque/dash realmente começa.
+	_play_attack_sound()
 
 
 	boss_attack_started.emit()
@@ -2246,6 +2446,12 @@ func take_boss_damage(
 		return
 
 
+	# Som de dano do boss.
+	# O boss.gd chama esta função quando o desafio/pergunta
+	# causa dano real na vida do boss.
+	_play_damage_sound()
+
+
 	current_health = max(
 		current_health - amount,
 		0
@@ -2289,6 +2495,11 @@ func heal_boss(
 	if amount <= 0:
 
 		return
+
+
+	# Som de cura do boss.
+	# Esta função é usada quando o jogador erra a pergunta/desafio.
+	_play_heal_sound()
 
 
 	current_health = min(
@@ -2506,6 +2717,12 @@ func _defeat() -> void:
 			"monitoring",
 			false
 		)
+
+
+	# Som final da morte do boss.
+	# Toca antes de avisar o controlador para garantir
+	# que o som comece mesmo quando o diálogo de vitória abre.
+	_play_death_sound()
 
 
 	# Mantém a animação de dano/morte na tela

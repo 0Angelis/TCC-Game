@@ -15,3 +15,13 @@ res://levels/world_03.tscn
 res://scripts/memory_game.gd
 res://scripts/mundo_03_music.gd
 res://scripts/credits.gd
+res://scripts/mundo_04_music.gd
+res://levels/world_05.tscn
+res://scripts/mundo_05_music.gd
+res://scripts/bossinimigo.gd
+res://scripts/brabao.gd
+res://scripts/fantasma.gd
+res://scripts/crocs.gd
+res://scripts/mosquito.gd
+res://scripts/laranjao.gd
+res://scripts/minhoca.gd
