@@ -42,6 +42,7 @@
 [ext_resource type="PackedScene" uid="uid://cu31oefxt7lgm" path="res://prefabs/frag_raciocinio.tscn" id="38_w682u"]
 [ext_resource type="Texture2D" uid="uid://djh3810gxagfq" path="res://assets/portal/ChatGPT Image 22 de ago. de 2026, 14_23_51.png" id="39_n1cxq"]
 [ext_resource type="Texture2D" uid="uid://cpqtblxl8p0bl" path="res://assets/portal/Purple Portal Sprite Sheet.png" id="40_n1cxq"]
+[ext_resource type="Script" uid="uid://u7i3lnlq3qu1" path="res://scripts/mundo_02_music.gd" id="43_oyd7s"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_j8rs1"]
 tile_data = PackedInt32Array(0, 65537, 1)
@@ -1627,3 +1628,6 @@ position = Vector2(-803, -332)
 
 [node name="frag_raciocinio4" parent="Fragmentos" unique_id=1163845356 instance=ExtResource("38_w682u")]
 position = Vector2(-823, -332)
+
+[node name="Mundo02Music" type="AudioStreamPlayer" parent="." unique_id=846653085]
+script = ExtResource("43_oyd7s")

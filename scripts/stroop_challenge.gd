@@ -362,6 +362,10 @@ var final_error_label: Label = null
 
 var final_enter_button: Button = null
 
+# Animação de seleção do botão final.
+var final_button_hover_tween: Tween = null
+var final_button_is_hovered := false
+
 # Evita qualquer acionamento duplicado da tela final.
 var final_action_locked := false
 
@@ -3694,6 +3698,25 @@ func _show_final_screen(
 		Control.CURSOR_POINTING_HAND
 	)
 
+	if not final_enter_button.mouse_entered.is_connected(
+		_on_final_button_mouse_entered
+	):
+		final_enter_button.mouse_entered.connect(
+			_on_final_button_mouse_entered
+		)
+
+	if not final_enter_button.mouse_exited.is_connected(
+		_on_final_button_mouse_exited
+	):
+		final_enter_button.mouse_exited.connect(
+			_on_final_button_mouse_exited
+		)
+
+	final_button_is_hovered = false
+	final_enter_button.pivot_offset = (
+		final_enter_button.size * 0.5
+	)
+
 	if success:
 
 		final_enter_button.pressed.connect(
@@ -4545,6 +4568,12 @@ func _clear_final_screen() -> void:
 	final_overlay = null
 	final_panel = null
 
+	if final_button_hover_tween != null:
+		final_button_hover_tween.kill()
+		final_button_hover_tween = null
+
+	final_button_is_hovered = false
+
 	if final_title_label != null:
 
 		if is_instance_valid(
@@ -4605,6 +4634,17 @@ func _close_result_screen() -> void:
 
 	final_action_locked = true
 
+	# Som de clique ao confirmar CONTINUAR.
+	if audio_click_button != null:
+		audio_click_button.stop()
+		audio_click_button.play()
+
+	if final_button_hover_tween != null:
+		final_button_hover_tween.kill()
+		final_button_hover_tween = null
+
+	final_button_is_hovered = false
+
 	result_screen_active = false
 
 	time_up_message = false
@@ -4655,6 +4695,17 @@ func _restart_after_timeout() -> void:
 
 	final_action_locked = true
 
+	# Som de clique ao confirmar TENTAR NOVAMENTE.
+	if audio_click_button != null:
+		audio_click_button.stop()
+		audio_click_button.play()
+
+	if final_button_hover_tween != null:
+		final_button_hover_tween.kill()
+		final_button_hover_tween = null
+
+	final_button_is_hovered = false
+
 	result_screen_active = false
 
 	time_up_message = false
@@ -4664,6 +4715,94 @@ func _restart_after_timeout() -> void:
 
 
 	start_challenge()
+
+
+# =========================================================
+# ANIMAÇÃO DE SELEÇÃO DO BOTÃO FINAL
+# =========================================================
+
+func _on_final_button_mouse_entered() -> void:
+
+	if final_enter_button == null:
+		return
+
+	if not is_instance_valid(final_enter_button):
+		return
+
+	if final_button_hover_tween != null:
+		final_button_hover_tween.kill()
+
+	final_button_is_hovered = true
+
+	final_enter_button.pivot_offset = (
+		final_enter_button.size * 0.5
+	)
+
+	final_button_hover_tween = create_tween()
+	final_button_hover_tween.set_parallel(true)
+
+	# Cresce levemente no próprio centro.
+	final_button_hover_tween.tween_property(
+		final_enter_button,
+		"scale",
+		Vector2(1.045, 1.045),
+		0.12
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+	# Clareia um pouco para deixar claro que está selecionado.
+	final_button_hover_tween.tween_property(
+		final_enter_button,
+		"modulate",
+		Color(1.12, 1.12, 1.12, 1.0),
+		0.12
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+
+func _on_final_button_mouse_exited() -> void:
+
+	if final_enter_button == null:
+		return
+
+	if not is_instance_valid(final_enter_button):
+		return
+
+	if final_button_hover_tween != null:
+		final_button_hover_tween.kill()
+
+	final_button_is_hovered = false
+
+	final_button_hover_tween = create_tween()
+	final_button_hover_tween.set_parallel(true)
+
+	final_button_hover_tween.tween_property(
+		final_enter_button,
+		"scale",
+		Vector2(1.0, 1.0),
+		0.10
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+	final_button_hover_tween.tween_property(
+		final_enter_button,
+		"modulate",
+		Color.WHITE,
+		0.10
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
 
 
 # =========================================================

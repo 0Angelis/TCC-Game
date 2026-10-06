@@ -93,7 +93,7 @@ var som_morte_pinguin = preload("res://sounds/pinguin/morte_pinguin.wav")
 
 @export_category("Volume dos Sons")
 @export_range(-40.0, 20.0, 0.5) var volume_dano_pinguin_db: float = 0.0
-@export_range(-40.0, 20.0, 0.5) var volume_jump_pinguin_db: float = 5.0
+@export_range(-40.0, 20.0, 0.5) var volume_jump_pinguin_db: float = -5.0
 @export_range(-40.0, 20.0, 0.5) var volume_morte_pinguin_db: float = 0.0
 
 var audio_dano_pinguin: AudioStreamPlayer = null
@@ -573,6 +573,23 @@ func verificar_colisao_com_inimigo() -> void:
 		if not other_body.is_in_group("enemies"):
 
 			continue
+
+
+		# ==========================================
+		# BOSS ANTES DA BATALHA
+		# ==========================================
+		# O boss pertence ao grupo "enemies", mas não pode
+		# causar dano por colisão enquanto o diálogo ainda não
+		# terminou. O próprio boss controla damage_enabled.
+		if other_body.is_in_group("boss"):
+
+			var boss_damage_enabled = (
+				other_body.get("damage_enabled")
+			)
+
+			if boss_damage_enabled == false:
+
+				continue
 
 
 		var enemy_dead = (

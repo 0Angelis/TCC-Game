@@ -46,6 +46,8 @@
 [ext_resource type="PackedScene" uid="uid://cu31oefxt7lgm" path="res://prefabs/frag_raciocinio.tscn" id="40_0aqq2"]
 [ext_resource type="Texture2D" uid="uid://cthvhxko1jkd8" path="res://assets/Sunny-land-files/Assets/environment/Props/tree-house.png" id="45_ln80i"]
 [ext_resource type="Texture2D" uid="uid://cg3h7vxms8duv" path="res://assets/Sunny-land-files/Assets/environment/Props/wooden-house.png" id="46_jt6s7"]
+[ext_resource type="AudioStream" uid="uid://b512vcvanma7a" path="res://sounds/mundos/mundo01.wav" id="47_5ha83"]
+[ext_resource type="Script" uid="uid://dhwptgbocjcis" path="res://scripts/mundo_01_music.gd" id="48_gutd6"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_j8rs1"]
 tile_data = PackedInt32Array(0, 65537, 1)
@@ -943,7 +945,7 @@ sprite_frames = SubResource("SpriteFrames_ffp5f")
 autoplay = "default"
 
 [node name="atention2" type="AnimatedSprite2D" parent="atention" unique_id=216517122]
-position = Vector2(4131, 665)
+position = Vector2(4131.0005, 662)
 scale = Vector2(0.015, 0.015)
 sprite_frames = SubResource("SpriteFrames_ffp5f")
 autoplay = "default"
@@ -1675,7 +1677,7 @@ position = Vector2(1.75, -2)
 shape = SubResource("RectangleShape2D_sob1t")
 
 [node name="warning_sing19" type="Node2D" parent="warning" unique_id=1004253775]
-position = Vector2(3643, 315)
+position = Vector2(3643, 312)
 script = ExtResource("20_6ibfi")
 dialog_texts = Array[String](["Eu... lembrei de alguma coisa.", "Foi só um instante... uma imagem, uma sensação...", "Mas desapareceu rápido demais.", "Então é isso... os fragmentos estão trazendo minhas lembranças de volta.", "Talvez eu não consiga lembrar de tudo de uma vez.", "A cada fragmento... uma parte de quem eu era volta para mim.", "Eu vou continuar.", "Talvez, quando eu recuperar todas as minhas memórias, eu finalmente descubra a verdade sobre mim."])
 
@@ -1839,3 +1841,8 @@ tipo_fragmento = "Raciocinio"
 [node name="frag_raciocinio5" parent="Fragmentos" unique_id=1284541050 instance=ExtResource("40_0aqq2")]
 position = Vector2(3132, -35)
 tipo_fragmento = "Raciocinio"
+
+[node name="Mundo01Music" type="AudioStreamPlayer" parent="." unique_id=1620946325]
+stream = ExtResource("47_5ha83")
+autoplay = true
+script = ExtResource("48_gutd6")
