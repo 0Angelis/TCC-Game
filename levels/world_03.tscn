@@ -1221,7 +1221,7 @@ position = Vector2(139331.23, 25874.998)
 scale = Vector2(55, 55)
 
 [node name="urso" parent="inimigos" unique_id=1888984014 instance=ExtResource("22_m0n0v")]
-position = Vector2(2137.4998, -675)
+position = Vector2(1574.9998, -675)
 scale = Vector2(56.249992, 56.249992)
 
 [node name="urso2" parent="inimigos" unique_id=1989341299 instance=ExtResource("22_m0n0v")]

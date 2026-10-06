@@ -112,6 +112,32 @@ const LAST_LIFE_SPEED_MULTIPLIER: float = 1.25
 
 
 # ==========================================
+# SONS
+# ==========================================
+
+const SOM_ACORDA := preload("res://sounds/inimigos/urso_acorda.wav")
+const SOM_ATAQUE := preload("res://sounds/inimigos/urso_ataque.wav")
+const SOM_DANO := preload("res://sounds/inimigos/urso_dano.wav")
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_acorda_db: float = 10.0
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_ataque_db: float = -5.0
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_dano_db: float = -50.0
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_morte_db: float = -50.0
+
+var audio_acorda: AudioStreamPlayer
+var audio_ataque: AudioStreamPlayer
+var audio_dano: AudioStreamPlayer
+var audio_morte: AudioStreamPlayer
+
+
+# ==========================================
 # NÓS
 # ==========================================
 
@@ -135,6 +161,8 @@ const LAST_LIFE_SPEED_MULTIPLIER: float = 1.25
 func _ready() -> void:
 
 	add_to_group("enemies")
+
+	_setup_sons()
 
 	is_dead = false
 	is_awake = false
@@ -202,6 +230,77 @@ func _ready() -> void:
 		hitbox.body_exited.connect(
 			_on_hitbox_body_exited
 	)
+
+
+# ==========================================
+# SONS
+# ==========================================
+
+func _setup_sons() -> void:
+
+	audio_acorda = AudioStreamPlayer.new()
+	audio_acorda.name = "AudioUrsoAcorda"
+	audio_acorda.stream = SOM_ACORDA
+	audio_acorda.volume_db = volume_acorda_db
+	audio_acorda.bus = "Master"
+	add_child(audio_acorda)
+
+	audio_ataque = AudioStreamPlayer.new()
+	audio_ataque.name = "AudioUrsoAtaque"
+	audio_ataque.stream = SOM_ATAQUE
+	audio_ataque.volume_db = volume_ataque_db
+	audio_ataque.bus = "Master"
+	add_child(audio_ataque)
+
+	audio_dano = AudioStreamPlayer.new()
+	audio_dano.name = "AudioUrsoDano"
+	audio_dano.stream = SOM_DANO
+	audio_dano.volume_db = volume_dano_db
+	audio_dano.bus = "Master"
+	add_child(audio_dano)
+
+	audio_morte = AudioStreamPlayer.new()
+	audio_morte.name = "AudioUrsoMorte"
+	audio_morte.stream = SOM_DANO
+	audio_morte.volume_db = volume_morte_db
+	audio_morte.bus = "Master"
+	add_child(audio_morte)
+
+
+func _tocar_som_acorda() -> void:
+
+	if audio_acorda == null:
+		return
+
+	audio_acorda.volume_db = volume_acorda_db
+	audio_acorda.play()
+
+
+func _tocar_som_ataque() -> void:
+
+	if audio_ataque == null:
+		return
+
+	audio_ataque.volume_db = volume_ataque_db
+	audio_ataque.play()
+
+
+func _tocar_som_dano() -> void:
+
+	if audio_dano == null:
+		return
+
+	audio_dano.volume_db = volume_dano_db
+	audio_dano.play()
+
+
+func _tocar_som_morte() -> void:
+
+	if audio_morte == null:
+		return
+
+	audio_morte.volume_db = volume_morte_db
+	audio_morte.play()
 
 
 # ==========================================
@@ -732,6 +831,7 @@ func acordar() -> void:
 
 	velocity.x = 0.0
 
+	_tocar_som_acorda()
 
 	print("URSO ACORDOU!")
 
@@ -1005,6 +1105,8 @@ func entrar_attack() -> void:
 
 
 	if can_attack:
+
+		_tocar_som_ataque()
 
 		can_attack = false
 
@@ -1384,6 +1486,8 @@ func reagir_ao_dano() -> void:
 		return
 
 
+	_tocar_som_dano()
+
 	is_hurt = true
 	is_attacking = false
 
@@ -1596,6 +1700,8 @@ func matar_urso() -> void:
 
 
 	is_dead = true
+
+	_tocar_som_morte()
 
 	is_awake = false
 	is_attacking = false
