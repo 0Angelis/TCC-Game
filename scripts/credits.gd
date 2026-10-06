@@ -28,6 +28,20 @@ const FONT_PATH: String = (
 	"OpenType (.otf)/PixeloidSans-Bold.otf"
 )
 
+# ============================================================
+# MUSICA DOS CREDITOS
+# ============================================================
+
+const MUSICA: AudioStream = preload(
+	"res://sounds/mundos/creditos.wav"
+)
+
+@export_range(-40.0, 5.0, 0.5)
+var volume_musica_db: float = -20.0
+
+var audio_musica: AudioStreamPlayer = null
+
+
 # Mais lento que antes.
 const CREDITS_SPEED: float = 40.0
 
@@ -99,6 +113,25 @@ func _ready() -> void:
 
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
+	# ========================================================
+	# MUSICA
+	# ========================================================
+
+	audio_musica = AudioStreamPlayer.new()
+	audio_musica.name = "CreditosMusic"
+	audio_musica.stream = MUSICA
+	audio_musica.volume_db = volume_musica_db
+	audio_musica.bus = "Master"
+	audio_musica.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(audio_musica)
+
+	# Comeca automaticamente.
+	audio_musica.play()
+
+	# Garante o loop mesmo sem configurar o WAV para repetir.
+	if not audio_musica.finished.is_connected(_on_musica_finished):
+		audio_musica.finished.connect(_on_musica_finished)
+
 	set_anchors_and_offsets_preset(
 		Control.PRESET_FULL_RECT
 	)
@@ -126,6 +159,16 @@ func _ready() -> void:
 		0,
 		viewport_size.y + 20.0
 	)
+
+
+# ============================================================
+# LOOP DA MUSICA
+# ============================================================
+
+func _on_musica_finished() -> void:
+
+	if audio_musica != null:
+		audio_musica.play()
 
 
 # ============================================================

@@ -1,11 +1,25 @@
 extends AudioStreamPlayer
 
+const MUSICA := preload("res://sounds/mundos/mundo03.wav")
 
-# Called when the node enters the scene tree for the first time.
+@export_range(-40.0, 5.0, 0.5)
+var volume_musica_db: float = -16.0
+
+
 func _ready() -> void:
-	pass # Replace with function body.
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	stream = MUSICA
+	volume_db = volume_musica_db
+	bus = "Master"
+
+	# garante que comece sozinho
+	play()
+
+	# garante o loop mesmo sem configurar pelo Import
+	if not finished.is_connected(_on_finished):
+		finished.connect(_on_finished)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+func _on_finished() -> void:
+	play()
