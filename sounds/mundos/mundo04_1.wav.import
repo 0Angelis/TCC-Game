@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://dtdf2pip53nex"
-path="res://.godot/imported/mundo04.wav-22219fedbff6d3b340ba7d79027c54ed.sample"
+path="res://.godot/imported/mundo04_1.wav-fe17923c631a0f73a6168435ebd77a7e.sample"
 
 [deps]
 
-source_file="res://sounds/mundos/mundo04.wav"
-dest_files=["res://.godot/imported/mundo04.wav-22219fedbff6d3b340ba7d79027c54ed.sample"]
+source_file="res://sounds/mundos/mundo04_1.wav"
+dest_files=["res://.godot/imported/mundo04_1.wav-fe17923c631a0f73a6168435ebd77a7e.sample"]
 
 [params]
 

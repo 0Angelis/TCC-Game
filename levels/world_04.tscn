@@ -35,7 +35,7 @@
 [ext_resource type="FontFile" uid="uid://ciyqtt45x1jtc" path="res://assets/Fontes/RevMiniPixel.ttf" id="34_mtj04"]
 [ext_resource type="Texture2D" uid="uid://bdai1dxok1ply" path="res://assets/Mini FX, Items & UI/Common Pick-ups/Health_Kit (16 x 16).png" id="35_5gpcm"]
 [ext_resource type="Texture2D" uid="uid://bjjeg7steh5y5" path="res://assets/Fragmentos/FragmentoMemoria.png" id="36_ae8o3"]
-[ext_resource type="AudioStream" uid="uid://dtdf2pip53nex" path="res://sounds/mundos/mundo04.wav" id="44_dm8ns"]
+[ext_resource type="AudioStream" uid="uid://dtdf2pip53nex" path="res://sounds/mundos/mundo04_1.wav" id="44_dm8ns"]
 [ext_resource type="Texture2D" uid="uid://cpqtblxl8p0bl" path="res://assets/portal/Purple Portal Sprite Sheet.png" id="44_e5t2f"]
 [ext_resource type="Script" uid="uid://blg8euc6kpooa" path="res://scripts/mundo_04_music.gd" id="44_fexhl"]
 [ext_resource type="PackedScene" uid="uid://c05me6gpn8c70" path="res://prefabs/goal.tscn" id="47_43ve4"]
