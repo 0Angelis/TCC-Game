@@ -35,7 +35,9 @@
 [ext_resource type="FontFile" uid="uid://ciyqtt45x1jtc" path="res://assets/Fontes/RevMiniPixel.ttf" id="34_mtj04"]
 [ext_resource type="Texture2D" uid="uid://bdai1dxok1ply" path="res://assets/Mini FX, Items & UI/Common Pick-ups/Health_Kit (16 x 16).png" id="35_5gpcm"]
 [ext_resource type="Texture2D" uid="uid://bjjeg7steh5y5" path="res://assets/Fragmentos/FragmentoMemoria.png" id="36_ae8o3"]
+[ext_resource type="AudioStream" uid="uid://dtdf2pip53nex" path="res://sounds/mundos/mundo04.wav" id="44_dm8ns"]
 [ext_resource type="Texture2D" uid="uid://cpqtblxl8p0bl" path="res://assets/portal/Purple Portal Sprite Sheet.png" id="44_e5t2f"]
+[ext_resource type="Script" uid="uid://blg8euc6kpooa" path="res://scripts/mundo_04_music.gd" id="44_fexhl"]
 [ext_resource type="PackedScene" uid="uid://c05me6gpn8c70" path="res://prefabs/goal.tscn" id="47_43ve4"]
 [ext_resource type="Script" uid="uid://drigg0hefx8yg" path="res://scripts/warning_sing.gd" id="48_r5tsm"]
 [ext_resource type="Texture2D" uid="uid://c3ci0i5r2t8h0" path="res://assets/Mini FX, Items & UI/Mini UI/Speech_Emotes (16 x 16).png" id="49_vfcun"]
@@ -2023,3 +2025,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("53_wyf3q")
+
+[node name="Mundo04Music" type="AudioStreamPlayer" parent="." unique_id=391548516]
+stream = ExtResource("44_dm8ns")
+volume_db = -20.0
+autoplay = true
+script = ExtResource("44_fexhl")
