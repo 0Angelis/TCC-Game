@@ -49,6 +49,11 @@ const SKIP_HOLD_TIME: float = 1.25
 
 const END_WAIT_TIME: float = 1.5
 
+# Coluna central usada por todos os creditos.
+# Evita textos encostando nas bordas ou ficando desalinhados.
+const CREDITS_COLUMN_WIDTH: float = 1080.0
+const CREDITS_SIDE_MARGIN: float = 40.0
+
 
 # ============================================================
 # CORES
@@ -506,7 +511,7 @@ func _build_credits() -> void:
 
 	credits_content.size = Vector2(
 		get_viewport_rect().size.x,
-		1500
+		4200
 	)
 
 	credits_content.mouse_filter = (
@@ -522,50 +527,68 @@ func _build_credits() -> void:
 	# CREDITOS
 	# ========================================================
 
-	# Comeca mais perto da parte inferior.
-	# Assim o primeiro titulo entra pela parte de baixo
-	# sem aparecer no meio da tela.
 	var y: float = 60.0
+
+	# --------------------------------------------------------
+	# TITULO
+	# --------------------------------------------------------
 
 	y = _add_title(
 		"MEMÓRIA ZERO",
 		y
 	)
 
-	y += 35.0
+	y += 55.0
 
-	y = _add_text(
-		"um jogo desenvolvido como Trabalho de Conclusão de Curso",
-		y
-	)
 
-	y += 50.0
+	# ========================================================
+	# DESENVOLVIMENTO
+	# ========================================================
 
 	y = _add_section(
-		"DESENVOLVIMENTO",
+		"DESENVOLVEDOR",
 		y
 	)
 
-	y += 10.0
+	y += 8.0
 
 	y = _add_text(
 		"Felipe Nascimento De Angelis",
 		y
 	)
 
-	y = _add_text(
-		"Engenharia de Software - UEM",
-		y
-	)
+	y += 38.0
 
-	y += 40.0
+
+	# ========================================================
+	# ORIENTADOR
+	# ========================================================
 
 	y = _add_section(
-		"TECNOLOGIAS",
+		"ORIENTADOR",
 		y
 	)
 
-	y += 10.0
+	y += 8.0
+
+	y = _add_text(
+		"Felippe Fernandes da Silva",
+		y
+	)
+
+	y += 38.0
+
+
+	# ========================================================
+	# PLATAFORMA DE DESENVOLVIMENTO
+	# ========================================================
+
+	y = _add_section(
+		"PLATAFORMA DE DESENVOLVIMENTO",
+		y
+	)
+
+	y += 8.0
 
 	y = _add_text(
 		"Godot Engine",
@@ -577,41 +600,466 @@ func _build_credits() -> void:
 		y
 	)
 
-	y = _add_text(
-		"Pixel Art",
-		y
-	)
+	y += 38.0
 
-	y += 40.0
+
+	# ========================================================
+	# CONCEITO E GAME DESIGN
+	# ========================================================
 
 	y = _add_section(
-		"CONCEITO",
+		"CONCEITO E GAME DESIGN",
 		y
 	)
 
-	y += 10.0
+	y += 8.0
 
 	y = _add_text(
 		"Raciocínio • Atenção • Memória",
 		y
 	)
 
-	y += 40.0
+	y = _add_text_small(
+		"Jogo 2D em pixel art com fases e desafios cognitivos.",
+		y
+	)
+
+	y += 48.0
+
+
+	# ========================================================
+	# ARTE E ASSETS - GRAFXKID
+	# ========================================================
+
+	y = _add_section(
+		"ARTE E ASSETS — GRAFXKID",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Cave Tileset",
+		y
+	)
+
+	y = _add_text(
+		"Seasonal Tilesets",
+		y
+	)
+
+	y = _add_text(
+		"Mini FX, Items & UI",
+		y
+	)
+
+	y = _add_text(
+		"Sprite Pack 4 • Sprite Pack 5 • Sprite Pack 6",
+		y
+	)
+
+	y = _add_text_small(
+		"Licença: CC0 1.0 Universal — uso pessoal e comercial.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://grafxkid.itch.io/",
+		y
+	)
+
+	y += 42.0
+
+
+	# ========================================================
+	# ARTE E ASSETS - ANSIMUZ
+	# ========================================================
+
+	y = _add_section(
+		"ARTE E ASSETS — ANSIMUZ",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"SunnyLand Forest",
+		y
+	)
+
+	y = _add_text(
+		"SunnyLand Forest of Illusion",
+		y
+	)
+
+	y = _add_text_small(
+		"Licença: CC0 1.0 Universal.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://ansimuz.itch.io/sunnyland-forest",
+		y
+	)
+
+	y = _add_text_small(
+		"https://ansimuz.itch.io/sunnyland-forest-of-illusion",
+		y
+	)
+
+	y += 42.0
+
+
+	# ========================================================
+	# OUTROS ASSETS
+	# ========================================================
+
+	y = _add_section(
+		"OUTROS ASSETS",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Stringstar Fields — Trixie",
+		y
+	)
+
+	y = _add_text_small(
+		"Licença: MIT.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://trixelized.itch.io/starstring-fields",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Helper's Free ArtPack — HelperWesley",
+		y
+	)
+
+	y = _add_text_small(
+		"Licença declarada na página: CC0 1.0 Universal.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://helperwesley.itch.io/helpers-artpack",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Mix n Match Market Stalls — TheStarvingArtificer",
+		y
+	)
+
+	y = _add_text_small(
+		"Uso permitido em projetos pessoais/comerciais.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://thestarvingartificer.itch.io/market-stalls",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"2D Pixel Art Portal Sprites — Elthen's Pixel Art Shop",
+		y
+	)
+
+	y = _add_text_small(
+		"Uso pessoal e comercial permitido.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://elthen.itch.io/2d-pixel-art-portal-sprites",
+		y
+	)
+
+	y += 8.0
+
+
+	# ========================================================
+	# FONTES
+	# ========================================================
+
+	y = _add_section(
+		"FONTES",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Pixeloid — GGBotNet",
+		y
+	)
+
+	y = _add_text_small(
+		"Licença: SIL Open Font License 1.1 (OFL).",
+		y
+	)
+
+	y = _add_text_small(
+		"https://ggbot.net/fonts/",
+		y
+	)
+
+	y += 42.0
+
+
+	# ========================================================
+	# MÚSICAS
+	# ========================================================
+
+	y = _add_section(
+		"MÚSICAS",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Mundo 00 — holizna",
+		y
+	)
+
+	y = _add_text_small(
+		"Simple Lofi Vinyl E-Piano Loop 95 BPM • CC0.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://freesound.org/people/holizna/sounds/629178/",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Mundo 01 — josefpres",
+		y
+	)
+
+	y = _add_text_small(
+		"Piano loops 213 octave down long loop 120 bpm • CC0.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://freesound.org/people/josefpres/sounds/871796/",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Mundo 02 — timouse",
+		y
+	)
+
+	y = _add_text_small(
+		"piano loop | Dark Lullaby.wav • CC BY 4.0.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://freesound.org/people/timouse/sounds/639648/",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Mundo 03 — josefpres",
+		y
+	)
+
+	y = _add_text_small(
+		"Piano loops 174 efect 4 octave long loop 120 bpm • CC0.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://freesound.org/people/josefpres/sounds/819708/",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Mundo 04 — Mark_Murray",
+		y
+	)
+
+	y = _add_text_small(
+		"Twlight Piano loop • CC BY 4.0.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://freesound.org/people/Mark_Murray/sounds/639958/",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Loja — SciCodeDev",
+		y
+	)
+
+	y = _add_text_small(
+		"calm_happy_rpgTownBackground.mp3 • CC0.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://freesound.org/people/SciCodeDev/sounds/442911/",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Tela inicial — Vrymaa / Paul Couture",
+		y
+	)
+
+	y = _add_text_small(
+		"Crystallo • CC0.",
+		y
+	)
+
+	y = _add_text_small(
+		"https://freesound.org/people/Vrymaa/sounds/722394/",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Batalha do Mundo 04 — faixa editada para o projeto",
+		y
+	)
+
+	y = _add_text_small(
+		"Edição/loop realizada para a versão final do jogo.",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Música dos créditos — Gustavo Michelin",
+		y
+	)
+
+	y = _add_text_small(
+		"Rain, sax and coding",
+		y
+	)
+
+	y += 42.0
+
+
+	# ========================================================
+	# EFEITOS SONOROS
+	# ========================================================
+
+	y = _add_section(
+		"EFEITOS SONOROS",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Efeitos de interface, coleta, portal, personagens e inimigos",
+		y
+	)
+
+	y = _add_text_small(
+		"https://freesound.org/",
+		y
+	)
+
+	y += 48.0
+
+
+	# ========================================================
+	# PLAYTESTERS
+	# ========================================================
+
+	y = _add_section(
+		"PLAYTESTERS",
+		y
+	)
+
+	y += 8.0
+
+	y = _add_text(
+		"Henrique Maeda",
+		y
+	)
+
+	y = _add_text(
+		"Bruno Manganoti",
+		y
+	)
+
+	y = _add_text(
+		"Kauan Kaeg",
+		y
+	)
+
+	y = _add_text(
+		"Gustavo Michelim",
+		y
+	)
+
+	y = _add_text(
+		"Pedro Tabada",
+		y
+	)
+
+	y = _add_text(
+		"Matheus Toscano",
+		y
+	)
+
+	y += 48.0
+
+
+	# ========================================================
+	# AGRADECIMENTOS
+	# ========================================================
 
 	y = _add_section(
 		"AGRADECIMENTOS",
 		y
 	)
 
-	y += 10.0
+	y += 8.0
 
 	y = _add_text(
-		"Obrigado por jogar!",
+		"A todos que apoiaram, testaram e acompanharam o desenvolvimento de Memória Zero.",
 		y
 	)
 
 	y = _add_text(
-		"Espero que tenha gostado da jornada.",
+		"Obrigado por jogar!",
 		y
 	)
 
@@ -624,19 +1072,65 @@ func _build_credits() -> void:
 
 	y += 20.0
 
-	y = _add_text(
-		"Finalmente... de volta para casa.",
-		y
-	)
-
-	# Espaco depois do texto para garantir
-	# que o fim demore um pouco para sair.
+	# Apenas o encerramento "FIM".
 	y += 400.0
 
 	credits_content.size.y = max(
 		y,
-		1500.0
+		4200.0
 	)
+
+func _get_credits_column_width() -> float:
+
+	var viewport_width: float = get_viewport_rect().size.x
+
+	return min(
+		CREDITS_COLUMN_WIDTH,
+		viewport_width - (CREDITS_SIDE_MARGIN * 2.0)
+	)
+
+
+func _get_credits_column_x() -> float:
+
+	var viewport_width: float = get_viewport_rect().size.x
+	var column_width: float = _get_credits_column_width()
+
+	return (viewport_width - column_width) / 2.0
+
+
+func _add_text_small(
+	text_value: String,
+	y: float
+) -> float:
+
+	var label := _make_label(
+		text_value,
+		11,
+		PURPLE_LIGHT
+	)
+
+	label.position.y = y
+
+	label.size = Vector2(
+		_get_credits_column_width(),
+		44.0
+	)
+
+	label.autowrap_mode = (
+		TextServer.AUTOWRAP_WORD_SMART
+	)
+
+	label.horizontal_alignment = (
+		HORIZONTAL_ALIGNMENT_CENTER
+	)
+
+	label.vertical_alignment = (
+		VERTICAL_ALIGNMENT_CENTER
+	)
+
+	label.clip_text = true
+
+	return y + label.size.y
 
 
 # ============================================================
@@ -651,17 +1145,15 @@ func _make_label(
 
 	var label := Label.new()
 
-	label.text = (
-		text_value
-	)
+	label.text = text_value
 
 	label.position = Vector2(
-		40.0,
+		_get_credits_column_x(),
 		0.0
 	)
 
 	label.size = Vector2(
-		get_viewport_rect().size.x - 80.0,
+		_get_credits_column_width(),
 		48.0
 	)
 
@@ -672,6 +1164,12 @@ func _make_label(
 	label.vertical_alignment = (
 		VERTICAL_ALIGNMENT_CENTER
 	)
+
+	label.autowrap_mode = (
+		TextServer.AUTOWRAP_WORD_SMART
+	)
+
+	label.clip_text = true
 
 	label.mouse_filter = (
 		Control.MOUSE_FILTER_IGNORE
@@ -748,7 +1246,7 @@ func _add_section(
 
 	var label := _make_label(
 		text_value,
-		22,
+		20,
 		PURPLE
 	)
 
@@ -764,7 +1262,7 @@ func _add_text(
 
 	var label := _make_label(
 		text_value,
-		17,
+		16,
 		TEXT_COLOR
 	)
 
@@ -790,12 +1288,12 @@ func _build_skip_ui() -> void:
 	)
 
 	skip_hint.position = Vector2(
-		get_viewport_rect().size.x - 275.0,
+		get_viewport_rect().size.x - 290.0,
 		get_viewport_rect().size.y - 88.0
 	)
 
 	skip_hint.size = Vector2(
-		240,
+		250,
 		28
 	)
 
