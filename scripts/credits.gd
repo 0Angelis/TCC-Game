@@ -962,7 +962,7 @@ func _build_credits() -> void:
 	y += 8.0
 
 	y = _add_text(
-		"Música dos créditos — Gustavo Michelin",
+		"Música dos créditos — Gustavo Michelim",
 		y
 	)
 
